@@ -13,7 +13,7 @@ import { Bird, Plus, FileText, Trash2, ArrowRight } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/granja")({
+export const Route = createFileRoute("/granja/")({
   head: () => ({
     meta: [
       { title: "Granja — AgroSítio" },
