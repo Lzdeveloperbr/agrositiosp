@@ -4,15 +4,15 @@ import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLotes, useMedidores } from "@/lib/state";
-import { Bird, Skull, Wheat, Zap, AlertTriangle, ArrowRight, Calendar } from "lucide-react";
+import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque } from "@/lib/state";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AgroSítio — Painel de Gestão Rural" },
-      { name: "description", content: "Painel de controle do sítio: granja de frango de corte e consumo de energia." },
+      { name: "description", content: "Painel de controle do sítio: granja, gado de corte, energia e diário." },
     ],
   }),
   component: Dashboard,
@@ -21,16 +21,22 @@ export const Route = createFileRoute("/")({
 function Dashboard() {
   const [lotes] = useLotes();
   const [medidores] = useMedidores();
+  const [animais] = useAnimais();
+  const [tarefas] = useTarefas();
+  const [estoque] = useEstoque();
 
   const ativo = lotes.find((l) => !l.encerrado);
   const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
   const vivas = ativo ? ativo.quantidadeInicial - totalMort : 0;
   const mortPct = ativo ? (totalMort / ativo.quantidadeInicial) * 100 : 0;
-  const totalRacao = ativo?.entries.reduce((s, e) => s + e.racaoKg, 0) ?? 0;
 
+  const ativosGado = animais.filter((a) => a.status === "ativo");
   const today = new Date();
   const diaLeitura = today.getDate() === 30;
   const ultLeitura = medidores.flatMap((m) => m.leituras).sort((a, b) => b.data.localeCompare(a.data))[0];
+
+  const tarefasPend = tarefas.filter((t) => !t.concluida);
+  const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
 
   const chartData = ativo
     ? [...ativo.entries]
@@ -43,33 +49,37 @@ function Dashboard() {
       <div className="space-y-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground capitalize">
               {today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             </p>
             <h1 className="text-3xl md:text-4xl font-display font-bold mt-1">Bom dia, granjeiro 🌱</h1>
             <p className="text-muted-foreground mt-1">Resumo do dia no sítio.</p>
           </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline"><Link to="/granja">Granja</Link></Button>
-            <Button asChild><Link to="/relatorios">Gerar relatório</Link></Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/gado">Gado</Link></Button>
+            <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
           </div>
         </header>
 
-        {diaLeitura && (
-          <Card className="p-4 border-accent/40 bg-accent/10 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-accent mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium">Dia 30 — hora da leitura dos relógios</p>
-              <p className="text-sm text-muted-foreground">Registre as leituras dos 3 medidores para fechar o mês.</p>
-            </div>
-            <Button asChild size="sm" variant="secondary"><Link to="/energia">Registrar</Link></Button>
-          </Card>
+        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0) && (
+          <div className="grid md:grid-cols-3 gap-3">
+            {diaLeitura && (
+              <Alert icon={AlertTriangle} title="Dia 30 — leitura dos relógios" desc="Registre as 3 leituras." to="/energia" />
+            )}
+            {tarefasPend.length > 0 && (
+              <Alert icon={ListChecks} title={`${tarefasPend.length} tarefa(s) pendente(s)`} desc="Confira o que falta." to="/tarefas" />
+            )}
+            {estoqueBaixo.length > 0 && (
+              <Alert icon={PackageX} title={`${estoqueBaixo.length} item(ns) em falta`} desc="Estoque abaixo do mínimo." to="/estoque" />
+            )}
+          </div>
         )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Aves vivas" value={vivas.toLocaleString("pt-BR")} hint={ativo ? `Lote ${ativo.numero}` : "Sem lote ativo"} icon={Bird} tone="primary" />
           <StatCard label="Mortalidade" value={`${mortPct.toFixed(2)}%`} hint={`${totalMort.toLocaleString("pt-BR")} aves`} icon={Skull} tone={mortPct > 5 ? "destructive" : "muted"} />
-          <StatCard label="Ração consumida" value={`${(totalRacao / 1000).toFixed(1)} t`} hint={`${totalRacao.toLocaleString("pt-BR")} kg`} icon={Wheat} tone="accent" />
+          <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />
           <StatCard label="Última leitura" value={ultLeitura ? `${ultLeitura.valor} kWh` : "—"} hint={ultLeitura ? new Date(ultLeitura.data).toLocaleDateString("pt-BR") : "Sem leituras"} icon={Zap} tone="accent" />
         </div>
 
@@ -99,11 +109,12 @@ function Dashboard() {
           </Card>
 
           <Card className="p-6" style={{ background: "var(--gradient-surface)" }}>
-            <h2 className="font-display font-semibold text-lg mb-4">Próximos passos</h2>
-            <ul className="space-y-3">
-              <Step icon={Calendar} text={ativo ? `Lançar dados do dia para o lote ${ativo.numero}` : "Cadastrar primeiro lote"} to="/granja" />
+            <h2 className="font-display font-semibold text-lg mb-4">Atalhos rápidos</h2>
+            <ul className="space-y-2">
+              <Step icon={BookOpen} text="Registrar dia no diário (com foto)" to="/diario" />
+              <Step icon={Calendar} text={ativo ? `Lançar dados do lote ${ativo.numero}` : "Cadastrar lote"} to="/granja" />
+              <Step icon={Beef} text="Adicionar animal ao rebanho" to="/gado" />
               <Step icon={Zap} text="Atualizar leituras dos relógios" to="/energia" />
-              <Step icon={Bird} text="Conferir previsão de abate" to="/granja" />
             </ul>
           </Card>
         </div>
@@ -112,15 +123,28 @@ function Dashboard() {
   );
 }
 
+function Alert({ icon: Icon, title, desc, to }: any) {
+  return (
+    <Card className="p-3 border-accent/40 bg-accent/10 flex items-center gap-3">
+      <Icon className="h-5 w-5 text-accent shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm truncate">{title}</p>
+        <p className="text-xs text-muted-foreground truncate">{desc}</p>
+      </div>
+      <Button asChild size="sm" variant="secondary"><Link to={to}>Ver</Link></Button>
+    </Card>
+  );
+}
+
 function Step({ icon: Icon, text, to }: { icon: any; text: string; to: string }) {
   return (
     <li>
-      <Link to={to} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors group">
+      <Link to={to} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted transition-colors group">
         <div className="h-8 w-8 rounded-md bg-primary/15 text-primary flex items-center justify-center">
           <Icon className="h-4 w-4" />
         </div>
         <span className="text-sm flex-1">{text}</span>
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-all" />
       </Link>
     </li>
   );
