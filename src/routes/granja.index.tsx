@@ -90,7 +90,7 @@ function GranjaPage() {
             {lotes.map((l) => {
               const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
               const vivas = l.quantidadeInicial - mort;
-              const racao = l.entries.reduce((s, e) => s + e.racaoKg, 0);
+              const ultPeso = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
               const dias = Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000);
               const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
               return (
@@ -108,7 +108,7 @@ function GranjaPage() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <Mini label="Vivas" value={vivas.toLocaleString("pt-BR")} />
                     <Mini label="Mort." value={`${((mort / l.quantidadeInicial) * 100).toFixed(1)}%`} />
-                    <Mini label="Ração" value={`${(racao / 1000).toFixed(1)}t`} />
+                    <Mini label="Peso" value={ultPeso ? `${ultPeso}g` : "—"} />
                   </div>
                   <div className="space-y-1 mb-4">
                     <div className="flex justify-between text-xs text-muted-foreground"><span>Crescimento</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>

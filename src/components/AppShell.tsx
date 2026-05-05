@@ -1,44 +1,51 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Bird, Zap, FileText, Sprout } from "lucide-react";
+import { LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks, Boxes, Wallet, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/", label: "Início", icon: LayoutDashboard },
   { to: "/granja", label: "Granja", icon: Bird },
+  { to: "/gado", label: "Gado", icon: Beef },
+  { to: "/diario", label: "Diário", icon: BookOpen },
+  { to: "/tarefas", label: "Tarefas", icon: ListChecks },
+  { to: "/estoque", label: "Estoque", icon: Boxes },
+  { to: "/financeiro", label: "Finanças", icon: Wallet },
   { to: "/energia", label: "Energia", icon: Zap },
   { to: "/relatorios", label: "Relatórios", icon: FileText },
+  { to: "/backup", label: "Backup", icon: Database },
 ] as const;
+
+const mobileItems = items.slice(0, 5);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Sidebar (desktop) */}
-      <aside className="hidden md:flex md:w-64 flex-col bg-sidebar border-r border-sidebar-border">
-        <div className="p-6 border-b border-sidebar-border">
+      <aside className="hidden md:flex md:w-60 flex-col bg-sidebar border-r border-sidebar-border">
+        <div className="p-5 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
               <Sprout className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
               <div className="font-display text-lg font-bold leading-tight">AgroSítio</div>
-              <div className="text-xs text-muted-foreground">Bello Alimentos</div>
+              <div className="text-xs text-muted-foreground">Granja & Gado</div>
             </div>
           </Link>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {items.map((it) => {
-            const active = pathname === it.to;
+            const active = pathname === it.to || (it.to !== "/" && pathname.startsWith(it.to));
             const Icon = it.icon;
             return (
               <Link
                 key={it.to}
                 to={it.to}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                   active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50",
                 )}
               >
@@ -49,12 +56,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="p-4 text-xs text-muted-foreground border-t border-sidebar-border">
-          v1.0 · 28.000 aves
-        </div>
+        <div className="p-3 text-[10px] text-muted-foreground border-t border-sidebar-border">v1.1 · offline</div>
       </aside>
 
-      {/* Mobile top bar */}
       <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-sidebar">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "var(--gradient-primary)" }}>
@@ -62,22 +66,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <span className="font-display font-bold">AgroSítio</span>
         </Link>
+        <Link to="/relatorios" className="text-xs text-muted-foreground">Relatórios</Link>
       </header>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 pb-20 md:pb-0">
         <div className="p-4 md:p-8 max-w-7xl mx-auto">{children}</div>
 
-        {/* Mobile bottom nav */}
-        <nav className="md:hidden sticky bottom-0 grid grid-cols-4 bg-sidebar border-t border-sidebar-border">
-          {items.map((it) => {
-            const active = pathname === it.to;
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 bg-sidebar border-t border-sidebar-border">
+          {mobileItems.map((it) => {
+            const active = pathname === it.to || (it.to !== "/" && pathname.startsWith(it.to));
             const Icon = it.icon;
             return (
               <Link
                 key={it.to}
                 to={it.to}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-3 text-xs",
+                  "flex flex-col items-center gap-1 py-2.5 text-[10px]",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
