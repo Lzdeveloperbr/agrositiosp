@@ -9,20 +9,52 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
+import { Route as DiarioRouteImport } from './routes/diario'
+import { Route as BackupRouteImport } from './routes/backup'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
+import { Route as GadoIndexRouteImport } from './routes/gado.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
+import { Route as GadoIdRouteImport } from './routes/gado.$id'
 
+const TarefasRoute = TarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnergiaRoute = EnergiaRouteImport.update({
   id: '/energia',
   path: '/energia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiarioRoute = DiarioRouteImport.update({
+  id: '/diario',
+  path: '/diario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -35,52 +67,134 @@ const GranjaIndexRoute = GranjaIndexRouteImport.update({
   path: '/granja/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GadoIndexRoute = GadoIndexRouteImport.update({
+  id: '/gado/',
+  path: '/gado/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GranjaIdRoute = GranjaIdRouteImport.update({
   id: '/granja/$id',
   path: '/granja/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GadoIdRoute = GadoIdRouteImport.update({
+  id: '/gado/$id',
+  path: '/gado/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
   '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
+  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
+  '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
   '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
+  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
+  '/gado': typeof GadoIndexRoute
   '/granja': typeof GranjaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
   '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
+  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
+  '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/energia' | '/relatorios' | '/granja/$id' | '/granja/'
+  fullPaths:
+    | '/'
+    | '/backup'
+    | '/diario'
+    | '/energia'
+    | '/estoque'
+    | '/financeiro'
+    | '/relatorios'
+    | '/tarefas'
+    | '/gado/$id'
+    | '/granja/$id'
+    | '/gado/'
+    | '/granja/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/energia' | '/relatorios' | '/granja/$id' | '/granja'
-  id: '__root__' | '/' | '/energia' | '/relatorios' | '/granja/$id' | '/granja/'
+  to:
+    | '/'
+    | '/backup'
+    | '/diario'
+    | '/energia'
+    | '/estoque'
+    | '/financeiro'
+    | '/relatorios'
+    | '/tarefas'
+    | '/gado/$id'
+    | '/granja/$id'
+    | '/gado'
+    | '/granja'
+  id:
+    | '__root__'
+    | '/'
+    | '/backup'
+    | '/diario'
+    | '/energia'
+    | '/estoque'
+    | '/financeiro'
+    | '/relatorios'
+    | '/tarefas'
+    | '/gado/$id'
+    | '/granja/$id'
+    | '/gado/'
+    | '/granja/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BackupRoute: typeof BackupRoute
+  DiarioRoute: typeof DiarioRoute
   EnergiaRoute: typeof EnergiaRoute
+  EstoqueRoute: typeof EstoqueRoute
+  FinanceiroRoute: typeof FinanceiroRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  TarefasRoute: typeof TarefasRoute
+  GadoIdRoute: typeof GadoIdRoute
   GranjaIdRoute: typeof GranjaIdRoute
+  GadoIndexRoute: typeof GadoIndexRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tarefas': {
+      id: '/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/relatorios': {
       id: '/relatorios'
       path: '/relatorios'
@@ -88,11 +202,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/energia': {
       id: '/energia'
       path: '/energia'
       fullPath: '/energia'
       preLoaderRoute: typeof EnergiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diario': {
+      id: '/diario'
+      path: '/diario'
+      fullPath: '/diario'
+      preLoaderRoute: typeof DiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -109,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GranjaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gado/': {
+      id: '/gado/'
+      path: '/gado'
+      fullPath: '/gado/'
+      preLoaderRoute: typeof GadoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/granja/$id': {
       id: '/granja/$id'
       path: '/granja/$id'
@@ -116,14 +265,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GranjaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gado/$id': {
+      id: '/gado/$id'
+      path: '/gado/$id'
+      fullPath: '/gado/$id'
+      preLoaderRoute: typeof GadoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BackupRoute: BackupRoute,
+  DiarioRoute: DiarioRoute,
   EnergiaRoute: EnergiaRoute,
+  EstoqueRoute: EstoqueRoute,
+  FinanceiroRoute: FinanceiroRoute,
   RelatoriosRoute: RelatoriosRoute,
+  TarefasRoute: TarefasRoute,
+  GadoIdRoute: GadoIdRoute,
   GranjaIdRoute: GranjaIdRoute,
+  GadoIndexRoute: GadoIndexRoute,
   GranjaIndexRoute: GranjaIndexRoute,
 }
 export const routeTree = rootRouteImport
