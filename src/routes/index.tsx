@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
@@ -31,8 +32,9 @@ function Dashboard() {
   const mortPct = ativo ? (totalMort / ativo.quantidadeInicial) * 100 : 0;
 
   const ativosGado = animais.filter((a) => a.status === "ativo");
-  const today = new Date();
-  const diaLeitura = today.getDate() === 30;
+  const [today, setToday] = useState<Date | null>(null);
+  useEffect(() => { setToday(new Date()); }, []);
+  const diaLeitura = today?.getDate() === 30;
   const ultLeitura = medidores.flatMap((m) => m.leituras).sort((a, b) => b.data.localeCompare(a.data))[0];
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
@@ -49,8 +51,8 @@ function Dashboard() {
       <div className="space-y-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground capitalize">
-              {today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            <p className="text-sm text-muted-foreground capitalize min-h-[20px]">
+              {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
             </p>
             <h1 className="text-3xl md:text-4xl font-display font-bold mt-1">Bom dia, granjeiro 🌱</h1>
             <p className="text-muted-foreground mt-1">Resumo do dia no sítio.</p>
