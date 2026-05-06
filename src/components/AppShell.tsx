@@ -1,6 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks, Boxes, Wallet, Database } from "lucide-react";
+import { LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks, Boxes, Wallet, Database, LogOut, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFazenda } from "@/lib/cloud/fazenda";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { to: "/", label: "Início", icon: LayoutDashboard },
@@ -64,9 +66,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="h-9 w-9 rounded-lg flex items-center justify-center" style={{ background: "var(--gradient-primary)" }}>
             <Sprout className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-display font-bold">AgroSítio</span>
+          <div className="leading-tight">
+            <div className="font-display font-bold text-sm">{fazendaNome ?? "AgroSítio"}</div>
+            <div className="text-[10px] text-muted-foreground">{operador || codigo}</div>
+          </div>
         </Link>
-        <Link to="/relatorios" className="text-xs text-muted-foreground">Relatórios</Link>
+        <Button variant="ghost" size="icon" onClick={sair} className="h-8 w-8"><LogOut className="h-4 w-4" /></Button>
       </header>
 
       <main className="flex-1 min-w-0 pb-20 md:pb-0">
