@@ -159,7 +159,7 @@ function DiarioPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Camera className="h-4 w-4 mr-1" /> Adicionar fotos</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>{uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Camera className="h-4 w-4 mr-1" />} {uploading ? "Enviando..." : "Adicionar fotos"}</Button>
                   <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" hidden onChange={(e) => addFotos(e.target.files)} />
                   <Button type="button" variant="outline" size="sm" onClick={captarGPS}><MapPin className="h-4 w-4 mr-1" /> {form.gps ? "GPS ✓" : "Capturar GPS"}</Button>
                   {form.gps && <span className="text-xs text-muted-foreground self-center">{form.gps.lat.toFixed(4)}, {form.gps.lon.toFixed(4)}</span>}
