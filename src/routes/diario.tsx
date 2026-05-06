@@ -12,9 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useDiario } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import type { DiarioEntry, DiarioFoto } from "@/lib/types";
-import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun } from "lucide-react";
+import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { gerarRelatorioDiario } from "@/lib/pdf";
+import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
+import { useFazenda } from "@/lib/cloud/fazenda";
 
 export const Route = createFileRoute("/diario")({
   head: () => ({
@@ -28,26 +30,13 @@ export const Route = createFileRoute("/diario")({
 
 const CATS = ["granja", "gado", "cerca", "maquina", "geral"] as const;
 
-async function compressToDataUrl(file: File, maxSize = 1280, quality = 0.75): Promise<string> {
-  const img = await new Promise<HTMLImageElement>((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = URL.createObjectURL(file);
-  });
-  const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
-  const w = Math.round(img.width * ratio);
-  const h = Math.round(img.height * ratio);
-  const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, w, h);
-  URL.revokeObjectURL(img.src);
-  return canvas.toDataURL("image/jpeg", quality);
-}
+// upload de fotos agora vai para o Storage da nuvem (ver lib/cloud/uploadFoto.ts)
+
 
 function DiarioPage() {
   const [entries, setEntries] = useDiario();
+  const { fazendaId, codigo } = useFazenda();
+  const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
@@ -68,11 +57,17 @@ function DiarioPage() {
   const reset = () => setForm({ data: new Date().toISOString().slice(0, 10), titulo: "", categoria: "geral", texto: "", condicao: "", temperatura: undefined, chuvaMm: undefined, gps: undefined, fotos: [] });
 
   const addFotos = async (files: FileList | null) => {
-    if (!files) return;
+    if (!files || !fazendaId || !codigo) return;
+    setUploading(true);
     const novas: DiarioFoto[] = [];
     for (const f of Array.from(files)) {
-      try { novas.push({ id: uid(), dataUrl: await compressToDataUrl(f) }); } catch {}
+      try {
+        const blob = await compressFile(f);
+        const url = await uploadFotoBlob(blob, fazendaId, codigo);
+        novas.push({ id: uid(), dataUrl: url });
+      } catch (e) { console.error(e); toast.error("Falha ao enviar foto"); }
     }
+    setUploading(false);
     setForm((p) => ({ ...p, fotos: [...p.fotos, ...novas] }));
   };
 
@@ -149,7 +144,7 @@ function DiarioPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Camera className="h-4 w-4 mr-1" /> Adicionar fotos</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>{uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Camera className="h-4 w-4 mr-1" />} {uploading ? "Enviando..." : "Adicionar fotos"}</Button>
                   <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" hidden onChange={(e) => addFotos(e.target.files)} />
                   <Button type="button" variant="outline" size="sm" onClick={captarGPS}><MapPin className="h-4 w-4 mr-1" /> {form.gps ? "GPS ✓" : "Capturar GPS"}</Button>
                   {form.gps && <span className="text-xs text-muted-foreground self-center">{form.gps.lat.toFixed(4)}, {form.gps.lon.toFixed(4)}</span>}
