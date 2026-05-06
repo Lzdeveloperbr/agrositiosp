@@ -123,26 +123,26 @@ function useCloud<T extends { id: string }>(table: string, mapper: Mapper<T>) {
     setLocal((prev) => {
       const next = typeof v === "function" ? (v as any)(prev) : v;
       // diff
-      const prevMap = new Map(prev.map((p) => [p.id, p]));
-      const nextMap = new Map(next.map((p: T) => [p.id, p]));
+      const prevMap = new Map<string, T>(prev.map((p) => [p.id, p]));
+      const nextMap = new Map<string, T>((next as T[]).map((p) => [p.id, p]));
 
-      // adicionados
-      for (const [id, item] of nextMap) {
+      // adicionados / atualizados
+      nextMap.forEach((item, id) => {
         if (!prevMap.has(id)) {
-          const row = { ...mapper.toRow(item as T), fazenda_id: fazendaId, autor: operador || null };
+          const row = { ...mapper.toRow(item), fazenda_id: fazendaId, autor: operador || null };
           client.from(table).insert(row).then(({ error }) => { if (error) console.error(`[${table}] insert`, error); });
         } else if (JSON.stringify(prevMap.get(id)) !== JSON.stringify(item)) {
-          const row = mapper.toRow(item as T);
+          const row: any = mapper.toRow(item);
           delete row.id;
           client.from(table).update(row).eq("id", id).then(({ error }) => { if (error) console.error(`[${table}] update`, error); });
         }
-      }
+      });
       // removidos
-      for (const id of prevMap.keys()) {
+      prevMap.forEach((_v, id) => {
         if (!nextMap.has(id)) {
           client.from(table).delete().eq("id", id).then(({ error }) => { if (error) console.error(`[${table}] delete`, error); });
         }
-      }
+      });
       return next;
     });
   }, [client, fazendaId, table, operador, mapper]);
