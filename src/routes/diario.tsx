@@ -12,9 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useDiario } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import type { DiarioEntry, DiarioFoto } from "@/lib/types";
-import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun } from "lucide-react";
+import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { gerarRelatorioDiario } from "@/lib/pdf";
+import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
+import { useFazenda } from "@/lib/cloud/fazenda";
 
 export const Route = createFileRoute("/diario")({
   head: () => ({
@@ -48,6 +50,8 @@ async function compressToDataUrl(file: File, maxSize = 1280, quality = 0.75): Pr
 
 function DiarioPage() {
   const [entries, setEntries] = useDiario();
+  const { fazendaId, codigo } = useFazenda();
+  const [uploading, setUploading] = useState(false);
   const [open, setOpen] = useState(false);
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
@@ -68,11 +72,17 @@ function DiarioPage() {
   const reset = () => setForm({ data: new Date().toISOString().slice(0, 10), titulo: "", categoria: "geral", texto: "", condicao: "", temperatura: undefined, chuvaMm: undefined, gps: undefined, fotos: [] });
 
   const addFotos = async (files: FileList | null) => {
-    if (!files) return;
+    if (!files || !fazendaId || !codigo) return;
+    setUploading(true);
     const novas: DiarioFoto[] = [];
     for (const f of Array.from(files)) {
-      try { novas.push({ id: uid(), dataUrl: await compressToDataUrl(f) }); } catch {}
+      try {
+        const blob = await compressFile(f);
+        const url = await uploadFotoBlob(blob, fazendaId, codigo);
+        novas.push({ id: uid(), dataUrl: url });
+      } catch (e) { console.error(e); toast.error("Falha ao enviar foto"); }
     }
+    setUploading(false);
     setForm((p) => ({ ...p, fotos: [...p.fotos, ...novas] }));
   };
 
