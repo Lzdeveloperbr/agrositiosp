@@ -27,4 +27,10 @@ export function useLocalStorage<T>(key: string, initial: T) {
   return [value, update] as const;
 }
 
-export const uid = () => Math.random().toString(36).slice(2, 10);
+export const uid = () => {
+  if (typeof crypto !== "undefined" && (crypto as any).randomUUID) return (crypto as any).randomUUID();
+  // fallback v4
+  const r = (n: number) => Math.floor(Math.random() * n);
+  const hex = (n: number) => n.toString(16);
+  return `${hex(r(0xffffffff)).padStart(8, "0")}-${hex(r(0xffff)).padStart(4, "0")}-4${hex(r(0xfff)).padStart(3, "0")}-${hex(0x8 | r(0x4)).padStart(1, "0")}${hex(r(0xfff)).padStart(3, "0")}-${hex(r(0xffffffff)).padStart(8, "0")}${hex(r(0xffff)).padStart(4, "0")}`;
+};
