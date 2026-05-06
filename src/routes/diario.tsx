@@ -30,23 +30,8 @@ export const Route = createFileRoute("/diario")({
 
 const CATS = ["granja", "gado", "cerca", "maquina", "geral"] as const;
 
-async function compressToDataUrl(file: File, maxSize = 1280, quality = 0.75): Promise<string> {
-  const img = await new Promise<HTMLImageElement>((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = URL.createObjectURL(file);
-  });
-  const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
-  const w = Math.round(img.width * ratio);
-  const h = Math.round(img.height * ratio);
-  const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, w, h);
-  URL.revokeObjectURL(img.src);
-  return canvas.toDataURL("image/jpeg", quality);
-}
+// upload de fotos agora vai para o Storage da nuvem (ver lib/cloud/uploadFoto.ts)
+
 
 function DiarioPage() {
   const [entries, setEntries] = useDiario();
