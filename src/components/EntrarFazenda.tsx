@@ -25,7 +25,7 @@ export function EntrarFazenda() {
       : await criar(nome || "Minha Fazenda", codigo);
     setLoading(false);
     if (!r.ok) { toast.error(r.erro || "Erro"); return; }
-    toast.success(modo === "entrar" ? `Bem-vindo a ${r.nome}` : "Fazenda criada");
+    toast.success(modo === "entrar" ? `Bem-vindo a ${(r as any).nome ?? "fazenda"}` : "Fazenda criada");
   };
 
   return (
