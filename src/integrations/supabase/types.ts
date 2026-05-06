@@ -28,6 +28,7 @@ export type Database = {
           observacoes: string | null
           origem: string | null
           pasto_id: string | null
+          pesagens: Json
           peso_entrada_kg: number | null
           peso_venda_kg: number | null
           preco_compra: number | null
@@ -35,6 +36,7 @@ export type Database = {
           raca: string | null
           saida_data: string | null
           saida_motivo: string | null
+          sanidade: Json
           sexo: string
           status: string
           updated_at: string
@@ -52,6 +54,7 @@ export type Database = {
           observacoes?: string | null
           origem?: string | null
           pasto_id?: string | null
+          pesagens?: Json
           peso_entrada_kg?: number | null
           peso_venda_kg?: number | null
           preco_compra?: number | null
@@ -59,6 +62,7 @@ export type Database = {
           raca?: string | null
           saida_data?: string | null
           saida_motivo?: string | null
+          sanidade?: Json
           sexo: string
           status?: string
           updated_at?: string
@@ -76,6 +80,7 @@ export type Database = {
           observacoes?: string | null
           origem?: string | null
           pasto_id?: string | null
+          pesagens?: Json
           peso_entrada_kg?: number | null
           peso_venda_kg?: number | null
           preco_compra?: number | null
@@ -83,6 +88,7 @@ export type Database = {
           raca?: string | null
           saida_data?: string | null
           saida_motivo?: string | null
+          sanidade?: Json
           sexo?: string
           status?: string
           updated_at?: string
@@ -161,6 +167,7 @@ export type Database = {
           fazenda_id: string
           id: string
           minimo: number | null
+          movimentacoes: Json
           nome: string
           observacoes: string | null
           quantidade: number
@@ -173,6 +180,7 @@ export type Database = {
           fazenda_id: string
           id?: string
           minimo?: number | null
+          movimentacoes?: Json
           nome: string
           observacoes?: string | null
           quantidade?: number
@@ -185,6 +193,7 @@ export type Database = {
           fazenda_id?: string
           id?: string
           minimo?: number | null
+          movimentacoes?: Json
           nome?: string
           observacoes?: string | null
           quantidade?: number
@@ -197,57 +206,6 @@ export type Database = {
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      estoque_mov: {
-        Row: {
-          autor: string | null
-          created_at: string
-          data: string
-          fazenda_id: string
-          id: string
-          item_id: string
-          nota: string | null
-          quantidade: number
-          tipo: string
-        }
-        Insert: {
-          autor?: string | null
-          created_at?: string
-          data: string
-          fazenda_id: string
-          id?: string
-          item_id: string
-          nota?: string | null
-          quantidade: number
-          tipo: string
-        }
-        Update: {
-          autor?: string | null
-          created_at?: string
-          data?: string
-          fazenda_id?: string
-          id?: string
-          item_id?: string
-          nota?: string | null
-          quantidade?: number
-          tipo?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "estoque_mov_fazenda_id_fkey"
-            columns: ["fazenda_id"]
-            isOneToOne: false
-            referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "estoque_mov_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "estoque"
             referencedColumns: ["id"]
           },
         ]
@@ -320,108 +278,13 @@ export type Database = {
           },
         ]
       }
-      leituras: {
-        Row: {
-          autor: string | null
-          created_at: string
-          data: string
-          fazenda_id: string
-          id: string
-          medidor_id: string
-          valor: number
-        }
-        Insert: {
-          autor?: string | null
-          created_at?: string
-          data: string
-          fazenda_id: string
-          id?: string
-          medidor_id: string
-          valor: number
-        }
-        Update: {
-          autor?: string | null
-          created_at?: string
-          data?: string
-          fazenda_id?: string
-          id?: string
-          medidor_id?: string
-          valor?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "leituras_fazenda_id_fkey"
-            columns: ["fazenda_id"]
-            isOneToOne: false
-            referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "leituras_medidor_id_fkey"
-            columns: ["medidor_id"]
-            isOneToOne: false
-            referencedRelation: "medidores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lote_entradas: {
-        Row: {
-          autor: string | null
-          created_at: string
-          data: string
-          fazenda_id: string
-          id: string
-          lote_id: string
-          mortalidade: number
-          observacoes: string | null
-          peso_medio_g: number | null
-        }
-        Insert: {
-          autor?: string | null
-          created_at?: string
-          data: string
-          fazenda_id: string
-          id?: string
-          lote_id: string
-          mortalidade?: number
-          observacoes?: string | null
-          peso_medio_g?: number | null
-        }
-        Update: {
-          autor?: string | null
-          created_at?: string
-          data?: string
-          fazenda_id?: string
-          id?: string
-          lote_id?: string
-          mortalidade?: number
-          observacoes?: string | null
-          peso_medio_g?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lote_entradas_fazenda_id_fkey"
-            columns: ["fazenda_id"]
-            isOneToOne: false
-            referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lote_entradas_lote_id_fkey"
-            columns: ["lote_id"]
-            isOneToOne: false
-            referencedRelation: "lotes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       lotes: {
         Row: {
           autor: string | null
           created_at: string
           data_entrada: string
           encerrado: boolean
+          entries: Json
           fazenda_id: string
           id: string
           integradora: string | null
@@ -437,6 +300,7 @@ export type Database = {
           created_at?: string
           data_entrada: string
           encerrado?: boolean
+          entries?: Json
           fazenda_id: string
           id?: string
           integradora?: string | null
@@ -452,6 +316,7 @@ export type Database = {
           created_at?: string
           data_entrada?: string
           encerrado?: boolean
+          entries?: Json
           fazenda_id?: string
           id?: string
           integradora?: string | null
@@ -479,6 +344,7 @@ export type Database = {
           created_at: string
           fazenda_id: string
           id: string
+          leituras: Json
           nome: string
         }
         Insert: {
@@ -487,6 +353,7 @@ export type Database = {
           created_at?: string
           fazenda_id: string
           id?: string
+          leituras?: Json
           nome: string
         }
         Update: {
@@ -495,6 +362,7 @@ export type Database = {
           created_at?: string
           fazenda_id?: string
           id?: string
+          leituras?: Json
           nome?: string
         }
         Relationships: [
@@ -538,111 +406,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pastos_fazenda_id_fkey"
-            columns: ["fazenda_id"]
-            isOneToOne: false
-            referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pesagens: {
-        Row: {
-          animal_id: string
-          autor: string | null
-          created_at: string
-          data: string
-          fazenda_id: string
-          id: string
-          observacoes: string | null
-          peso_kg: number
-        }
-        Insert: {
-          animal_id: string
-          autor?: string | null
-          created_at?: string
-          data: string
-          fazenda_id: string
-          id?: string
-          observacoes?: string | null
-          peso_kg: number
-        }
-        Update: {
-          animal_id?: string
-          autor?: string | null
-          created_at?: string
-          data?: string
-          fazenda_id?: string
-          id?: string
-          observacoes?: string | null
-          peso_kg?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pesagens_animal_id_fkey"
-            columns: ["animal_id"]
-            isOneToOne: false
-            referencedRelation: "animais"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pesagens_fazenda_id_fkey"
-            columns: ["fazenda_id"]
-            isOneToOne: false
-            referencedRelation: "fazendas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sanidade: {
-        Row: {
-          animal_id: string
-          autor: string | null
-          created_at: string
-          data: string
-          dose: string | null
-          fazenda_id: string
-          id: string
-          observacoes: string | null
-          produto: string
-          proxima_data: string | null
-          tipo: string
-        }
-        Insert: {
-          animal_id: string
-          autor?: string | null
-          created_at?: string
-          data: string
-          dose?: string | null
-          fazenda_id: string
-          id?: string
-          observacoes?: string | null
-          produto: string
-          proxima_data?: string | null
-          tipo: string
-        }
-        Update: {
-          animal_id?: string
-          autor?: string | null
-          created_at?: string
-          data?: string
-          dose?: string | null
-          fazenda_id?: string
-          id?: string
-          observacoes?: string | null
-          produto?: string
-          proxima_data?: string | null
-          tipo?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sanidade_animal_id_fkey"
-            columns: ["animal_id"]
-            isOneToOne: false
-            referencedRelation: "animais"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sanidade_fazenda_id_fkey"
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"
