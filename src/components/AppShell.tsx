@@ -21,6 +21,7 @@ const mobileItems = items.slice(0, 5);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { fazendaNome, codigo, operador, sair } = useFazenda();
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
