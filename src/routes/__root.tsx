@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { FazendaProvider, useFazenda } from "@/lib/cloud/fazenda";
+import { EntrarFazenda } from "@/components/EntrarFazenda";
 
 import appCss from "../styles.css?url";
 
@@ -77,5 +79,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  return (
+    <FazendaProvider>
+      <Gate />
+    </FazendaProvider>
+  );
+}
+
+function Gate() {
+  const { fazendaId } = useFazenda();
+  if (!fazendaId) return <EntrarFazenda />;
   return <Outlet />;
 }
