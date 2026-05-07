@@ -149,6 +149,8 @@ function FinanceiroPage() {
                       <span className="text-[11px] text-muted-foreground">{new Date(l.data).toLocaleDateString("pt-BR")}</span>
                       {l.categoria && <Badge variant="outline" className="text-[10px]">{l.categoria}</Badge>}
                       {l.modulo && <Badge variant="secondary" className="text-[10px] capitalize">{l.modulo}</Badge>}
+                      {l.vencimento && <Badge variant="outline" className="text-[10px]">venc. {new Date(l.vencimento).toLocaleDateString("pt-BR")}</Badge>}
+                      <Badge variant={l.status === "pago" ? "default" : l.status === "atrasado" ? "destructive" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePago(l.id)}>{l.status}</Badge>
                     </div>
                   </div>
                   <p className={`font-display font-bold tabular-nums ${l.tipo === "receita" ? "text-primary" : "text-destructive"}`}>{l.tipo === "receita" ? "+" : "-"}{fmt(l.valor)}</p>
