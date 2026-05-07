@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import type {
   Lote, Medidor, Animal, Pasto, DiarioEntry, Tarefa, ItemEstoque, Lancamento,
+  Maquina, Chuva, Monitoramento, Compra,
 } from "@/lib/types";
 
 // ====== mapeamento por tabela ======
@@ -48,9 +49,12 @@ const animalMap: Mapper<Animal> = {
     dataEntrada: r.data_entrada, origem: r.origem ?? undefined, precoCompra: r.preco_compra ?? undefined,
     pastoId: r.pasto_id ?? undefined, status: r.status, saidaData: r.saida_data ?? undefined, saidaMotivo: r.saida_motivo ?? undefined,
     precoVenda: r.preco_venda ?? undefined, pesoVendaKg: r.peso_venda_kg ?? undefined, observacoes: r.observacoes ?? undefined,
-    pesagens: r.pesagens ?? [], sanidade: r.sanidade ?? [],
+    pesagens: r.pesagens ?? [], sanidade: r.sanidade ?? [], reproducao: r.reproducao ?? [],
   }),
 };
+// Adiciona reproducao no toRow do animal
+const _origAnimalToRow = animalMap.toRow;
+animalMap.toRow = (a: Animal) => ({ ..._origAnimalToRow(a), reproducao: a.reproducao ?? [] });
 
 const pastoMap: Mapper<Pasto> = {
   toRow: (p) => ({ id: p.id, nome: p.nome, area_ha: p.areaHa ?? null, capacidade: p.capacidade ?? null, observacoes: p.observacoes ?? null }),
@@ -73,8 +77,25 @@ const estoqueMap: Mapper<ItemEstoque> = {
 };
 
 const finMap: Mapper<Lancamento> = {
-  toRow: (l) => ({ id: l.id, data: l.data, tipo: l.tipo, categoria: l.categoria, descricao: l.descricao, valor: l.valor, modulo: l.modulo ?? null }),
-  fromRow: (r) => ({ id: r.id, data: r.data, tipo: r.tipo, categoria: r.categoria, descricao: r.descricao, valor: Number(r.valor), modulo: r.modulo ?? undefined }),
+  toRow: (l) => ({ id: l.id, data: l.data, tipo: l.tipo, categoria: l.categoria, descricao: l.descricao, valor: l.valor, modulo: l.modulo ?? null, vencimento: l.vencimento ?? null, status: l.status ?? "pago", data_pagamento: l.dataPagamento ?? null }),
+  fromRow: (r) => ({ id: r.id, data: r.data, tipo: r.tipo, categoria: r.categoria, descricao: r.descricao, valor: Number(r.valor), modulo: r.modulo ?? undefined, vencimento: r.vencimento ?? undefined, status: (r.status ?? "pago") as any, dataPagamento: r.data_pagamento ?? undefined }),
+};
+
+const maquinaMap: Mapper<Maquina> = {
+  toRow: (m) => ({ id: m.id, nome: m.nome, tipo: m.tipo, marca: m.marca ?? null, modelo: m.modelo ?? null, ano: m.ano ?? null, placa: m.placa ?? null, horimetro: m.horimetro, observacoes: m.observacoes ?? null, abastecimentos: m.abastecimentos, manutencoes: m.manutencoes }),
+  fromRow: (r) => ({ id: r.id, nome: r.nome, tipo: r.tipo, marca: r.marca ?? undefined, modelo: r.modelo ?? undefined, ano: r.ano ?? undefined, placa: r.placa ?? undefined, horimetro: Number(r.horimetro ?? 0), observacoes: r.observacoes ?? undefined, abastecimentos: r.abastecimentos ?? [], manutencoes: r.manutencoes ?? [] }),
+};
+const chuvaMap: Mapper<Chuva> = {
+  toRow: (c) => ({ id: c.id, data: c.data, mm: c.mm, local: c.local ?? null, observacoes: c.observacoes ?? null }),
+  fromRow: (r) => ({ id: r.id, data: r.data, mm: Number(r.mm), local: r.local ?? undefined, observacoes: r.observacoes ?? undefined }),
+};
+const monitMap: Mapper<Monitoramento> = {
+  toRow: (m) => ({ id: m.id, data: m.data, modulo: m.modulo, alvo: m.alvo, severidade: m.severidade, acao: m.acao ?? null, produto: m.produto ?? null, dose: m.dose ?? null, local: m.local ?? null, gps: m.gps ?? null, fotos: m.fotos, observacoes: m.observacoes ?? null }),
+  fromRow: (r) => ({ id: r.id, data: r.data, modulo: r.modulo, alvo: r.alvo, severidade: r.severidade, acao: r.acao ?? undefined, produto: r.produto ?? undefined, dose: r.dose ?? undefined, local: r.local ?? undefined, gps: r.gps ?? undefined, fotos: r.fotos ?? [], observacoes: r.observacoes ?? undefined }),
+};
+const compraMap: Mapper<Compra> = {
+  toRow: (c) => ({ id: c.id, data: c.data, fornecedor: c.fornecedor ?? null, status: c.status, solicitante: c.solicitante ?? null, itens: c.itens, total: c.total, data_pedido: c.dataPedido ?? null, data_recebimento: c.dataRecebimento ?? null, observacoes: c.observacoes ?? null }),
+  fromRow: (r) => ({ id: r.id, data: r.data, fornecedor: r.fornecedor ?? undefined, status: r.status, solicitante: r.solicitante ?? undefined, itens: r.itens ?? [], total: Number(r.total ?? 0), dataPedido: r.data_pedido ?? undefined, dataRecebimento: r.data_recebimento ?? undefined, observacoes: r.observacoes ?? undefined }),
 };
 
 // ====== hook genérico ======
@@ -159,6 +180,10 @@ export const useDiario = () => useCloud<DiarioEntry>("diario", diarioMap);
 export const useTarefas = () => useCloud<Tarefa>("tarefas", tarefaMap);
 export const useEstoque = () => useCloud<ItemEstoque>("estoque", estoqueMap);
 export const useFinanceiro = () => useCloud<Lancamento>("financeiro", finMap);
+export const useMaquinas = () => useCloud<Maquina>("maquinas", maquinaMap);
+export const useChuvas = () => useCloud<Chuva>("chuvas", chuvaMap);
+export const useMonitoramentos = () => useCloud<Monitoramento>("monitoramentos", monitMap);
+export const useCompras = () => useCloud<Compra>("compras", compraMap);
 
 // Mantido para compatibilidade do botão de Backup (agora apaga local apenas).
 export const STORAGE_KEYS = ["agro:lotes","agro:medidores","agro:animais","agro:pastos","agro:diario","agro:tarefas","agro:estoque","agro:financeiro"];

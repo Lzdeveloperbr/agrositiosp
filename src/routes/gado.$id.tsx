@@ -71,7 +71,7 @@ function AnimalDetalhe() {
       saidaMotivo: saida.motivo,
     } : x));
     if (saida.tipo === "vendido" && saida.preco) {
-      setFinanc((p) => [{ id: uid(), data: saida.data, tipo: "receita", categoria: "Venda de gado", descricao: `Venda brinco ${a.brinco}`, valor: saida.preco, modulo: "gado" }, ...p]);
+      setFinanc((p) => [{ id: uid(), data: saida.data, tipo: "receita", categoria: "Venda de gado", descricao: `Venda brinco ${a.brinco}`, valor: saida.preco, modulo: "gado", status: "pago" }, ...p]);
     }
     toast.success("Saída registrada");
   };

@@ -71,11 +71,12 @@ function GadoPage() {
       precoCompra: form.precoCompra,
       pesagens: form.pesoEntradaKg ? [{ data: form.dataEntrada!, pesoKg: form.pesoEntradaKg }] : [],
       sanidade: [],
+      reproducao: [],
       status: "ativo",
     };
     setAnimais((p) => [novo, ...p]);
     if (form.origem === "comprado" && form.precoCompra) {
-      setFinanc((p) => [{ id: uid(), data: form.dataEntrada!, tipo: "despesa", categoria: "Compra de gado", descricao: `Compra brinco ${form.brinco}`, valor: form.precoCompra!, modulo: "gado" }, ...p]);
+      setFinanc((p) => [{ id: uid(), data: form.dataEntrada!, tipo: "despesa", categoria: "Compra de gado", descricao: `Compra brinco ${form.brinco}`, valor: form.precoCompra!, modulo: "gado", status: "pago" }, ...p]);
     }
     setOpen(false);
     setForm({ ...form, brinco: "", nome: "", pesoEntradaKg: undefined, precoCompra: undefined });
