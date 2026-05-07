@@ -34,6 +34,7 @@ export type Database = {
           preco_compra: number | null
           preco_venda: number | null
           raca: string | null
+          reproducao: Json
           saida_data: string | null
           saida_motivo: string | null
           sanidade: Json
@@ -60,6 +61,7 @@ export type Database = {
           preco_compra?: number | null
           preco_venda?: number | null
           raca?: string | null
+          reproducao?: Json
           saida_data?: string | null
           saida_motivo?: string | null
           sanidade?: Json
@@ -86,6 +88,7 @@ export type Database = {
           preco_compra?: number | null
           preco_venda?: number | null
           raca?: string | null
+          reproducao?: Json
           saida_data?: string | null
           saida_motivo?: string | null
           sanidade?: Json
@@ -106,6 +109,106 @@ export type Database = {
             columns: ["pasto_id"]
             isOneToOne: false
             referencedRelation: "pastos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chuvas: {
+        Row: {
+          autor: string | null
+          created_at: string
+          data: string
+          fazenda_id: string
+          id: string
+          local: string | null
+          mm: number
+          observacoes: string | null
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          data: string
+          fazenda_id: string
+          id?: string
+          local?: string | null
+          mm?: number
+          observacoes?: string | null
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          data?: string
+          fazenda_id?: string
+          id?: string
+          local?: string | null
+          mm?: number
+          observacoes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chuvas_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compras: {
+        Row: {
+          autor: string | null
+          created_at: string
+          data: string
+          data_pedido: string | null
+          data_recebimento: string | null
+          fazenda_id: string
+          fornecedor: string | null
+          id: string
+          itens: Json
+          observacoes: string | null
+          solicitante: string | null
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          data: string
+          data_pedido?: string | null
+          data_recebimento?: string | null
+          fazenda_id: string
+          fornecedor?: string | null
+          id?: string
+          itens?: Json
+          observacoes?: string | null
+          solicitante?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          data?: string
+          data_pedido?: string | null
+          data_recebimento?: string | null
+          fazenda_id?: string
+          fornecedor?: string | null
+          id?: string
+          itens?: Json
+          observacoes?: string | null
+          solicitante?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compras_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
             referencedColumns: ["id"]
           },
         ]
@@ -237,36 +340,45 @@ export type Database = {
           categoria: string
           created_at: string
           data: string
+          data_pagamento: string | null
           descricao: string
           fazenda_id: string
           id: string
           modulo: string | null
+          status: string
           tipo: string
           valor: number
+          vencimento: string | null
         }
         Insert: {
           autor?: string | null
           categoria: string
           created_at?: string
           data: string
+          data_pagamento?: string | null
           descricao: string
           fazenda_id: string
           id?: string
           modulo?: string | null
+          status?: string
           tipo: string
           valor: number
+          vencimento?: string | null
         }
         Update: {
           autor?: string | null
           categoria?: string
           created_at?: string
           data?: string
+          data_pagamento?: string | null
           descricao?: string
           fazenda_id?: string
           id?: string
           modulo?: string | null
+          status?: string
           tipo?: string
           valor?: number
+          vencimento?: string | null
         }
         Relationships: [
           {
@@ -337,6 +449,68 @@ export type Database = {
           },
         ]
       }
+      maquinas: {
+        Row: {
+          abastecimentos: Json
+          ano: number | null
+          autor: string | null
+          created_at: string
+          fazenda_id: string
+          horimetro: number | null
+          id: string
+          manutencoes: Json
+          marca: string | null
+          modelo: string | null
+          nome: string
+          observacoes: string | null
+          placa: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          abastecimentos?: Json
+          ano?: number | null
+          autor?: string | null
+          created_at?: string
+          fazenda_id: string
+          horimetro?: number | null
+          id?: string
+          manutencoes?: Json
+          marca?: string | null
+          modelo?: string | null
+          nome: string
+          observacoes?: string | null
+          placa?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          abastecimentos?: Json
+          ano?: number | null
+          autor?: string | null
+          created_at?: string
+          fazenda_id?: string
+          horimetro?: number | null
+          id?: string
+          manutencoes?: Json
+          marca?: string | null
+          modelo?: string | null
+          nome?: string
+          observacoes?: string | null
+          placa?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maquinas_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medidores: {
         Row: {
           codigo_instalacao: string | null
@@ -368,6 +542,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "medidores_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoramentos: {
+        Row: {
+          acao: string | null
+          alvo: string
+          autor: string | null
+          created_at: string
+          data: string
+          dose: string | null
+          fazenda_id: string
+          fotos: Json
+          gps: Json | null
+          id: string
+          local: string | null
+          modulo: string
+          observacoes: string | null
+          produto: string | null
+          severidade: string
+        }
+        Insert: {
+          acao?: string | null
+          alvo: string
+          autor?: string | null
+          created_at?: string
+          data: string
+          dose?: string | null
+          fazenda_id: string
+          fotos?: Json
+          gps?: Json | null
+          id?: string
+          local?: string | null
+          modulo?: string
+          observacoes?: string | null
+          produto?: string | null
+          severidade?: string
+        }
+        Update: {
+          acao?: string | null
+          alvo?: string
+          autor?: string | null
+          created_at?: string
+          data?: string
+          dose?: string | null
+          fazenda_id?: string
+          fotos?: Json
+          gps?: Json | null
+          id?: string
+          local?: string | null
+          modulo?: string
+          observacoes?: string | null
+          produto?: string | null
+          severidade?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoramentos_fazenda_id_fkey"
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"
