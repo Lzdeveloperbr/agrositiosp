@@ -11,10 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
+import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
+import { Route as ComprasRouteImport } from './routes/compras'
+import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
@@ -30,6 +34,16 @@ const TarefasRoute = TarefasRouteImport.update({
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MonitoramentoRoute = MonitoramentoRouteImport.update({
+  id: '/monitoramento',
+  path: '/monitoramento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaquinasRoute = MaquinasRouteImport.update({
+  id: '/maquinas',
+  path: '/maquinas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -50,6 +64,16 @@ const EnergiaRoute = EnergiaRouteImport.update({
 const DiarioRoute = DiarioRouteImport.update({
   id: '/diario',
   path: '/diario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComprasRoute = ComprasRouteImport.update({
+  id: '/compras',
+  path: '/compras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChuvasRoute = ChuvasRouteImport.update({
+  id: '/chuvas',
+  path: '/chuvas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BackupRoute = BackupRouteImport.update({
@@ -86,10 +110,14 @@ const GadoIdRoute = GadoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/backup': typeof BackupRoute
+  '/chuvas': typeof ChuvasRoute
+  '/compras': typeof ComprasRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/maquinas': typeof MaquinasRoute
+  '/monitoramento': typeof MonitoramentoRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -100,10 +128,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/backup': typeof BackupRoute
+  '/chuvas': typeof ChuvasRoute
+  '/compras': typeof ComprasRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/maquinas': typeof MaquinasRoute
+  '/monitoramento': typeof MonitoramentoRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -115,10 +147,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/backup': typeof BackupRoute
+  '/chuvas': typeof ChuvasRoute
+  '/compras': typeof ComprasRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/maquinas': typeof MaquinasRoute
+  '/monitoramento': typeof MonitoramentoRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -131,10 +167,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/backup'
+    | '/chuvas'
+    | '/compras'
     | '/diario'
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/maquinas'
+    | '/monitoramento'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -145,10 +185,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/backup'
+    | '/chuvas'
+    | '/compras'
     | '/diario'
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/maquinas'
+    | '/monitoramento'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -159,10 +203,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/backup'
+    | '/chuvas'
+    | '/compras'
     | '/diario'
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/maquinas'
+    | '/monitoramento'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -174,10 +222,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BackupRoute: typeof BackupRoute
+  ChuvasRoute: typeof ChuvasRoute
+  ComprasRoute: typeof ComprasRoute
   DiarioRoute: typeof DiarioRoute
   EnergiaRoute: typeof EnergiaRoute
   EstoqueRoute: typeof EstoqueRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  MaquinasRoute: typeof MaquinasRoute
+  MonitoramentoRoute: typeof MonitoramentoRoute
   RelatoriosRoute: typeof RelatoriosRoute
   TarefasRoute: typeof TarefasRoute
   GadoIdRoute: typeof GadoIdRoute
@@ -200,6 +252,20 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monitoramento': {
+      id: '/monitoramento'
+      path: '/monitoramento'
+      fullPath: '/monitoramento'
+      preLoaderRoute: typeof MonitoramentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maquinas': {
+      id: '/maquinas'
+      path: '/maquinas'
+      fullPath: '/maquinas'
+      preLoaderRoute: typeof MaquinasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -228,6 +294,20 @@ declare module '@tanstack/react-router' {
       path: '/diario'
       fullPath: '/diario'
       preLoaderRoute: typeof DiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compras': {
+      id: '/compras'
+      path: '/compras'
+      fullPath: '/compras'
+      preLoaderRoute: typeof ComprasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chuvas': {
+      id: '/chuvas'
+      path: '/chuvas'
+      fullPath: '/chuvas'
+      preLoaderRoute: typeof ChuvasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/backup': {
@@ -278,10 +358,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BackupRoute: BackupRoute,
+  ChuvasRoute: ChuvasRoute,
+  ComprasRoute: ComprasRoute,
   DiarioRoute: DiarioRoute,
   EnergiaRoute: EnergiaRoute,
   EstoqueRoute: EstoqueRoute,
   FinanceiroRoute: FinanceiroRoute,
+  MaquinasRoute: MaquinasRoute,
+  MonitoramentoRoute: MonitoramentoRoute,
   RelatoriosRoute: RelatoriosRoute,
   TarefasRoute: TarefasRoute,
   GadoIdRoute: GadoIdRoute,
