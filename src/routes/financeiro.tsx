@@ -87,6 +87,18 @@ function FinanceiroPage() {
                       <SelectItem value="granja">Granja</SelectItem>
                       <SelectItem value="gado">Gado</SelectItem>
                       <SelectItem value="energia">Energia</SelectItem>
+                      <SelectItem value="maquina">Máquina</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="Vencimento (opcional)"><Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} /></Field>
+                <Field label="Status">
+                  <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as any })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pago">Pago</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="atrasado">Atrasado</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
