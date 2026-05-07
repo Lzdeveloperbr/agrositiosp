@@ -13,7 +13,7 @@ import { useMonitoramentos } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import { Bug, Plus, Trash2, MapPin, Camera } from "lucide-react";
 import { toast } from "sonner";
-import { uploadFotoToCloud } from "@/lib/cloud/uploadFoto";
+import { uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import { useFazenda } from "@/lib/cloud/fazenda";
 
 export const Route = createFileRoute("/monitoramento")({
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/monitoramento")({
 
 function MonitPage() {
   const [items, setItems] = useMonitoramentos();
-  const { codigo } = useFazenda();
+  const { codigo, fazendaId } = useFazenda();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<any>({ data: new Date().toISOString().slice(0, 10), modulo: "gado", alvo: "", severidade: "media", acao: "", produto: "", dose: "", local: "", observacoes: "" });
   const [fotos, setFotos] = useState<{ id: string; dataUrl: string }[]>([]);
@@ -59,8 +59,11 @@ function MonitPage() {
     const fotosUp: { id: string; dataUrl: string }[] = [];
     for (const f of fotos) {
       try {
-        const url = codigo ? await uploadFotoToCloud(f.dataUrl, codigo) : f.dataUrl;
-        fotosUp.push({ id: f.id, dataUrl: url });
+        if (codigo && fazendaId) {
+          const blob = await (await fetch(f.dataUrl)).blob();
+          const url = await uploadFotoBlob(blob, fazendaId, codigo);
+          fotosUp.push({ id: f.id, dataUrl: url });
+        } else fotosUp.push(f);
       } catch { fotosUp.push(f); }
     }
     setItems((p) => [{ id: uid(), ...form, gps: gps ?? undefined, fotos: fotosUp }, ...p]);
