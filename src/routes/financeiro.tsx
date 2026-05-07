@@ -33,15 +33,19 @@ function FinanceiroPage() {
     descricao: "",
     valor: 0,
     modulo: "geral" as any,
+    vencimento: "",
+    status: "pago" as "pago" | "pendente" | "atrasado",
   });
 
   const criar = () => {
     if (!form.descricao || !form.valor) { toast.error("Descrição e valor são obrigatórios"); return; }
-    setLan((p) => [{ id: uid(), ...form }, ...p]);
+    setLan((p) => [{ id: uid(), ...form, vencimento: form.vencimento || undefined }, ...p]);
     setOpen(false);
-    setForm({ ...form, descricao: "", valor: 0, categoria: "" });
+    setForm({ ...form, descricao: "", valor: 0, categoria: "", vencimento: "" });
     toast.success("Lançamento registrado");
   };
+
+  const togglePago = (id: string) => setLan((p) => p.map((l) => l.id === id ? { ...l, status: l.status === "pago" ? "pendente" : "pago", dataPagamento: l.status === "pago" ? undefined : new Date().toISOString().slice(0, 10) } : l));
 
   const remover = (id: string) => setLan((p) => p.filter((l) => l.id !== id));
 
