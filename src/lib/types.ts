@@ -48,6 +48,16 @@ export type EventoSanitario = {
   observacoes?: string;
 };
 
+export type EventoReproducao = {
+  id: string;
+  data: string;
+  tipo: "cobertura" | "ia" | "diagnostico" | "parto" | "aborto";
+  resultado?: "prenhe" | "vazia" | "macho" | "femea" | "perda";
+  touroOuSemen?: string;
+  previsaoParto?: string;
+  observacoes?: string;
+};
+
 export type Animal = {
   id: string;
   brinco: string;
@@ -63,6 +73,7 @@ export type Animal = {
   pastoId?: string;
   pesagens: Pesagem[];
   sanidade: EventoSanitario[];
+  reproducao: EventoReproducao[];
   status: "ativo" | "vendido" | "morto" | "abatido";
   saidaData?: string;
   saidaMotivo?: string;
@@ -108,7 +119,7 @@ export type ItemEstoque = {
   movimentacoes: { id: string; data: string; tipo: "entrada" | "saida"; quantidade: number; nota?: string }[];
 };
 
-// ===== Financeiro =====
+// ===== Financeiro (com contas a pagar/receber) =====
 export type Lancamento = {
   id: string;
   data: string;
@@ -116,5 +127,85 @@ export type Lancamento = {
   categoria: string;
   descricao: string;
   valor: number;
-  modulo?: "granja" | "gado" | "energia" | "geral";
+  modulo?: "granja" | "gado" | "energia" | "maquina" | "geral";
+  vencimento?: string;
+  status: "pago" | "pendente" | "atrasado";
+  dataPagamento?: string;
+};
+
+// ===== Máquinas =====
+export type Abastecimento = {
+  id: string;
+  data: string;
+  litros: number;
+  precoLitro?: number;
+  total?: number;
+  horimetro?: number;
+  posto?: string;
+  combustivel: "diesel" | "gasolina" | "etanol" | "outro";
+  observacoes?: string;
+};
+export type Manutencao = {
+  id: string;
+  data: string;
+  tipo: "preventiva" | "corretiva" | "troca_oleo" | "filtro" | "outro";
+  descricao: string;
+  custo?: number;
+  horimetro?: number;
+  proximaData?: string;
+  proximoHorimetro?: number;
+  observacoes?: string;
+};
+export type Maquina = {
+  id: string;
+  nome: string;
+  tipo: "trator" | "caminhao" | "carro" | "moto" | "implemento" | "gerador" | "outro";
+  marca?: string;
+  modelo?: string;
+  ano?: number;
+  placa?: string;
+  horimetro: number;
+  observacoes?: string;
+  abastecimentos: Abastecimento[];
+  manutencoes: Manutencao[];
+};
+
+// ===== Pluviometria =====
+export type Chuva = {
+  id: string;
+  data: string;
+  mm: number;
+  local?: string;
+  observacoes?: string;
+};
+
+// ===== MIP / Monitoramento =====
+export type Monitoramento = {
+  id: string;
+  data: string;
+  modulo: "gado" | "granja" | "pasto" | "geral";
+  alvo: string; // praga / doença / sintoma
+  severidade: "baixa" | "media" | "alta";
+  acao?: string;
+  produto?: string;
+  dose?: string;
+  local?: string;
+  gps?: { lat: number; lon: number };
+  fotos: DiarioFoto[];
+  observacoes?: string;
+};
+
+// ===== Compras =====
+export type CompraItem = { id: string; nome: string; quantidade: number; unidade: string; precoUnit?: number };
+export type Compra = {
+  id: string;
+  data: string;
+  fornecedor?: string;
+  status: "solicitado" | "aprovado" | "pedido" | "recebido" | "cancelado";
+  solicitante?: string;
+  itens: CompraItem[];
+  total: number;
+  dataPedido?: string;
+  dataRecebimento?: string;
+  observacoes?: string;
 };
