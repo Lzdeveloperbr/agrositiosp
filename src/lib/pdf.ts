@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { Lote, Medidor, Animal, DiarioEntry } from "./types";
+import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
@@ -269,4 +269,51 @@ export async function gerarRelatorioDiario(entries: DiarioEntry[], titulo = "Di�
 
   footer(doc);
   doc.save(`diario-${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string) {
+  const doc = new jsPDF();
+  header(doc, "Livro Caixa do Produtor", periodoLabel);
+
+  const sorted = [...lancamentos].sort((a, b) => a.data.localeCompare(b.data));
+  let saldo = 0;
+  const rows = sorted.map((l) => {
+    const e = l.tipo === "receita" ? l.valor : 0;
+    const s = l.tipo === "despesa" ? l.valor : 0;
+    saldo += e - s;
+    return [
+      new Date(l.data).toLocaleDateString("pt-BR"),
+      l.descricao + (l.categoria ? ` (${l.categoria})` : ""),
+      l.modulo ?? "—",
+      e ? e.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—",
+      s ? s.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—",
+      saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+    ];
+  });
+
+  const totReceita = sorted.filter((l) => l.tipo === "receita").reduce((a, b) => a + b.valor, 0);
+  const totDespesa = sorted.filter((l) => l.tipo === "despesa").reduce((a, b) => a + b.valor, 0);
+
+  autoTable(doc, {
+    startY: 58, theme: "grid",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Resumo", "Valor"]],
+    body: [
+      ["Total de receitas", totReceita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })],
+      ["Total de despesas", totDespesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })],
+      ["Resultado do período", (totReceita - totDespesa).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })],
+      ["Lançamentos", sorted.length.toString()],
+    ],
+  });
+
+  autoTable(doc, {
+    startY: (doc as any).lastAutoTable.finalY + 8, theme: "striped",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Data", "Histórico", "Módulo", "Entrada", "Saída", "Saldo"]],
+    body: rows.length ? rows : [["—", "Sem lançamentos", "—", "—", "—", "—"]],
+    styles: { fontSize: 8 },
+  });
+
+  footer(doc);
+  doc.save(`livro-caixa-${periodoLabel.replace(/\s+/g, "-").toLowerCase()}.pdf`);
 }

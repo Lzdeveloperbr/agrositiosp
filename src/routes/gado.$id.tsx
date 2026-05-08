@@ -31,6 +31,7 @@ function AnimalDetalhe() {
 
   const [pesagem, setPesagem] = useState({ data: new Date().toISOString().slice(0, 10), pesoKg: 0, observacoes: "" });
   const [sani, setSani] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "vacina" as any, produto: "", dose: "", proximaData: "", observacoes: "" });
+  const [repro, setRepro] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura" as any, resultado: "" as any, touroOuSemen: "", previsaoParto: "", observacoes: "" });
   const [saida, setSaida] = useState({ tipo: "vendido" as "vendido" | "morto" | "abatido", data: new Date().toISOString().slice(0, 10), pesoKg: 0, preco: 0, motivo: "" });
 
   if (!a) return <AppShell><p>Animal não encontrado.</p><Button asChild variant="link"><Link to="/gado">Voltar</Link></Button></AppShell>;
@@ -60,6 +61,17 @@ function AnimalDetalhe() {
 
   const remPesagem = (idx: number) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, pesagens: x.pesagens.filter((_, i) => i !== idx) } : x));
   const remSani = (sid: string) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, sanidade: x.sanidade.filter((s) => s.id !== sid) } : x));
+
+  const addRepro = () => {
+    if (!repro.tipo) { toast.error("Informe o tipo"); return; }
+    const previsao = repro.tipo === "cobertura" || repro.tipo === "ia"
+      ? (repro.previsaoParto || new Date(new Date(repro.data).getTime() + 283 * 86400000).toISOString().slice(0, 10))
+      : (repro.previsaoParto || undefined);
+    setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: [{ id: uid(), ...repro, resultado: repro.resultado || undefined, previsaoParto: previsao }, ...(x.reproducao || [])] } : x));
+    setRepro({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });
+    toast.success("Evento reprodutivo registrado");
+  };
+  const remRepro = (rid: string) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: (x.reproducao || []).filter((r) => r.id !== rid) } : x));
 
   const darSaida = () => {
     setAnimais((p) => p.map((x) => x.id === id ? {
@@ -119,6 +131,7 @@ function AnimalDetalhe() {
           <TabsList>
             <TabsTrigger value="pesagens">Pesagens</TabsTrigger>
             <TabsTrigger value="sanidade">Sanidade</TabsTrigger>
+            {a.sexo === "femea" && <TabsTrigger value="reproducao">Reprodução</TabsTrigger>}
             {a.status === "ativo" && <TabsTrigger value="saida">Dar saída</TabsTrigger>}
           </TabsList>
 
@@ -215,6 +228,79 @@ function AnimalDetalhe() {
               )}
             </Card>
           </TabsContent>
+
+          {a.sexo === "femea" && (
+            <TabsContent value="reproducao" className="mt-4 space-y-4">
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h3 className="font-display font-semibold mb-3">Novo evento reprodutivo</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <Field label="Data"><Input type="date" value={repro.data} onChange={(e) => setRepro({ ...repro, data: e.target.value })} /></Field>
+                  <Field label="Tipo">
+                    <Select value={repro.tipo} onValueChange={(v) => setRepro({ ...repro, tipo: v as any })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cobertura">Cobertura</SelectItem>
+                        <SelectItem value="ia">Inseminação</SelectItem>
+                        <SelectItem value="diagnostico">Diagnóstico</SelectItem>
+                        <SelectItem value="parto">Parto</SelectItem>
+                        <SelectItem value="aborto">Aborto</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field label="Touro / Sêmen"><Input value={repro.touroOuSemen} onChange={(e) => setRepro({ ...repro, touroOuSemen: e.target.value })} /></Field>
+                  {repro.tipo === "diagnostico" && (
+                    <Field label="Resultado">
+                      <Select value={repro.resultado || ""} onValueChange={(v) => setRepro({ ...repro, resultado: v as any })}>
+                        <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="prenhe">Prenhe</SelectItem>
+                          <SelectItem value="vazia">Vazia</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  )}
+                  {repro.tipo === "parto" && (
+                    <Field label="Cria">
+                      <Select value={repro.resultado || ""} onValueChange={(v) => setRepro({ ...repro, resultado: v as any })}>
+                        <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="macho">Macho</SelectItem>
+                          <SelectItem value="femea">Fêmea</SelectItem>
+                          <SelectItem value="perda">Perda</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  )}
+                  <Field label="Previsão de parto"><Input type="date" value={repro.previsaoParto} onChange={(e) => setRepro({ ...repro, previsaoParto: e.target.value })} /></Field>
+                  <div className="md:col-span-2"><Field label="Obs"><Input value={repro.observacoes} onChange={(e) => setRepro({ ...repro, observacoes: e.target.value })} /></Field></div>
+                </div>
+                <Button onClick={addRepro} className="mt-3 w-full md:w-auto"><Plus className="h-4 w-4 mr-1" /> Adicionar</Button>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h3 className="font-display font-semibold mb-3">Histórico reprodutivo</h3>
+                {(!a.reproducao || a.reproducao.length === 0) ? <p className="text-sm text-muted-foreground py-6 text-center">Sem registros.</p> : (
+                  <div className="space-y-2">
+                    {a.reproducao.map((r) => (
+                      <div key={r.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/60 bg-card/50">
+                        <Badge variant="outline" className="capitalize">{r.tipo}</Badge>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">
+                            {new Date(r.data).toLocaleDateString("pt-BR")}
+                            {r.resultado && <span className="text-muted-foreground"> · {r.resultado}</span>}
+                            {r.touroOuSemen && <span className="text-muted-foreground"> · {r.touroOuSemen}</span>}
+                          </p>
+                          {r.previsaoParto && <p className="text-xs text-muted-foreground">Previsão de parto: {new Date(r.previsaoParto).toLocaleDateString("pt-BR")}</p>}
+                          {r.observacoes && <p className="text-xs text-muted-foreground mt-1">{r.observacoes}</p>}
+                        </div>
+                        <Button size="icon" variant="ghost" onClick={() => remRepro(r.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+          )}
 
           {a.status === "ativo" && (
             <TabsContent value="saida" className="mt-4">
