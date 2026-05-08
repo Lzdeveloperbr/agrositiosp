@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import type { Lote, Medidor, Animal, DiarioEntry } from "./types";
+import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
