@@ -5,8 +5,8 @@ import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX } from "lucide-react";
+import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro } from "@/lib/state";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/")({
@@ -25,6 +25,7 @@ function Dashboard() {
   const [animais] = useAnimais();
   const [tarefas] = useTarefas();
   const [estoque] = useEstoque();
+  const [financ] = useFinanceiro();
 
   const ativo = lotes.find((l) => !l.encerrado);
   const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
@@ -39,6 +40,11 @@ function Dashboard() {
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
   const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
+  const hojeStr = today?.toISOString().slice(0, 10) ?? "";
+  const em7 = today ? new Date(today.getTime() + 7 * 86400000).toISOString().slice(0, 10) : "";
+  const contasVencendo = financ.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento <= em7);
+  const contasAtrasadas = contasVencendo.filter((l) => l.vencimento! < hojeStr);
+  const totalAVencer = contasVencendo.reduce((s, l) => s + (l.tipo === "despesa" ? l.valor : -l.valor), 0);
 
   const chartData = ativo
     ? [...ativo.entries]
@@ -64,8 +70,8 @@ function Dashboard() {
           </div>
         </header>
 
-        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0) && (
-          <div className="grid md:grid-cols-3 gap-3">
+        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0) && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {diaLeitura && (
               <Alert icon={AlertTriangle} title="Dia 30 — leitura dos relógios" desc="Registre as 3 leituras." to="/energia" />
             )}
@@ -74,6 +80,14 @@ function Dashboard() {
             )}
             {estoqueBaixo.length > 0 && (
               <Alert icon={PackageX} title={`${estoqueBaixo.length} item(ns) em falta`} desc="Estoque abaixo do mínimo." to="/estoque" />
+            )}
+            {contasVencendo.length > 0 && (
+              <Alert
+                icon={Wallet}
+                title={`${contasVencendo.length} conta(s) ${contasAtrasadas.length > 0 ? "atrasada(s)" : "a vencer"}`}
+                desc={`${totalAVencer > 0 ? "Pagar" : "Receber"} ${Math.abs(totalAVencer).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} em 7 dias`}
+                to="/financeiro"
+              />
             )}
           </div>
         )}
