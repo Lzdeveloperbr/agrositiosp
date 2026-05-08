@@ -31,6 +31,7 @@ function AnimalDetalhe() {
 
   const [pesagem, setPesagem] = useState({ data: new Date().toISOString().slice(0, 10), pesoKg: 0, observacoes: "" });
   const [sani, setSani] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "vacina" as any, produto: "", dose: "", proximaData: "", observacoes: "" });
+  const [repro, setRepro] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura" as any, resultado: "" as any, touroOuSemen: "", previsaoParto: "", observacoes: "" });
   const [saida, setSaida] = useState({ tipo: "vendido" as "vendido" | "morto" | "abatido", data: new Date().toISOString().slice(0, 10), pesoKg: 0, preco: 0, motivo: "" });
 
   if (!a) return <AppShell><p>Animal não encontrado.</p><Button asChild variant="link"><Link to="/gado">Voltar</Link></Button></AppShell>;
@@ -60,6 +61,17 @@ function AnimalDetalhe() {
 
   const remPesagem = (idx: number) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, pesagens: x.pesagens.filter((_, i) => i !== idx) } : x));
   const remSani = (sid: string) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, sanidade: x.sanidade.filter((s) => s.id !== sid) } : x));
+
+  const addRepro = () => {
+    if (!repro.tipo) { toast.error("Informe o tipo"); return; }
+    const previsao = repro.tipo === "cobertura" || repro.tipo === "ia"
+      ? (repro.previsaoParto || new Date(new Date(repro.data).getTime() + 283 * 86400000).toISOString().slice(0, 10))
+      : (repro.previsaoParto || undefined);
+    setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: [{ id: uid(), ...repro, resultado: repro.resultado || undefined, previsaoParto: previsao }, ...(x.reproducao || [])] } : x));
+    setRepro({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });
+    toast.success("Evento reprodutivo registrado");
+  };
+  const remRepro = (rid: string) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: (x.reproducao || []).filter((r) => r.id !== rid) } : x));
 
   const darSaida = () => {
     setAnimais((p) => p.map((x) => x.id === id ? {
@@ -119,6 +131,7 @@ function AnimalDetalhe() {
           <TabsList>
             <TabsTrigger value="pesagens">Pesagens</TabsTrigger>
             <TabsTrigger value="sanidade">Sanidade</TabsTrigger>
+            {a.sexo === "femea" && <TabsTrigger value="reproducao">Reprodução</TabsTrigger>}
             {a.status === "ativo" && <TabsTrigger value="saida">Dar saída</TabsTrigger>}
           </TabsList>
 
