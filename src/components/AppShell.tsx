@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks, Boxes, Wallet, Database, LogOut, Wifi } from "lucide-react";
+import { LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks, Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,11 @@ const items = [
   { to: "/diario", label: "Diário", icon: BookOpen },
   { to: "/tarefas", label: "Tarefas", icon: ListChecks },
   { to: "/estoque", label: "Estoque", icon: Boxes },
+  { to: "/compras", label: "Compras", icon: ShoppingCart },
   { to: "/financeiro", label: "Finanças", icon: Wallet },
+  { to: "/maquinas", label: "Máquinas", icon: Tractor },
+  { to: "/chuvas", label: "Chuvas", icon: CloudRain },
+  { to: "/monitoramento", label: "Monitoramento", icon: Bug },
   { to: "/energia", label: "Energia", icon: Zap },
   { to: "/relatorios", label: "Relatórios", icon: FileText },
   { to: "/backup", label: "Backup", icon: Database },
