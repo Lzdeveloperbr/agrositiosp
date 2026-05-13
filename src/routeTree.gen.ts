@@ -26,6 +26,7 @@ import { Route as CustosRouteImport } from './routes/custos'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
+import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
@@ -117,6 +118,11 @@ const BackupRoute = BackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutomacoesRoute = AutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -145,6 +151,7 @@ const GadoIdRoute = GadoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
@@ -293,6 +305,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
   ChuvasRoute: typeof ChuvasRoute
   ComprasRoute: typeof ComprasRoute
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/automacoes': {
+      id: '/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -477,6 +497,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
   ChuvasRoute: ChuvasRoute,
   ComprasRoute: ComprasRoute,
