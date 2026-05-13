@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
@@ -21,15 +22,22 @@ import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
+import { Route as CustosRouteImport } from './routes/custos'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
+import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as GadoIdRouteImport } from './routes/gado.$id'
 
+const VeterinarioRoute = VeterinarioRouteImport.update({
+  id: '/veterinario',
+  path: '/veterinario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -90,6 +98,11 @@ const DiarioRoute = DiarioRouteImport.update({
   path: '/diario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CustosRoute = CustosRouteImport.update({
+  id: '/custos',
+  path: '/custos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComprasRoute = ComprasRouteImport.update({
   id: '/compras',
   path: '/compras',
@@ -103,6 +116,11 @@ const ChuvasRoute = ChuvasRouteImport.update({
 const BackupRoute = BackupRouteImport.update({
   id: '/backup',
   path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomacoesRoute = AutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -133,9 +151,11 @@ const GadoIdRoute = GadoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -148,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
@@ -155,9 +176,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -170,6 +193,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado': typeof GadoIndexRoute
@@ -178,9 +202,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -193,6 +219,7 @@ export interface FileRoutesById {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
@@ -202,9 +229,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -217,6 +246,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado/'
@@ -224,9 +254,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -239,6 +271,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado'
@@ -246,9 +279,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/automacoes'
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -261,6 +296,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado/'
@@ -269,9 +305,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
   ChuvasRoute: typeof ChuvasRoute
   ComprasRoute: typeof ComprasRoute
+  CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
   EnergiaRoute: typeof EnergiaRoute
   EstoqueRoute: typeof EstoqueRoute
@@ -284,6 +322,7 @@ export interface RootRouteChildren {
   RelatoriosRoute: typeof RelatoriosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
+  VeterinarioRoute: typeof VeterinarioRoute
   GadoIdRoute: typeof GadoIdRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GadoIndexRoute: typeof GadoIndexRoute
@@ -292,6 +331,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/veterinario': {
+      id: '/veterinario'
+      path: '/veterinario'
+      fullPath: '/veterinario'
+      preLoaderRoute: typeof VeterinarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tarefas': {
       id: '/tarefas'
       path: '/tarefas'
@@ -376,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/custos': {
+      id: '/custos'
+      path: '/custos'
+      fullPath: '/custos'
+      preLoaderRoute: typeof CustosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compras': {
       id: '/compras'
       path: '/compras'
@@ -395,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/backup'
       fullPath: '/backup'
       preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automacoes': {
+      id: '/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AutomacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -437,9 +497,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
   ChuvasRoute: ChuvasRoute,
   ComprasRoute: ComprasRoute,
+  CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
   EnergiaRoute: EnergiaRoute,
   EstoqueRoute: EstoqueRoute,
@@ -452,6 +514,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelatoriosRoute: RelatoriosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
+  VeterinarioRoute: VeterinarioRoute,
   GadoIdRoute: GadoIdRoute,
   GranjaIdRoute: GranjaIdRoute,
   GadoIndexRoute: GadoIndexRoute,
@@ -460,12 +523,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
