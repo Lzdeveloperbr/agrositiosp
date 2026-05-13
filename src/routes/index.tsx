@@ -79,14 +79,18 @@ function Dashboard() {
             <p className="text-muted-foreground mt-1">Resumo do dia no sítio.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <InstallAppButton />
+            <Button asChild variant="outline" size="sm"><Link to="/lembretes">Lembretes</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
-            <Button asChild variant="outline" size="sm"><Link to="/gado">Gado</Link></Button>
             <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
           </div>
         </header>
 
-        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0) && (
+        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0 || lembretesHoje.length > 0) && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {lembretesHoje.map((l) => (
+              <Alert key={l.id} icon={BellRing} title={`📌 ${l.titulo}`} desc={l.descricao || "Lembrete de hoje"} to="/lembretes" />
+            ))}
             {diaLeitura && (
               <Alert icon={AlertTriangle} title="Dia 30 — leitura dos relógios" desc="Registre as 3 leituras." to="/energia" />
             )}
@@ -105,6 +109,28 @@ function Dashboard() {
               />
             )}
           </div>
+        )}
+
+        {lembretesProximos.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2"><BellRing className="h-4 w-4 text-primary" /> Próximos lembretes</h2>
+              <Button asChild variant="ghost" size="sm"><Link to="/lembretes">Ver todos</Link></Button>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {lembretesProximos.slice(0, 6).map(({ lembrete: l, diasAte }) => (
+                <div key={l.id} className="flex items-center gap-3 p-2 rounded-lg border border-border/60">
+                  <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex flex-col items-center justify-center text-xs font-semibold">
+                    <span className="text-sm leading-none">{l.dia}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{l.titulo}</div>
+                    <div className="text-xs text-muted-foreground">{diasAte === 0 ? "Hoje" : `em ${diasAte} dia(s)`}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
 
         <div className="grid lg:grid-cols-3 gap-4">
