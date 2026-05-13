@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
-  Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout,
+  Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/", label: "Início", icon: LayoutDashboard },
       { to: "/diario", label: "Diário", icon: BookOpen },
       { to: "/tarefas", label: "Tarefas", icon: ListChecks },
+      { to: "/lembretes", label: "Lembretes", icon: BellRing },
     ],
   },
   {

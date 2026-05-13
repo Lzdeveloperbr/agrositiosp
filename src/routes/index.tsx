@@ -6,10 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout } from "lucide-react";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
+import { InstallAppButton } from "@/components/InstallAppButton";
+import { useFazenda } from "@/lib/cloud/fazenda";
+import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +32,8 @@ function Dashboard() {
   const [estoque] = useEstoque();
   const [financ] = useFinanceiro();
   const [plantios] = usePlantios();
+  const { fazendaId } = useFazenda();
+  const [lembretes] = useLembretes(fazendaId);
   const plantiosAtivos = plantios.filter((p) => p.status !== "encerrado");
 
   const ativo = lotes.find((l) => !l.encerrado);
@@ -39,8 +44,14 @@ function Dashboard() {
   const ativosGado = animais.filter((a) => a.status === "ativo");
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => { setToday(new Date()); }, []);
+  useEffect(() => {
+    if (!fazendaId) return;
+    verificarENotificar(fazendaId);
+  }, [fazendaId]);
   const diaLeitura = today?.getDate() === 30;
   const ultLeitura = medidores.flatMap((m) => m.leituras).sort((a, b) => b.data.localeCompare(a.data))[0];
+  const lembretesHoje = today ? lembretesDoDia(lembretes, today) : [];
+  const lembretesProximos = today ? proximosLembretes(lembretes, 7, today) : [];
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
   const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
@@ -68,14 +79,18 @@ function Dashboard() {
             <p className="text-muted-foreground mt-1">Resumo do dia no sítio.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <InstallAppButton />
+            <Button asChild variant="outline" size="sm"><Link to="/lembretes">Lembretes</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
-            <Button asChild variant="outline" size="sm"><Link to="/gado">Gado</Link></Button>
             <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
           </div>
         </header>
 
-        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0) && (
+        {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0 || lembretesHoje.length > 0) && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {lembretesHoje.map((l) => (
+              <Alert key={l.id} icon={BellRing} title={`📌 ${l.titulo}`} desc={l.descricao || "Lembrete de hoje"} to="/lembretes" />
+            ))}
             {diaLeitura && (
               <Alert icon={AlertTriangle} title="Dia 30 — leitura dos relógios" desc="Registre as 3 leituras." to="/energia" />
             )}
@@ -94,6 +109,28 @@ function Dashboard() {
               />
             )}
           </div>
+        )}
+
+        {lembretesProximos.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2"><BellRing className="h-4 w-4 text-primary" /> Próximos lembretes</h2>
+              <Button asChild variant="ghost" size="sm"><Link to="/lembretes">Ver todos</Link></Button>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {lembretesProximos.slice(0, 6).map(({ lembrete: l, diasAte }) => (
+                <div key={l.id} className="flex items-center gap-3 p-2 rounded-lg border border-border/60">
+                  <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex flex-col items-center justify-center text-xs font-semibold">
+                    <span className="text-sm leading-none">{l.dia}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{l.titulo}</div>
+                    <div className="text-xs text-muted-foreground">{diasAte === 0 ? "Hoje" : `em ${diasAte} dia(s)`}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
 
         <div className="grid lg:grid-cols-3 gap-4">
