@@ -29,6 +29,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/granja", label: "Granja", icon: Bird },
       { to: "/manejo", label: "Manejo Frango", icon: BookOpen },
       { to: "/gado", label: "Gado", icon: Beef },
+      { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
       { to: "/plantios", label: "Plantios", icon: Sprout },
       { to: "/chuvas", label: "Chuvas", icon: CloudRain },
       { to: "/monitoramento", label: "Monitoramento", icon: Bug },
@@ -47,6 +48,8 @@ const groups: { label: string; items: Item[] }[] = [
     label: "Gestão",
     items: [
       { to: "/financeiro", label: "Finanças", icon: Wallet },
+      { to: "/custos", label: "Custos por Lote", icon: TrendingUp },
+      { to: "/automacoes", label: "Automações", icon: Sparkles },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
       { to: "/backup", label: "Backup", icon: Database },
     ],
