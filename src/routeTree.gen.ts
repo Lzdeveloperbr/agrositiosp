@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
@@ -21,6 +22,7 @@ import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
+import { Route as CustosRouteImport } from './routes/custos'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -30,6 +32,11 @@ import { Route as GadoIndexRouteImport } from './routes/gado.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as GadoIdRouteImport } from './routes/gado.$id'
 
+const VeterinarioRoute = VeterinarioRouteImport.update({
+  id: '/veterinario',
+  path: '/veterinario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -90,6 +97,11 @@ const DiarioRoute = DiarioRouteImport.update({
   path: '/diario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CustosRoute = CustosRouteImport.update({
+  id: '/custos',
+  path: '/custos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComprasRoute = ComprasRouteImport.update({
   id: '/compras',
   path: '/compras',
@@ -136,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -148,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
@@ -158,6 +172,7 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -170,6 +185,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado': typeof GadoIndexRoute
@@ -181,6 +197,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
+  '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
@@ -193,6 +210,7 @@ export interface FileRoutesById {
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/veterinario': typeof VeterinarioRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
@@ -205,6 +223,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -217,6 +236,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado/'
@@ -227,6 +247,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -239,6 +260,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado'
@@ -249,6 +271,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/chuvas'
     | '/compras'
+    | '/custos'
     | '/diario'
     | '/energia'
     | '/estoque'
@@ -261,6 +284,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/veterinario'
     | '/gado/$id'
     | '/granja/$id'
     | '/gado/'
@@ -272,6 +296,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   ChuvasRoute: typeof ChuvasRoute
   ComprasRoute: typeof ComprasRoute
+  CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
   EnergiaRoute: typeof EnergiaRoute
   EstoqueRoute: typeof EstoqueRoute
@@ -284,6 +309,7 @@ export interface RootRouteChildren {
   RelatoriosRoute: typeof RelatoriosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
+  VeterinarioRoute: typeof VeterinarioRoute
   GadoIdRoute: typeof GadoIdRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GadoIndexRoute: typeof GadoIndexRoute
@@ -292,6 +318,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/veterinario': {
+      id: '/veterinario'
+      path: '/veterinario'
+      fullPath: '/veterinario'
+      preLoaderRoute: typeof VeterinarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tarefas': {
       id: '/tarefas'
       path: '/tarefas'
@@ -376,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/custos': {
+      id: '/custos'
+      path: '/custos'
+      fullPath: '/custos'
+      preLoaderRoute: typeof CustosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compras': {
       id: '/compras'
       path: '/compras'
@@ -440,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   ChuvasRoute: ChuvasRoute,
   ComprasRoute: ComprasRoute,
+  CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
   EnergiaRoute: EnergiaRoute,
   EstoqueRoute: EstoqueRoute,
@@ -452,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   RelatoriosRoute: RelatoriosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
+  VeterinarioRoute: VeterinarioRoute,
   GadoIdRoute: GadoIdRoute,
   GranjaIdRoute: GranjaIdRoute,
   GadoIndexRoute: GadoIndexRoute,
