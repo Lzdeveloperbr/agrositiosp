@@ -6,10 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout } from "lucide-react";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
+import { InstallAppButton } from "@/components/InstallAppButton";
+import { useFazenda } from "@/lib/cloud/fazenda";
+import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,6 +32,8 @@ function Dashboard() {
   const [estoque] = useEstoque();
   const [financ] = useFinanceiro();
   const [plantios] = usePlantios();
+  const { fazendaId } = useFazenda();
+  const [lembretes] = useLembretes(fazendaId);
   const plantiosAtivos = plantios.filter((p) => p.status !== "encerrado");
 
   const ativo = lotes.find((l) => !l.encerrado);
@@ -39,8 +44,14 @@ function Dashboard() {
   const ativosGado = animais.filter((a) => a.status === "ativo");
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => { setToday(new Date()); }, []);
+  useEffect(() => {
+    if (!fazendaId) return;
+    verificarENotificar(fazendaId);
+  }, [fazendaId]);
   const diaLeitura = today?.getDate() === 30;
   const ultLeitura = medidores.flatMap((m) => m.leituras).sort((a, b) => b.data.localeCompare(a.data))[0];
+  const lembretesHoje = today ? lembretesDoDia(lembretes, today) : [];
+  const lembretesProximos = today ? proximosLembretes(lembretes, 7, today) : [];
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
   const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
