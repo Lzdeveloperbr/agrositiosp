@@ -17,7 +17,14 @@ import { gerarRelatorioAnimal } from "@/lib/pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/gado/$id")({
-  head: () => ({ meta: [{ title: "Animal — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Detalhes do Animal — AgroSítio" },
+      { name: "description", content: "Histórico completo do animal: pesagens, sanidade, reprodução e produção." },
+      { property: "og:title", content: "Detalhes do Animal — AgroSítio" },
+      { property: "og:description", content: "Histórico completo do animal: pesagens, sanidade, reprodução e produção." },
+    ],
+  }),
   component: AnimalDetalhe,
 });
 

@@ -16,7 +16,14 @@ import { ListChecks, Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/tarefas")({
-  head: () => ({ meta: [{ title: "Tarefas — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Tarefas — AgroSítio" },
+      { name: "description", content: "Lista de tarefas da fazenda com prioridade, categoria e vencimento." },
+      { property: "og:title", content: "Tarefas — AgroSítio" },
+      { property: "og:description", content: "Lista de tarefas da fazenda com prioridade, categoria e vencimento." },
+    ],
+  }),
   component: TarefasPage,
 });
 

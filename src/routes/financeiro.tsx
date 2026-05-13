@@ -14,7 +14,14 @@ import { Wallet, Plus, Trash2, TrendingUp, TrendingDown, Banknote } from "lucide
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/financeiro")({
-  head: () => ({ meta: [{ title: "Financeiro — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Financeiro — AgroSítio" },
+      { name: "description", content: "Receitas, despesas, contas a vencer e livro caixa do produtor rural." },
+      { property: "og:title", content: "Financeiro — AgroSítio" },
+      { property: "og:description", content: "Receitas, despesas, contas a vencer e livro caixa do produtor rural." },
+    ],
+  }),
   component: FinanceiroPage,
 });
 

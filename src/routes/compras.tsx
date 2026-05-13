@@ -15,7 +15,14 @@ import { toast } from "sonner";
 import type { CompraItem } from "@/lib/types";
 
 export const Route = createFileRoute("/compras")({
-  head: () => ({ meta: [{ title: "Compras — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Compras — AgroSítio" },
+      { name: "description", content: "Pedidos de compra, fornecedores e controle de recebimento de insumos." },
+      { property: "og:title", content: "Compras — AgroSítio" },
+      { property: "og:description", content: "Pedidos de compra, fornecedores e controle de recebimento de insumos." },
+    ],
+  }),
   component: ComprasPage,
 });
 

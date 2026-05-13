@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://granja-flow-smart-agri.lovable.app/sitemap.xml

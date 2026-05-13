@@ -15,7 +15,14 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, type Lembrete, pedirPermissaoNotificacao, lembretesDoDia, proximosLembretes, dispararNotificacao } from "@/lib/lembretes";
 
 export const Route = createFileRoute("/lembretes")({
-  head: () => ({ meta: [{ title: "Lembretes — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Lembretes Mensais — AgroSítio" },
+      { name: "description", content: "Contas e tarefas recorrentes (energia, internet, leituras) com notificação no dia." },
+      { property: "og:title", content: "Lembretes Mensais — AgroSítio" },
+      { property: "og:description", content: "Contas e tarefas recorrentes (energia, internet, leituras) com notificação no dia." },
+    ],
+  }),
   component: LembretesPage,
 });
 

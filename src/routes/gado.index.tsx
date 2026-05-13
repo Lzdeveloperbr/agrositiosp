@@ -22,7 +22,9 @@ export const Route = createFileRoute("/gado/")({
   head: () => ({
     meta: [
       { title: "Gado de Corte — AgroSítio" },
-      { name: "description", content: "Cadastro e manejo do rebanho de corte." },
+      { name: "description", content: "Cadastro e manejo do rebanho de corte: pesagens, sanidade e reprodução." },
+      { property: "og:title", content: "Gado de Corte — AgroSítio" },
+      { property: "og:description", content: "Cadastro e manejo do rebanho de corte: pesagens, sanidade e reprodução." },
     ],
   }),
   component: GadoPage,

@@ -1,0 +1,25 @@
+# AgroSítio — Gestão Rural
+
+> Sistema profissional de gestão de fazenda: granja de frango de corte, gado, plantios, energia, finanças e diário de campo, com clima ao vivo, IA agrícola e relatórios em PDF.
+
+AgroSítio é um aplicativo web (instalável como PWA) para produtores rurais que precisam acompanhar a operação do dia a dia: lotes de frango com mortalidade, peso e conversão alimentar; rebanho de corte com pesagens e sanidade; plantios e calendário de safras; consumo de energia por relógio; estoque, compras e máquinas; finanças com livro caixa; lembretes recorrentes (energia, internet, etc.) com notificações; previsão do tempo Open-Meteo e insights gerados por IA.
+
+## Pages
+
+- [Início](/): Painel com clima, IA, alertas e indicadores do dia.
+- [Diário de Campo](/diario): Registros diários com fotos, clima e GPS.
+- [Tarefas](/tarefas): Lista de tarefas com prioridade e vencimento.
+- [Lembretes](/lembretes): Contas mensais recorrentes com notificação no dia.
+- [Granja](/granja): Lotes de frango — mortalidade, ração, água e peso.
+- [Manejo do Frango](/manejo): Protocolo dia a dia (temperatura, equipamentos, luz, CA).
+- [Gado](/gado): Cadastro e manejo do rebanho de corte.
+- [Plantios](/plantios): Gestão de plantios, safras e calendário agrícola.
+- [Pluviometria](/chuvas): Registro de chuvas por local.
+- [Monitoramento](/monitoramento): Pragas, sanidade e ocorrências de campo.
+- [Estoque](/estoque): Insumos, vacinas, ração e movimentações.
+- [Compras](/compras): Pedidos de compra e fornecedores.
+- [Máquinas](/maquinas): Tratores, veículos e manutenções.
+- [Energia](/energia): Auto-leitura mensal dos relógios de energia.
+- [Financeiro](/financeiro): Receitas, despesas e contas a vencer.
+- [Relatórios](/relatorios): Relatórios profissionais em PDF.
+- [Backup](/backup): Exportar e restaurar dados da fazenda.

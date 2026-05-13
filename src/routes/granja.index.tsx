@@ -16,8 +16,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/granja/")({
   head: () => ({
     meta: [
-      { title: "Granja — AgroSítio" },
-      { name: "description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água e peso." },
+      { title: "Granja de Frango — AgroSítio" },
+      { name: "description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
+      { property: "og:title", content: "Granja de Frango — AgroSítio" },
+      { property: "og:description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
     ],
   }),
   component: GranjaPage,
