@@ -52,7 +52,9 @@ function footer(doc: jsPDF) {
     doc.setTextColor(140);
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
-    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, h - 8);
+    doc.text(`${SITIO.nome} · ${SITIO.local}`, 14, h - 12);
+    doc.text(`Resp.: ${SITIO.responsavel}`, 14, h - 8);
+    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, w / 2, h - 8, { align: "center" });
     doc.text(`Página ${i} de ${pages}`, w - 14, h - 8, { align: "right" });
   }
 }
