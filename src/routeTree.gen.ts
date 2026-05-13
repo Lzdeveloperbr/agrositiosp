@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
@@ -32,6 +33,11 @@ import { Route as GadoIdRouteImport } from './routes/gado.$id'
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
@@ -140,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/plantios'
     | '/relatorios'
+    | '/sitemap.xml'
     | '/tarefas'
     | '/gado/$id'
     | '/granja/$id'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/plantios'
     | '/relatorios'
+    | '/sitemap.xml'
     | '/tarefas'
     | '/gado/$id'
     | '/granja/$id'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/plantios'
     | '/relatorios'
+    | '/sitemap.xml'
     | '/tarefas'
     | '/gado/$id'
     | '/granja/$id'
@@ -270,6 +282,7 @@ export interface RootRouteChildren {
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
   GadoIdRoute: typeof GadoIdRoute
   GranjaIdRoute: typeof GranjaIdRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/tarefas'
       fullPath: '/tarefas'
       preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relatorios': {
@@ -430,6 +450,7 @@ const rootRouteChildren: RootRouteChildren = {
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
   RelatoriosRoute: RelatoriosRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
   GadoIdRoute: GadoIdRoute,
   GranjaIdRoute: GranjaIdRoute,
