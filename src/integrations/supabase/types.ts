@@ -315,21 +315,30 @@ export type Database = {
       }
       fazendas: {
         Row: {
+          cidade: string | null
           codigo_acesso: string
           created_at: string
           id: string
+          latitude: number | null
+          longitude: number | null
           nome: string
         }
         Insert: {
+          cidade?: string | null
           codigo_acesso: string
           created_at?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           nome: string
         }
         Update: {
+          cidade?: string | null
           codigo_acesso?: string
           created_at?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           nome?: string
         }
         Relationships: []
@@ -649,6 +658,75 @@ export type Database = {
           },
         ]
       }
+      plantios: {
+        Row: {
+          area_ha: number
+          autor: string | null
+          created_at: string
+          cultura: string
+          data_colheita: string | null
+          data_plantio: string
+          fazenda_id: string
+          id: string
+          local: string | null
+          observacoes: string | null
+          preco_kg: number | null
+          previsao_colheita: string | null
+          produtividade_kg: number | null
+          quantidade_sementes: number | null
+          status: string
+          tipo_solo: string | null
+          tratos: Json
+          unidade_sementes: string | null
+          updated_at: string
+          variedade: string | null
+        }
+        Insert: {
+          area_ha?: number
+          autor?: string | null
+          created_at?: string
+          cultura: string
+          data_colheita?: string | null
+          data_plantio: string
+          fazenda_id: string
+          id?: string
+          local?: string | null
+          observacoes?: string | null
+          preco_kg?: number | null
+          previsao_colheita?: string | null
+          produtividade_kg?: number | null
+          quantidade_sementes?: number | null
+          status?: string
+          tipo_solo?: string | null
+          tratos?: Json
+          unidade_sementes?: string | null
+          updated_at?: string
+          variedade?: string | null
+        }
+        Update: {
+          area_ha?: number
+          autor?: string | null
+          created_at?: string
+          cultura?: string
+          data_colheita?: string | null
+          data_plantio?: string
+          fazenda_id?: string
+          id?: string
+          local?: string | null
+          observacoes?: string | null
+          preco_kg?: number | null
+          previsao_colheita?: string | null
+          produtividade_kg?: number | null
+          quantidade_sementes?: number | null
+          status?: string
+          tipo_solo?: string | null
+          tratos?: Json
+          unidade_sementes?: string | null
+          updated_at?: string
+          variedade?: string | null
+        }
+        Relationships: []
+      }
       tarefas: {
         Row: {
           autor: string | null
@@ -701,11 +779,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      atualizar_coords_fazenda: {
+        Args: {
+          p_cidade: string
+          p_codigo: string
+          p_lat: number
+          p_lon: number
+        }
+        Returns: {
+          cidade: string
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       criar_fazenda: {
         Args: { p_codigo: string; p_nome: string }
         Returns: {
+          cidade: string
           codigo_acesso: string
           id: string
+          latitude: number
+          longitude: number
           nome: string
         }[]
       }
@@ -713,7 +808,10 @@ export type Database = {
       entrar_fazenda: {
         Args: { p_codigo: string }
         Returns: {
+          cidade: string
           id: string
+          latitude: number
+          longitude: number
           nome: string
         }[]
       }
