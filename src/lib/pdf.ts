@@ -68,7 +68,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const pesoTotalKg = (vivas * ultPeso) / 1000;
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Indicador", "Valor"]],
@@ -148,7 +148,7 @@ export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais
   const ativos = animais.filter((a) => a.status === "ativo");
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Resumo", "Valor"]],
@@ -174,7 +174,7 @@ export function gerarRelatorioRebanho(animais: Animal[]) {
   header(doc, "Relatório do Rebanho", `${ativos.length} cabeças ativas`);
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "striped",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Brinco", "Sexo", "Categoria", "Raça", "Peso (kg)", "Status"]],
@@ -197,7 +197,7 @@ export function gerarRelatorioAnimal(a: Animal) {
   header(doc, `Animal ${a.brinco}`, `${a.sexo} · ${a.categoria ?? ""} · ${a.raca ?? ""}`);
 
   autoTable(doc, {
-    startY: 58, theme: "grid",
+    startY: 62, theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Indicador", "Valor"]],
     body: [
@@ -311,7 +311,7 @@ export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string)
   const totDespesa = sorted.filter((l) => l.tipo === "despesa").reduce((a, b) => a + b.valor, 0);
 
   autoTable(doc, {
-    startY: 58, theme: "grid",
+    startY: 62, theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Resumo", "Valor"]],
     body: [
