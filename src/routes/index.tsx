@@ -5,9 +5,11 @@ import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet } from "lucide-react";
+import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { WeatherWidget } from "@/components/WeatherWidget";
+import { AIInsightsCard } from "@/components/AIInsightsCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,6 +28,8 @@ function Dashboard() {
   const [tarefas] = useTarefas();
   const [estoque] = useEstoque();
   const [financ] = useFinanceiro();
+  const [plantios] = usePlantios();
+  const plantiosAtivos = plantios.filter((p) => p.status !== "encerrado");
 
   const ativo = lotes.find((l) => !l.encerrado);
   const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
@@ -92,11 +96,23 @@ function Dashboard() {
           </div>
         )}
 
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2"><WeatherWidget /></div>
+          <AIInsightsCard context={JSON.stringify({
+            granja: { aves_vivas: vivas, mortalidade_pct: Number(mortPct.toFixed(2)), lote: ativo?.numero, dias: ativo ? ativo.entries.length : 0 },
+            gado: { cabecas_ativas: ativosGado.length, total_historico: animais.length },
+            plantios_ativos: plantiosAtivos.map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, dias_para_colheita: p.previsaoColheita ? Math.ceil((new Date(p.previsaoColheita).getTime() - Date.now()) / 86400000) : null })),
+            estoque_baixo: estoqueBaixo.map((i) => ({ nome: i.nome, qtd: i.quantidade, min: i.minimo })),
+            financeiro: { contas_a_vencer: contasVencendo.length, saldo_previsto: -totalAVencer },
+            tarefas_pendentes: tarefasPend.length,
+          })} />
+        </div>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Aves vivas" value={vivas.toLocaleString("pt-BR")} hint={ativo ? `Lote ${ativo.numero}` : "Sem lote ativo"} icon={Bird} tone="primary" />
           <StatCard label="Mortalidade" value={`${mortPct.toFixed(2)}%`} hint={`${totalMort.toLocaleString("pt-BR")} aves`} icon={Skull} tone={mortPct > 5 ? "destructive" : "muted"} />
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />
-          <StatCard label="Última leitura" value={ultLeitura ? `${ultLeitura.valor} kWh` : "—"} hint={ultLeitura ? new Date(ultLeitura.data).toLocaleDateString("pt-BR") : "Sem leituras"} icon={Zap} tone="accent" />
+          <StatCard label="Plantios ativos" value={plantiosAtivos.length.toString()} hint={`${plantiosAtivos.reduce((s, p) => s + p.areaHa, 0).toFixed(1)} ha`} icon={Sprout} tone="primary" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
