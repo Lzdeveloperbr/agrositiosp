@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Bird, Beef, Zap, FileText, Sprout, BookOpen, ListChecks,
-  Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu,
+  LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
+  Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import logoUrl from "@/assets/logo-agrositio.png";
 
 type Item = { to: string; label: string; icon: any };
 
@@ -26,6 +27,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/granja", label: "Granja", icon: Bird },
       { to: "/manejo", label: "Manejo Frango", icon: BookOpen },
       { to: "/gado", label: "Gado", icon: Beef },
+      { to: "/plantios", label: "Plantios", icon: Sprout },
       { to: "/chuvas", label: "Chuvas", icon: CloudRain },
       { to: "/monitoramento", label: "Monitoramento", icon: Bug },
     ],
@@ -69,9 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex md:w-60 flex-col bg-sidebar border-r border-sidebar-border">
         <div className="p-5 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
-              <Sprout className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoUrl} alt="AgroSítio" width={40} height={40} className="h-10 w-10 object-contain" />
             <div>
               <div className="font-display text-lg font-bold leading-tight">AgroSítio</div>
               <div className="text-xs text-muted-foreground">{fazendaNome ?? "Granja & Gado"}</div>
@@ -118,9 +118,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <header className="md:hidden flex items-center justify-between p-3 border-b border-border bg-sidebar sticky top-0 z-30">
         <Link to="/" className="flex items-center gap-2 min-w-0">
-          <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--gradient-primary)" }}>
-            <Sprout className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
             <div className="font-display font-bold text-sm truncate">{fazendaNome ?? "AgroSítio"}</div>
             <div className="text-[10px] text-muted-foreground truncate">{operador || codigo}</div>

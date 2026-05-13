@@ -6,6 +6,7 @@ import type {
   Lote, Medidor, Animal, Pasto, DiarioEntry, Tarefa, ItemEstoque, Lancamento,
   Maquina, Chuva, Monitoramento, Compra,
 } from "@/lib/types";
+import type { Plantio } from "@/lib/agro";
 
 // ====== mapeamento por tabela ======
 type Mapper<T> = { toRow: (v: T) => any; fromRow: (r: any) => T };
@@ -184,6 +185,12 @@ export const useMaquinas = () => useCloud<Maquina>("maquinas", maquinaMap);
 export const useChuvas = () => useCloud<Chuva>("chuvas", chuvaMap);
 export const useMonitoramentos = () => useCloud<Monitoramento>("monitoramentos", monitMap);
 export const useCompras = () => useCloud<Compra>("compras", compraMap);
+
+const plantioMap: Mapper<Plantio> = {
+  toRow: (p) => ({ id: p.id, cultura: p.cultura, variedade: p.variedade ?? null, area_ha: p.areaHa, quantidade_sementes: p.quantidadeSementes ?? null, unidade_sementes: p.unidadeSementes ?? null, tipo_solo: p.tipoSolo ?? null, local: p.local ?? null, data_plantio: p.dataPlantio, previsao_colheita: p.previsaoColheita ?? null, data_colheita: p.dataColheita ?? null, produtividade_kg: p.produtividadeKg ?? null, preco_kg: p.precoKg ?? null, status: p.status, tratos: p.tratos, observacoes: p.observacoes ?? null }),
+  fromRow: (r) => ({ id: r.id, cultura: r.cultura, variedade: r.variedade ?? undefined, areaHa: Number(r.area_ha), quantidadeSementes: r.quantidade_sementes ?? undefined, unidadeSementes: r.unidade_sementes ?? undefined, tipoSolo: r.tipo_solo ?? undefined, local: r.local ?? undefined, dataPlantio: r.data_plantio, previsaoColheita: r.previsao_colheita ?? undefined, dataColheita: r.data_colheita ?? undefined, produtividadeKg: r.produtividade_kg ?? undefined, precoKg: r.preco_kg ?? undefined, status: r.status, tratos: r.tratos ?? [], observacoes: r.observacoes ?? undefined }),
+};
+export const usePlantios = () => useCloud<Plantio>("plantios", plantioMap);
 
 // Mantido para compatibilidade do botão de Backup (agora apaga local apenas).
 export const STORAGE_KEYS = ["agro:lotes","agro:medidores","agro:animais","agro:pastos","agro:diario","agro:tarefas","agro:estoque","agro:financeiro"];
