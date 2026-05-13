@@ -4,26 +4,42 @@ import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
+export const SITIO = {
+  nome: "Sítio Santo Antônio",
+  local: "Meridiano - SP",
+  proprietario: "Luiz Antônio Balbo Pereira",
+  responsavel: "Alan José Godoy",
+};
+
 function header(doc: jsPDF, title: string, subtitle?: string) {
+  const w = doc.internal.pageSize.getWidth();
   doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 28, "F");
+  doc.rect(0, 0, w, 32, "F");
   doc.setTextColor(255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("AgroSítio", 14, 13);
+  doc.text(SITIO.nome, 14, 13);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Gestão Rural · Bello Alimentos", 14, 20);
+  doc.text(SITIO.local, 14, 20);
+  doc.setFontSize(8);
+  doc.text(`Proprietário: ${SITIO.proprietario}`, 14, 26);
+  doc.text(`Responsável: ${SITIO.responsavel}`, 14, 30);
+
+  doc.setFontSize(9);
+  doc.text("AgroSítio · Gestão Rural", w - 14, 13, { align: "right" });
+  doc.setFontSize(8);
+  doc.text(new Date().toLocaleDateString("pt-BR"), w - 14, 20, { align: "right" });
 
   doc.setTextColor(40);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(title, 14, 42);
+  doc.text(title, 14, 46);
   if (subtitle) {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(110);
-    doc.text(subtitle, 14, 49);
+    doc.text(subtitle, 14, 53);
   }
   doc.setTextColor(40);
 }
@@ -36,7 +52,9 @@ function footer(doc: jsPDF) {
     doc.setTextColor(140);
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
-    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, h - 8);
+    doc.text(`${SITIO.nome} · ${SITIO.local}`, 14, h - 12);
+    doc.text(`Resp.: ${SITIO.responsavel}`, 14, h - 8);
+    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, w / 2, h - 8, { align: "center" });
     doc.text(`Página ${i} de ${pages}`, w - 14, h - 8, { align: "right" });
   }
 }
@@ -52,7 +70,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const pesoTotalKg = (vivas * ultPeso) / 1000;
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Indicador", "Valor"]],
@@ -132,7 +150,7 @@ export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais
   const ativos = animais.filter((a) => a.status === "ativo");
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Resumo", "Valor"]],
@@ -158,7 +176,7 @@ export function gerarRelatorioRebanho(animais: Animal[]) {
   header(doc, "Relatório do Rebanho", `${ativos.length} cabeças ativas`);
 
   autoTable(doc, {
-    startY: 58,
+    startY: 62,
     theme: "striped",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Brinco", "Sexo", "Categoria", "Raça", "Peso (kg)", "Status"]],
@@ -181,7 +199,7 @@ export function gerarRelatorioAnimal(a: Animal) {
   header(doc, `Animal ${a.brinco}`, `${a.sexo} · ${a.categoria ?? ""} · ${a.raca ?? ""}`);
 
   autoTable(doc, {
-    startY: 58, theme: "grid",
+    startY: 62, theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Indicador", "Valor"]],
     body: [
@@ -295,7 +313,7 @@ export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string)
   const totDespesa = sorted.filter((l) => l.tipo === "despesa").reduce((a, b) => a + b.valor, 0);
 
   autoTable(doc, {
-    startY: 58, theme: "grid",
+    startY: 62, theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Resumo", "Valor"]],
     body: [
