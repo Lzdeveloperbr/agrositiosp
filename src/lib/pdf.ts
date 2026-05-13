@@ -4,26 +4,42 @@ import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
+export const SITIO = {
+  nome: "Sítio Santo Antônio",
+  local: "Meridiano - SP",
+  proprietario: "Luiz Antônio Balbo Pereira",
+  responsavel: "Alan José Godoy",
+};
+
 function header(doc: jsPDF, title: string, subtitle?: string) {
+  const w = doc.internal.pageSize.getWidth();
   doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-  doc.rect(0, 0, doc.internal.pageSize.getWidth(), 28, "F");
+  doc.rect(0, 0, w, 32, "F");
   doc.setTextColor(255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("AgroSítio", 14, 13);
+  doc.text(SITIO.nome, 14, 13);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Gestão Rural · Bello Alimentos", 14, 20);
+  doc.text(SITIO.local, 14, 20);
+  doc.setFontSize(8);
+  doc.text(`Proprietário: ${SITIO.proprietario}`, 14, 26);
+  doc.text(`Responsável: ${SITIO.responsavel}`, 14, 30);
+
+  doc.setFontSize(9);
+  doc.text("AgroSítio · Gestão Rural", w - 14, 13, { align: "right" });
+  doc.setFontSize(8);
+  doc.text(new Date().toLocaleDateString("pt-BR"), w - 14, 20, { align: "right" });
 
   doc.setTextColor(40);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(title, 14, 42);
+  doc.text(title, 14, 46);
   if (subtitle) {
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(110);
-    doc.text(subtitle, 14, 49);
+    doc.text(subtitle, 14, 53);
   }
   doc.setTextColor(40);
 }
