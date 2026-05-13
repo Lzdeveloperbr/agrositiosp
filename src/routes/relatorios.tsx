@@ -11,8 +11,10 @@ import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet } from "lucide-reac
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios — AgroSítio" },
-      { name: "description", content: "Relatórios profissionais em PDF do sítio." },
+      { title: "Relatórios em PDF — AgroSítio" },
+      { name: "description", content: "Relatórios profissionais em PDF: lotes, rebanho, energia, livro caixa e diário." },
+      { property: "og:title", content: "Relatórios em PDF — AgroSítio" },
+      { property: "og:description", content: "Relatórios profissionais em PDF: lotes, rebanho, energia, livro caixa e diário." },
     ],
   }),
   component: RelatoriosPage,

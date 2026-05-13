@@ -7,7 +7,14 @@ import { Database, Download, Cloud, Users, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/backup")({
-  head: () => ({ meta: [{ title: "Backup — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Backup e Restauração — AgroSítio" },
+      { name: "description", content: "Exporte e restaure todos os dados da fazenda em um único arquivo seguro." },
+      { property: "og:title", content: "Backup e Restauração — AgroSítio" },
+      { property: "og:description", content: "Exporte e restaure todos os dados da fazenda em um único arquivo seguro." },
+    ],
+  }),
   component: BackupPage,
 });
 

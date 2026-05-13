@@ -16,7 +16,14 @@ import { toast } from "sonner";
 import type { Maquina } from "@/lib/types";
 
 export const Route = createFileRoute("/maquinas")({
-  head: () => ({ meta: [{ title: "Máquinas — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Máquinas e Veículos — AgroSítio" },
+      { name: "description", content: "Tratores, caminhões, geradores: horímetro, abastecimentos e manutenções." },
+      { property: "og:title", content: "Máquinas e Veículos — AgroSítio" },
+      { property: "og:description", content: "Tratores, caminhões, geradores: horímetro, abastecimentos e manutenções." },
+    ],
+  }),
   component: MaquinasPage,
 });
 

@@ -15,8 +15,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/energia")({
   head: () => ({
     meta: [
-      { title: "Energia — AgroSítio" },
-      { name: "description", content: "Auto-leitura mensal dos relógios de energia do sítio." },
+      { title: "Consumo de Energia — AgroSítio" },
+      { name: "description", content: "Auto-leitura mensal dos relógios de energia com cálculo de consumo por instalação." },
+      { property: "og:title", content: "Consumo de Energia — AgroSítio" },
+      { property: "og:description", content: "Auto-leitura mensal dos relógios de energia com cálculo de consumo por instalação." },
     ],
   }),
   component: EnergiaPage,

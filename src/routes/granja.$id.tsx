@@ -14,7 +14,14 @@ import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/granja/$id")({
-  head: () => ({ meta: [{ title: "Lote — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Detalhes do Lote — AgroSítio" },
+      { name: "description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
+      { property: "og:title", content: "Detalhes do Lote — AgroSítio" },
+      { property: "og:description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
+    ],
+  }),
   component: LoteDetalhe,
   notFoundComponent: () => <AppShell><p>Lote não encontrado.</p></AppShell>,
 });

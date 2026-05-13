@@ -17,7 +17,14 @@ import { uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import { useFazenda } from "@/lib/cloud/fazenda";
 
 export const Route = createFileRoute("/monitoramento")({
-  head: () => ({ meta: [{ title: "Monitoramento — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Monitoramento — AgroSítio" },
+      { name: "description", content: "Pragas, doenças e ocorrências de campo com fotos, GPS e ações tomadas." },
+      { property: "og:title", content: "Monitoramento — AgroSítio" },
+      { property: "og:description", content: "Pragas, doenças e ocorrências de campo com fotos, GPS e ações tomadas." },
+    ],
+  }),
   component: MonitPage,
 });
 

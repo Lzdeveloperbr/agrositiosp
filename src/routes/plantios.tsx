@@ -15,7 +15,14 @@ import { Sprout, Plus, Calendar, Trash2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/plantios")({
-  head: () => ({ meta: [{ title: "Plantios e Safras — AgroSítio" }, { name: "description", content: "Gestão de plantios, safras e calendário agrícola." }] }),
+  head: () => ({
+    meta: [
+      { title: "Plantios e Calendário de Safras — AgroSítio" },
+      { name: "description", content: "Gestão de plantios, safras e calendário agrícola brasileiro por cultura." },
+      { property: "og:title", content: "Plantios e Calendário de Safras — AgroSítio" },
+      { property: "og:description", content: "Gestão de plantios, safras e calendário agrícola brasileiro por cultura." },
+    ],
+  }),
   component: PlantiosPage,
 });
 

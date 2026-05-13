@@ -12,7 +12,14 @@ import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGri
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chuvas")({
-  head: () => ({ meta: [{ title: "Pluviometria — AgroSítio" }] }),
+  head: () => ({
+    meta: [
+      { title: "Pluviometria — AgroSítio" },
+      { name: "description", content: "Registre e acompanhe o índice de chuvas (mm) por local na fazenda." },
+      { property: "og:title", content: "Pluviometria — AgroSítio" },
+      { property: "og:description", content: "Registre e acompanhe o índice de chuvas (mm) por local na fazenda." },
+    ],
+  }),
   component: ChuvasPage,
 });
 

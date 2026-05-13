@@ -13,7 +13,9 @@ export const Route = createFileRoute("/manejo")({
   head: () => ({
     meta: [
       { title: "Manejo do Frango — AgroSítio" },
-      { name: "description", content: "Protocolo profissional dia a dia: temperatura, comedouros, nipples, luz, ração e CA." },
+      { name: "description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
+      { property: "og:title", content: "Manejo do Frango — AgroSítio" },
+      { property: "og:description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
     ],
   }),
   component: ManejoPage,

@@ -18,7 +18,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AgroSítio — Painel de Gestão Rural" },
-      { name: "description", content: "Painel de controle do sítio: granja, gado de corte, energia e diário." },
+      { name: "description", content: "Painel do sítio com clima ao vivo, IA agrícola, alertas, lembretes e indicadores de granja, gado e plantios." },
+      { property: "og:title", content: "AgroSítio — Painel de Gestão Rural" },
+      { property: "og:description", content: "Painel do sítio com clima ao vivo, IA agrícola, alertas, lembretes e indicadores de granja, gado e plantios." },
     ],
   }),
   component: Dashboard,

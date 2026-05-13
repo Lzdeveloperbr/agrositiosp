@@ -22,7 +22,9 @@ export const Route = createFileRoute("/diario")({
   head: () => ({
     meta: [
       { title: "Diário de Campo — AgroSítio" },
-      { name: "description", content: "Registros diários com fotos, clima e GPS." },
+      { name: "description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
+      { property: "og:title", content: "Diário de Campo — AgroSítio" },
+      { property: "og:description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
     ],
   }),
   component: DiarioPage,
