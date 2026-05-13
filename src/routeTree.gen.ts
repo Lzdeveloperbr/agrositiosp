@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
@@ -35,6 +36,11 @@ const TarefasRoute = TarefasRouteImport.update({
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlantiosRoute = PlantiosRouteImport.update({
+  id: '/plantios',
+  path: '/plantios',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/plantios': typeof PlantiosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
   '/gado/$id': typeof GadoIdRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
+    | '/plantios'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
+    | '/plantios'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
+    | '/plantios'
     | '/relatorios'
     | '/tarefas'
     | '/gado/$id'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   ManejoRoute: typeof ManejoRoute
   MaquinasRoute: typeof MaquinasRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
+  PlantiosRoute: typeof PlantiosRoute
   RelatoriosRoute: typeof RelatoriosRoute
   TarefasRoute: typeof TarefasRoute
   GadoIdRoute: typeof GadoIdRoute
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plantios': {
+      id: '/plantios'
+      path: '/plantios'
+      fullPath: '/plantios'
+      preLoaderRoute: typeof PlantiosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/monitoramento': {
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManejoRoute: ManejoRoute,
   MaquinasRoute: MaquinasRoute,
   MonitoramentoRoute: MonitoramentoRoute,
+  PlantiosRoute: PlantiosRoute,
   RelatoriosRoute: RelatoriosRoute,
   TarefasRoute: TarefasRoute,
   GadoIdRoute: GadoIdRoute,
