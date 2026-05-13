@@ -15,6 +15,7 @@ import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
+import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
@@ -56,6 +57,11 @@ const MaquinasRoute = MaquinasRouteImport.update({
 const ManejoRoute = ManejoRouteImport.update({
   id: '/manejo',
   path: '/manejo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LembretesRoute = LembretesRouteImport.update({
+  id: '/lembretes',
+  path: '/lembretes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   EnergiaRoute: typeof EnergiaRoute
   EstoqueRoute: typeof EstoqueRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
   MaquinasRoute: typeof MaquinasRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/manejo'
       fullPath: '/manejo'
       preLoaderRoute: typeof ManejoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lembretes': {
+      id: '/lembretes'
+      path: '/lembretes'
+      fullPath: '/lembretes'
+      preLoaderRoute: typeof LembretesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnergiaRoute: EnergiaRoute,
   EstoqueRoute: EstoqueRoute,
   FinanceiroRoute: FinanceiroRoute,
+  LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
   MaquinasRoute: MaquinasRoute,
   MonitoramentoRoute: MonitoramentoRoute,
