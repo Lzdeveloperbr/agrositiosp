@@ -113,7 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="truncate">{operador || "—"}</div>
             <div className="truncate">{codigo} · v1.2</div>
           </div>
-          <Button variant="ghost" size="icon" onClick={sair} className="h-8 w-8 shrink-0"><LogOut className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={sair} aria-label="Sair da fazenda" className="h-8 w-8 shrink-0"><LogOut className="h-4 w-4" /></Button>
         </div>
       </aside>
 
@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-1 shrink-0">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9"><Menu className="h-5 w-5" /></Button>
+              <Button variant="ghost" size="icon" aria-label="Abrir menu" className="h-9 w-9"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] sm:w-[360px] overflow-y-auto p-0 bg-sidebar">
               <SheetHeader className="p-5 border-b border-sidebar-border text-left">
@@ -173,7 +173,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 min-w-0 pb-20 md:pb-0">
         <div className="p-4 md:p-8 max-w-7xl mx-auto">{children}</div>
 
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 bg-sidebar border-t border-sidebar-border">
+        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 bg-sidebar border-t border-sidebar-border">
           {mobileBottom.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;
