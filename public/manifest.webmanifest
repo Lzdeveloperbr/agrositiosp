@@ -1,17 +1,17 @@
 {
   "name": "AgroSítio — Gestão Rural",
   "short_name": "AgroSítio",
-  "description": "Gestão de granja de frango de corte e energia.",
+  "description": "Gestão de granja de frango de corte, gado, plantios e energia.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b1410",
-  "theme_color": "#0b1410",
+  "theme_color": "#2d6a3e",
   "lang": "pt-BR",
   "icons": [
     { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
     { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
-    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180", "purpose": "any" }
   ]
 }

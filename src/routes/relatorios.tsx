@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLotes, useMedidores, useAnimais, useDiario, useFinanceiro } from "@/lib/state";
 import { gerarRelatorioLote, gerarRelatorioEnergia, gerarRelatorioGeral, gerarRelatorioRebanho, gerarRelatorioDiario, gerarRelatorioAnimal, gerarLivroCaixa } from "@/lib/pdf";
-import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet } from "lucide-react";
+import { listPdfHistory, deletePdfHistory, downloadFromHistory, printFromHistory, clearPdfHistory, type PdfHistoryItem } from "@/lib/pdfHistory";
+import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet, History, Download, Printer, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
@@ -84,8 +85,71 @@ function RelatoriosPage() {
             </div>
           )}
         </Card>
+
+        <HistoricoPdfs />
       </div>
     </AppShell>
+  );
+}
+
+function HistoricoPdfs() {
+  const [items, setItems] = useState<PdfHistoryItem[]>([]);
+
+  useEffect(() => {
+    const refresh = () => setItems(listPdfHistory());
+    refresh();
+    window.addEventListener("pdf-history-changed", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("pdf-history-changed", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
+
+  const fmtSize = (b: number) => b > 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`;
+
+  return (
+    <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
+          <History className="h-5 w-5 text-primary" />
+          <h2 className="font-display font-semibold text-lg">Histórico de PDFs gerados</h2>
+        </div>
+        {items.length > 0 && (
+          <Button size="sm" variant="ghost" onClick={() => { if (confirm("Apagar todo o histórico?")) clearPdfHistory(); }}>
+            <Trash2 className="h-4 w-4 mr-1" /> Limpar
+          </Button>
+        )}
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-6 text-center">Nenhum PDF gerado ainda. Clique em qualquer botão acima para criar.</p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((it) => (
+            <div key={it.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-card/50">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium truncate">{it.titulo}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {new Date(it.data).toLocaleString("pt-BR")} · {it.modulo}
+                  {it.ref ? ` · ${it.ref}` : ""} · {fmtSize(it.size)}
+                </p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => downloadFromHistory(it)} title="Baixar">
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => printFromHistory(it)} title="Imprimir">
+                  <Printer className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => deletePdfHistory(it.id)} title="Excluir">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   );
 }
 

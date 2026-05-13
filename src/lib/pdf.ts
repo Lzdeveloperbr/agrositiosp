@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
+import { savePdf } from "./pdfHistory";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
@@ -101,7 +102,7 @@ export function gerarRelatorioLote(lote: Lote) {
   }
 
   footer(doc);
-  doc.save(`relatorio-lote-${lote.numero}.pdf`);
+  savePdf(doc, `relatorio-lote-${lote.numero}.pdf`, { titulo: `Relatório do Lote ${lote.numero}`, modulo: "Granja", ref: `Lote ${lote.numero}` });
 }
 
 export function gerarRelatorioEnergia(medidores: Medidor[]) {
@@ -138,7 +139,7 @@ export function gerarRelatorioEnergia(medidores: Medidor[]) {
   }
 
   footer(doc);
-  doc.save(`relatorio-energia-${new Date().toISOString().slice(0, 10)}.pdf`);
+  savePdf(doc, `relatorio-energia-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Consumo de Energia", modulo: "Energia" });
 }
 
 export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais: Animal[]) {
@@ -163,7 +164,7 @@ export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais
   });
 
   footer(doc);
-  doc.save(`relatorio-geral-${new Date().toISOString().slice(0, 10)}.pdf`);
+  savePdf(doc, `relatorio-geral-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Relatório Geral do Sítio", modulo: "Geral" });
 }
 
 function ultimoPeso(a: Animal) {
@@ -191,7 +192,7 @@ export function gerarRelatorioRebanho(animais: Animal[]) {
   });
 
   footer(doc);
-  doc.save(`relatorio-rebanho-${new Date().toISOString().slice(0, 10)}.pdf`);
+  savePdf(doc, `relatorio-rebanho-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Relatório do Rebanho", modulo: "Gado" });
 }
 
 export function gerarRelatorioAnimal(a: Animal) {
@@ -237,7 +238,7 @@ export function gerarRelatorioAnimal(a: Animal) {
   }
 
   footer(doc);
-  doc.save(`animal-${a.brinco}.pdf`);
+  savePdf(doc, `animal-${a.brinco}.pdf`, { titulo: `Animal ${a.brinco}`, modulo: "Gado", ref: `Brinco ${a.brinco}` });
 }
 
 export async function gerarRelatorioDiario(entries: DiarioEntry[], titulo = "Diário de Campo") {
@@ -286,7 +287,7 @@ export async function gerarRelatorioDiario(entries: DiarioEntry[], titulo = "Di�
   }
 
   footer(doc);
-  doc.save(`diario-${new Date().toISOString().slice(0, 10)}.pdf`);
+  savePdf(doc, `diario-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo, modulo: "Diário" });
 }
 
 export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string) {
@@ -333,5 +334,5 @@ export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string)
   });
 
   footer(doc);
-  doc.save(`livro-caixa-${periodoLabel.replace(/\s+/g, "-").toLowerCase()}.pdf`);
+  savePdf(doc, `livro-caixa-${periodoLabel.replace(/\s+/g, "-").toLowerCase()}.pdf`, { titulo: `Livro Caixa — ${periodoLabel}`, modulo: "Financeiro", ref: periodoLabel });
 }
