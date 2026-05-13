@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLotes, useMedidores, useAnimais, useDiario, useFinanceiro } from "@/lib/state";
 import { gerarRelatorioLote, gerarRelatorioEnergia, gerarRelatorioGeral, gerarRelatorioRebanho, gerarRelatorioDiario, gerarRelatorioAnimal, gerarLivroCaixa } from "@/lib/pdf";
-import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet } from "lucide-react";
+import { listPdfHistory, deletePdfHistory, downloadFromHistory, printFromHistory, clearPdfHistory, type PdfHistoryItem } from "@/lib/pdfHistory";
+import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet, History, Download, Printer, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
