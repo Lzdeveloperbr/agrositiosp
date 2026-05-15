@@ -53,7 +53,6 @@ function footer(doc: jsPDF) {
   }
 }
 
-// Limpa markdown básico (negrito, listas, headers) para texto plano legível em PDF
 function limparMarkdown(md: string): string {
   return md
     .replace(/^#{1,6}\s*/gm, "")
@@ -64,6 +63,18 @@ function limparMarkdown(md: string): string {
     .replace(/^\s*\d+\.\s+/gm, (m) => m.trim() + " ");
 }
 
+function sectionTitle(doc: jsPDF, y: number, label: string): number {
+  if (y > 270) { doc.addPage(); y = 20; }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(40);
+  doc.text(label, 14, y);
+  doc.setDrawColor(BRAND.r, BRAND.g, BRAND.b);
+  doc.setLineWidth(0.5);
+  doc.line(14, y + 1.5, 196, y + 1.5);
+  return y + 7;
+}
+
 export function gerarPdfQuizDiario(q: QuizDia) {
   const doc = new jsPDF();
   const dataLabel = new Date(q.data + "T12:00:00").toLocaleDateString("pt-BR", {
@@ -71,49 +82,104 @@ export function gerarPdfQuizDiario(q: QuizDia) {
   });
   header(doc, "Relatório Diário do Sítio", dataLabel);
 
-  // Resumo respostas
-  const rows = q.perguntas.map((p) => [
-    p.area,
-    p.texto,
-    rotuloResposta(p, q.respostas[p.id] ?? ""),
-  ]);
+  let y = 62;
 
+  // ===== Clima do dia =====
+  if (q.clima) {
+    y = sectionTitle(doc, y, "Clima do Dia");
+    const c = q.clima;
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+      head: [["Indicador", "Valor"]],
+      body: [
+        ["Local", c.cidade ?? "—"],
+        ["Condição", c.condicao],
+        ["Temperatura", `${c.tempC.toFixed(1)} °C (sensação ${c.feelsC.toFixed(1)} °C)`],
+        ["Umidade", `${c.umidade.toFixed(0)} %`],
+        ["Vento", `${c.vento.toFixed(0)} km/h`],
+        ["Probabilidade de chuva", `${c.chuvaProb.toFixed(0)} %`],
+        ["Alertas", c.alertas.length ? c.alertas.join(" · ") : "—"],
+      ],
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { cellWidth: 50, fontStyle: "bold" } },
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
+
+  // ===== Energia =====
+  if (q.energia && q.energia.porMedidor.length) {
+    y = sectionTitle(doc, y, "Consumo de Energia (hoje)");
+    autoTable(doc, {
+      startY: y,
+      theme: "striped",
+      headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+      head: [["Medidor", "Última leitura", "Data", "Consumo do dia"]],
+      body: q.energia.porMedidor.map((m) => [
+        m.nome,
+        m.ultimaLeitura !== undefined ? `${m.ultimaLeitura.toLocaleString("pt-BR")} kWh` : "—",
+        m.dataUltima ? new Date(m.dataUltima).toLocaleDateString("pt-BR") : "—",
+        `${m.consumoKwh.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kWh`,
+      ]),
+      foot: [["Total", "", "", `${q.energia.consumoTotalDiaKwh.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kWh`]],
+      footStyles: { fillColor: [240, 240, 240], textColor: 40, fontStyle: "bold" },
+      styles: { fontSize: 9 },
+    });
+    y = (doc as any).lastAutoTable.finalY + 6;
+  }
+
+  // ===== Respostas do quiz =====
+  y = sectionTitle(doc, y, "Quiz do Dia");
   autoTable(doc, {
-    startY: 62,
+    startY: y,
     theme: "grid",
     headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
     head: [["Área", "Pergunta", "Resposta"]],
-    body: rows,
+    body: q.perguntas.map((p) => [p.area, p.texto, rotuloResposta(p, q.respostas[p.id] ?? "")]),
     styles: { fontSize: 9, cellPadding: 3 },
     columnStyles: { 0: { cellWidth: 24, fontStyle: "bold" }, 2: { cellWidth: 40, fontStyle: "bold" } },
   });
+  y = (doc as any).lastAutoTable.finalY + 6;
 
-  // Análise da IA
-  let y = (doc as any).lastAutoTable.finalY + 10;
-  if (y > 240) { doc.addPage(); y = 20; }
+  // ===== Fotos =====
+  if (q.fotos && q.fotos.length) {
+    y = sectionTitle(doc, y, "Registro Fotográfico");
+    const cellW = 56;
+    const cellH = 42;
+    const gap = 6;
+    let x = 14;
+    let count = 0;
+    for (const f of q.fotos) {
+      if (y + cellH + 8 > 285) { doc.addPage(); y = 20; x = 14; }
+      try {
+        const fmt = f.dataUrl.includes("png") ? "PNG" : "JPEG";
+        doc.addImage(f.dataUrl, fmt, x, y, cellW, cellH, undefined, "FAST");
+        doc.setFontSize(8);
+        doc.setTextColor(110);
+        doc.text(`Foto ${++count}${f.legenda ? ` — ${f.legenda}` : ""}`, x, y + cellH + 4, { maxWidth: cellW });
+      } catch {}
+      x += cellW + gap;
+      if (x + cellW > 196) { x = 14; y += cellH + 12; }
+    }
+    if (x !== 14) y += cellH + 12;
+    y += 4;
+  }
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.setTextColor(40);
-  doc.text("Análise & Recomendações da IA", 14, y);
-  y += 6;
-  doc.setDrawColor(BRAND.r, BRAND.g, BRAND.b);
-  doc.setLineWidth(0.6);
-  doc.line(14, y, 196, y);
-  y += 6;
-
+  // ===== Análise IA =====
+  y = sectionTitle(doc, y, "Análise & Recomendações da IA");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(40);
   const texto = q.analise ? limparMarkdown(q.analise) : "Sem análise gerada para este relatório.";
   const linhas = doc.splitTextToSize(texto, 180);
   for (const linha of linhas) {
-    if (y > 275) { doc.addPage(); y = 20; }
+    if (y > 278) { doc.addPage(); y = 20; }
     doc.text(linha, 14, y);
     y += 5;
   }
 
-  // Assinatura
+  // Assinaturas
   if (y > 250) { doc.addPage(); y = 20; }
   y += 16;
   doc.setDrawColor(160);
