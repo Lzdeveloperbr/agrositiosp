@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
@@ -38,6 +39,7 @@ function QuizPage() {
   const [analise, setAnalise] = useState<string>("");
   const [carregando, setCarregando] = useState(false);
   const [historico, setHistorico] = useState<QuizDia[]>([]);
+  const chamarIA = useServerFn(gerarInsightAgro);
 
   useEffect(() => {
     const q = carregarQuiz(data);
@@ -68,7 +70,7 @@ function QuizPage() {
           resposta: rotuloResposta(p, respostas[p.id] ?? ""),
         })),
       };
-      const r = await gerarInsightAgro({
+      const r = await chamarIA({
         data: {
           context: JSON.stringify(contexto),
           question: "Com base APENAS nestas respostas do dia, escreva um relatório diário profissional do sítio em PORTUGUÊS, com: (1) Resumo do dia em 2-3 linhas; (2) Pontos de atenção (alertas concretos com base nas respostas); (3) Recomendações práticas para amanhã (3-5 ações); (4) Indicadores que devem ser acompanhados. Use **negrito** e listas. Não invente dados que não estão nas respostas.",
