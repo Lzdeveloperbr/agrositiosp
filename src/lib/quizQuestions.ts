@@ -84,11 +84,33 @@ export function perguntasDoDia(dataISO: string, qtd = 10): Pergunta[] {
 
 export type RespostasQuiz = Record<string, string>;
 
+export type FotoQuiz = { id: string; dataUrl: string; legenda?: string };
+
+export type ClimaResumo = {
+  cidade?: string;
+  tempC: number;
+  feelsC: number;
+  umidade: number;
+  vento: number;
+  chuvaProb: number;
+  condicao: string;
+  alertas: string[];
+  proximosDias?: Array<{ data: string; tMax: number; tMin: number; chuvaMm: number; chuvaProb: number; condicao: string }>;
+};
+
+export type EnergiaResumo = {
+  consumoTotalDiaKwh: number;
+  porMedidor: Array<{ nome: string; consumoKwh: number; ultimaLeitura?: number; dataUltima?: string }>;
+};
+
 export type QuizDia = {
-  data: string; // YYYY-MM-DD
+  data: string;
   respostas: RespostasQuiz;
   perguntas: Pergunta[];
-  analise?: string; // markdown gerado pela IA
+  fotos?: FotoQuiz[];
+  clima?: ClimaResumo;
+  energia?: EnergiaResumo;
+  analise?: string;
   geradoEm?: string;
 };
 
