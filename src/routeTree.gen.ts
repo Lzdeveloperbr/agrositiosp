@@ -13,6 +13,7 @@ import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
@@ -51,6 +52,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlantiosRoute = PlantiosRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
+  '/quiz': typeof QuizRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
+  '/quiz': typeof QuizRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
+  '/quiz': typeof QuizRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
+    | '/quiz'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
+    | '/quiz'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
+    | '/quiz'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   MaquinasRoute: typeof MaquinasRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
+  QuizRoute: typeof QuizRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
@@ -357,6 +370,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plantios': {
@@ -511,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaquinasRoute: MaquinasRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
+  QuizRoute: QuizRoute,
   RelatoriosRoute: RelatoriosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
