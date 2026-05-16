@@ -28,6 +28,7 @@ import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
+import { Route as AmbienciaRouteImport } from './routes/ambiencia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
@@ -129,6 +130,11 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
   path: '/automacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AmbienciaRoute = AmbienciaRouteImport.update({
+  id: '/ambiencia',
+  path: '/ambiencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -157,6 +163,7 @@ const GadoIdRoute = GadoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/chuvas': typeof ChuvasRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ambiencia'
     | '/automacoes'
     | '/backup'
     | '/chuvas'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ambiencia'
     | '/automacoes'
     | '/backup'
     | '/chuvas'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ambiencia'
     | '/automacoes'
     | '/backup'
     | '/chuvas'
@@ -317,6 +329,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AmbienciaRoute: typeof AmbienciaRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
   ChuvasRoute: typeof ChuvasRoute
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ambiencia': {
+      id: '/ambiencia'
+      path: '/ambiencia'
+      fullPath: '/ambiencia'
+      preLoaderRoute: typeof AmbienciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -517,6 +537,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AmbienciaRoute: AmbienciaRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
   ChuvasRoute: ChuvasRoute,
@@ -544,12 +565,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
