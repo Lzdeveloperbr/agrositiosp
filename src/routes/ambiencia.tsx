@@ -48,7 +48,7 @@ const DEFAULT_CFG: Cfg = {
 
 function AmbienciaPage() {
   const [lotes] = useLotes();
-  const { fazendaId } = useFazenda();
+  const { fazendaId, coords } = useFazenda();
   const [cfg, setCfg] = useState<Cfg>(DEFAULT_CFG);
   const [temp, setTemp] = useState<number>(28);
   const [umid, setUmid] = useState<number>(70);
@@ -95,13 +95,14 @@ function AmbienciaPage() {
   const corPeso = !pesoMedioG ? "text-muted-foreground" : Math.abs(diffPct) <= 3 ? "text-emerald-600" : diffPct < -3 ? "text-destructive" : "text-amber-600";
 
   const carregarClima = async () => {
+    if (!coords) return;
     setClimaLoading(true);
     try {
-      const w = await fetchWeather();
-      if (w) {
-        setTemp(w.tempC);
-        setUmid(w.humidity ?? umid);
-        setVento(Math.round((w.windKmh ?? 0) / 3.6 * 10) / 10);
+      const w = await fetchWeather(coords.lat, coords.lon);
+      if (w?.current) {
+        setTemp(w.current.tempC);
+        setUmid(w.current.umidade);
+        setVento(Math.round((w.current.vento / 3.6) * 10) / 10);
       }
     } finally { setClimaLoading(false); }
   };
