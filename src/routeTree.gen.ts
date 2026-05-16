@@ -29,6 +29,7 @@ import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AmbienciaRouteImport } from './routes/ambiencia'
+import { Route as AmbienciaRouteImport } from './routes/ambiencia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
@@ -128,6 +129,11 @@ const BackupRoute = BackupRouteImport.update({
 const AutomacoesRoute = AutomacoesRouteImport.update({
   id: '/automacoes',
   path: '/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AmbienciaRoute = AmbienciaRouteImport.update({
+  id: '/ambiencia',
+  path: '/ambiencia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AmbienciaRoute = AmbienciaRouteImport.update({
@@ -488,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/automacoes'
       fullPath: '/automacoes'
       preLoaderRoute: typeof AutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ambiencia': {
+      id: '/ambiencia'
+      path: '/ambiencia'
+      fullPath: '/ambiencia'
+      preLoaderRoute: typeof AmbienciaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ambiencia': {
