@@ -13,12 +13,14 @@ import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
+import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EnergiaRouteImport } from './routes/energia'
@@ -55,6 +57,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RacaoRoute = RacaoRouteImport.update({
+  id: '/racao',
+  path: '/racao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
@@ -83,6 +90,11 @@ const ManejoRoute = ManejoRouteImport.update({
 const LembretesRoute = LembretesRouteImport.update({
   id: '/lembretes',
   path: '/lembretes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeiteRoute = LeiteRouteImport.update({
+  id: '/leite',
+  path: '/leite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -173,12 +185,14 @@ export interface FileRoutesByFullPath {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
+  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -200,12 +214,14 @@ export interface FileRoutesByTo {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
+  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -228,12 +244,14 @@ export interface FileRoutesById {
   '/energia': typeof EnergiaRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
+  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
+  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
@@ -257,12 +275,14 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/leite'
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
+    | '/racao'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -284,12 +304,14 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/leite'
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
+    | '/racao'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -311,12 +333,14 @@ export interface FileRouteTypes {
     | '/energia'
     | '/estoque'
     | '/financeiro'
+    | '/leite'
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
+    | '/racao'
     | '/relatorios'
     | '/sitemap.xml'
     | '/tarefas'
@@ -339,12 +363,14 @@ export interface RootRouteChildren {
   EnergiaRoute: typeof EnergiaRoute
   EstoqueRoute: typeof EstoqueRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
   MaquinasRoute: typeof MaquinasRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
   QuizRoute: typeof QuizRoute
+  RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
@@ -383,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/racao': {
+      id: '/racao'
+      path: '/racao'
+      fullPath: '/racao'
+      preLoaderRoute: typeof RacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quiz': {
@@ -425,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/lembretes'
       fullPath: '/lembretes'
       preLoaderRoute: typeof LembretesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leite': {
+      id: '/leite'
+      path: '/leite'
+      fullPath: '/leite'
+      preLoaderRoute: typeof LeiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -547,12 +587,14 @@ const rootRouteChildren: RootRouteChildren = {
   EnergiaRoute: EnergiaRoute,
   EstoqueRoute: EstoqueRoute,
   FinanceiroRoute: FinanceiroRoute,
+  LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
   MaquinasRoute: MaquinasRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
   QuizRoute: QuizRoute,
+  RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
@@ -565,3 +607,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
