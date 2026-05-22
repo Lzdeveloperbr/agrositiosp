@@ -681,6 +681,5 @@ function exportarRelatorio(entregas: Entrega[], granjas: Granja[]) {
   });
 
   const filename = `racao-${todayISO()}.pdf`;
-  doc.save(filename);
-  try { savePdf({ tipo: "racao", titulo: "Entregas de Ração", filename, dataUrl: doc.output("datauristring") }); } catch {}
+  savePdf(doc, filename, { titulo: "Entregas de Ração", modulo: "racao" });
 }
