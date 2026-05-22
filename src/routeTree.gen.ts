@@ -23,6 +23,7 @@ import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
+import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
 import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
 import { Route as CustosRouteImport } from './routes/custos'
@@ -107,6 +108,11 @@ const EstoqueRoute = EstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntregasRacaoRoute = EntregasRacaoRouteImport.update({
+  id: '/entregas-racao',
+  path: '/entregas-racao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnergiaRoute = EnergiaRouteImport.update({
   id: '/energia',
   path: '/energia',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/energia': typeof EnergiaRoute
+  '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/custos'
     | '/diario'
     | '/energia'
+    | '/entregas-racao'
     | '/estoque'
     | '/financeiro'
     | '/leite'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/custos'
     | '/diario'
     | '/energia'
+    | '/entregas-racao'
     | '/estoque'
     | '/financeiro'
     | '/leite'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/custos'
     | '/diario'
     | '/energia'
+    | '/entregas-racao'
     | '/estoque'
     | '/financeiro'
     | '/leite'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
   EnergiaRoute: typeof EnergiaRoute
+  EntregasRacaoRoute: typeof EntregasRacaoRoute
   EstoqueRoute: typeof EstoqueRoute
   FinanceiroRoute: typeof FinanceiroRoute
   LeiteRoute: typeof LeiteRoute
@@ -481,6 +494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entregas-racao': {
+      id: '/entregas-racao'
+      path: '/entregas-racao'
+      fullPath: '/entregas-racao'
+      preLoaderRoute: typeof EntregasRacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/energia': {
       id: '/energia'
       path: '/energia'
@@ -585,6 +605,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
   EnergiaRoute: EnergiaRoute,
+  EntregasRacaoRoute: EntregasRacaoRoute,
   EstoqueRoute: EstoqueRoute,
   FinanceiroRoute: FinanceiroRoute,
   LeiteRoute: LeiteRoute,
