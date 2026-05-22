@@ -34,6 +34,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/leite", label: "Leite", icon: Milk },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
       { to: "/racao", label: "Fábrica Ração", icon: Factory },
+      { to: "/entregas-racao", label: "Entregas Ração", icon: Truck },
       { to: "/plantios", label: "Plantios", icon: Sprout },
       { to: "/chuvas", label: "Chuvas", icon: CloudRain },
       { to: "/monitoramento", label: "Monitoramento", icon: Bug },
