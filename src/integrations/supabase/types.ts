@@ -263,6 +263,105 @@ export type Database = {
           },
         ]
       }
+      documentos_racao: {
+        Row: {
+          autor: string | null
+          created_at: string
+          data: string | null
+          entrega_id: string | null
+          fazenda_id: string
+          granja_id: string | null
+          id: string
+          mime: string | null
+          motorista: string | null
+          nome: string
+          url: string
+          viagem: string | null
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          data?: string | null
+          entrega_id?: string | null
+          fazenda_id: string
+          granja_id?: string | null
+          id?: string
+          mime?: string | null
+          motorista?: string | null
+          nome: string
+          url: string
+          viagem?: string | null
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          data?: string | null
+          entrega_id?: string | null
+          fazenda_id?: string
+          granja_id?: string | null
+          id?: string
+          mime?: string | null
+          motorista?: string | null
+          nome?: string
+          url?: string
+          viagem?: string | null
+        }
+        Relationships: []
+      }
+      entregas_racao: {
+        Row: {
+          autor: string | null
+          created_at: string
+          data: string
+          documento_url: string | null
+          fazenda_id: string
+          galpao: string | null
+          granja_id: string | null
+          id: string
+          motorista: string | null
+          observacoes: string | null
+          placa: string | null
+          quantidade_kg: number
+          tipo_racao: string | null
+          updated_at: string
+          viagem: string | null
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          data: string
+          documento_url?: string | null
+          fazenda_id: string
+          galpao?: string | null
+          granja_id?: string | null
+          id?: string
+          motorista?: string | null
+          observacoes?: string | null
+          placa?: string | null
+          quantidade_kg?: number
+          tipo_racao?: string | null
+          updated_at?: string
+          viagem?: string | null
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          data?: string
+          documento_url?: string | null
+          fazenda_id?: string
+          galpao?: string | null
+          granja_id?: string | null
+          id?: string
+          motorista?: string | null
+          observacoes?: string | null
+          placa?: string | null
+          quantidade_kg?: number
+          tipo_racao?: string | null
+          updated_at?: string
+          viagem?: string | null
+        }
+        Relationships: []
+      }
       estoque: {
         Row: {
           categoria: string
@@ -398,6 +497,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      granjas_racao: {
+        Row: {
+          autor: string | null
+          cidade: string | null
+          created_at: string
+          endereco: string | null
+          fazenda_id: string
+          id: string
+          nome: string
+          observacoes: string | null
+          proprietario: string | null
+          qtd_aves: number | null
+          qtd_galpoes: number | null
+          updated_at: string
+        }
+        Insert: {
+          autor?: string | null
+          cidade?: string | null
+          created_at?: string
+          endereco?: string | null
+          fazenda_id: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          proprietario?: string | null
+          qtd_aves?: number | null
+          qtd_galpoes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          autor?: string | null
+          cidade?: string | null
+          created_at?: string
+          endereco?: string | null
+          fazenda_id?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          proprietario?: string | null
+          qtd_aves?: number | null
+          qtd_galpoes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       lotes: {
         Row: {

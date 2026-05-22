@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
   Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
-  Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk,
+  Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/leite", label: "Leite", icon: Milk },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
       { to: "/racao", label: "Fábrica Ração", icon: Factory },
+      { to: "/entregas-racao", label: "Entregas Ração", icon: Truck },
       { to: "/plantios", label: "Plantios", icon: Sprout },
       { to: "/chuvas", label: "Chuvas", icon: CloudRain },
       { to: "/monitoramento", label: "Monitoramento", icon: Bug },
