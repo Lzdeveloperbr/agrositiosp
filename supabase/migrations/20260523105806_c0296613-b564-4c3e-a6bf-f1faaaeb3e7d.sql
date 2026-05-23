@@ -1,0 +1,1 @@
+ALTER TABLE public.entregas_racao ADD COLUMN IF NOT EXISTS foto_caminhao_url text;
