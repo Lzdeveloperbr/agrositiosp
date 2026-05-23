@@ -315,6 +315,7 @@ export type Database = {
           data: string
           documento_url: string | null
           fazenda_id: string
+          foto_caminhao_url: string | null
           galpao: string | null
           granja_id: string | null
           id: string
@@ -332,6 +333,7 @@ export type Database = {
           data: string
           documento_url?: string | null
           fazenda_id: string
+          foto_caminhao_url?: string | null
           galpao?: string | null
           granja_id?: string | null
           id?: string
@@ -349,6 +351,7 @@ export type Database = {
           data?: string
           documento_url?: string | null
           fazenda_id?: string
+          foto_caminhao_url?: string | null
           galpao?: string | null
           granja_id?: string | null
           id?: string
