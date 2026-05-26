@@ -29,6 +29,7 @@ const groups: { label: string; items: Item[] }[] = [
     items: [
       { to: "/granja", label: "Granja", icon: Bird },
       { to: "/manejo", label: "Manejo Frango", icon: BookOpen },
+      { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList },
       { to: "/ambiencia", label: "Ambiência Aviário", icon: Wind },
       { to: "/gado", label: "Gado", icon: Beef },
       { to: "/leite", label: "Leite", icon: Milk },
