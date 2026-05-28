@@ -305,9 +305,7 @@ function ChecklistGranjaPage() {
     });
 
     const nome = `checklist-granja-lote${estado.loteNumero || "X"}-${estado.data}.pdf`;
-    const blob = doc.output("blob");
-    savePdf({ nome, blob, modulo: "granja", descricao: `Checklist diário · Lote ${estado.loteNumero} · ${idade}d` });
-    doc.save(nome);
+    savePdf(doc, nome, { titulo: `Checklist Granja · Lote ${estado.loteNumero}`, modulo: "granja", ref: estado.loteNumero });
     toast.success("PDF gerado");
   };
 
