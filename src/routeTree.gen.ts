@@ -30,6 +30,7 @@ import { Route as DiarioRouteImport } from './routes/diario'
 import { Route as CustosRouteImport } from './routes/custos'
 import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
+import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AmbienciaRouteImport } from './routes/ambiencia'
@@ -144,6 +145,11 @@ const ChuvasRoute = ChuvasRouteImport.update({
   path: '/chuvas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
+  id: '/checklist-granja',
+  path: '/checklist-granja',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BackupRoute = BackupRouteImport.update({
   id: '/backup',
   path: '/backup',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/ambiencia': typeof AmbienciaRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/ambiencia'
     | '/automacoes'
     | '/backup'
+    | '/checklist-granja'
     | '/chuvas'
     | '/compras'
     | '/custos'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/ambiencia'
     | '/automacoes'
     | '/backup'
+    | '/checklist-granja'
     | '/chuvas'
     | '/compras'
     | '/custos'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/ambiencia'
     | '/automacoes'
     | '/backup'
+    | '/checklist-granja'
     | '/chuvas'
     | '/compras'
     | '/custos'
@@ -380,6 +392,7 @@ export interface RootRouteChildren {
   AmbienciaRoute: typeof AmbienciaRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
+  ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ChuvasRoute: typeof ChuvasRoute
   ComprasRoute: typeof ComprasRoute
   CustosRoute: typeof CustosRoute
@@ -556,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChuvasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checklist-granja': {
+      id: '/checklist-granja'
+      path: '/checklist-granja'
+      fullPath: '/checklist-granja'
+      preLoaderRoute: typeof ChecklistGranjaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/backup': {
       id: '/backup'
       path: '/backup'
@@ -620,6 +640,7 @@ const rootRouteChildren: RootRouteChildren = {
   AmbienciaRoute: AmbienciaRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
+  ChecklistGranjaRoute: ChecklistGranjaRoute,
   ChuvasRoute: ChuvasRoute,
   ComprasRoute: ComprasRoute,
   CustosRoute: CustosRoute,
@@ -649,12 +670,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
