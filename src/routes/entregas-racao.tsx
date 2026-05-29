@@ -500,7 +500,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       </div>
 
       {editing && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
           <div>
             <Label className="text-xs">Data de alojamento</Label>
             <Input type="date" value={cfg.dataAlojamento}
@@ -516,8 +516,32 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
               onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves perdidas" />
           </div>
+          <div>
+            <Label className="text-xs">Linhagem</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              value={cfg.linhagem}
+              onChange={e => setCfg({ ...cfg, linhagem: e.target.value as Linhagem })}
+            >
+              <option value="cobb500">Cobb 500</option>
+              <option value="ross308">Ross 308</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Sexagem</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              value={cfg.sexo}
+              onChange={e => setCfg({ ...cfg, sexo: e.target.value as Sexo })}
+            >
+              <option value="misto">Misto</option>
+              <option value="macho">Macho</option>
+              <option value="femea">Fêmea</option>
+            </select>
+          </div>
         </div>
       )}
+
 
       {!calc ? (
         <p className="text-sm text-muted-foreground text-center p-6">
