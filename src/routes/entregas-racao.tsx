@@ -19,15 +19,27 @@ import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
 
-// ===== Curvas de referência (frango de corte misto Cobb/Ross — médias práticas) =====
-// Consumo ACUMULADO por ave (g) por idade em dias
-const CONSUMO_ACUM_G: Record<number, number> = {
-  1: 13, 7: 165, 14: 490, 21: 990, 28: 1640, 35: 2400, 42: 3250, 49: 4180, 56: 5100,
+// ===== Curvas de referência por linhagem (base = misto) =====
+// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308.
+const CURVAS_BASE = {
+  cobb500: {
+    consumo: { 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
+    peso:    { 1: 42, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
+  },
+  ross308: {
+    consumo: { 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
+    peso:    { 1: 43, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+  },
 };
-// Peso médio (g) por idade em dias
-const PESO_MEDIO_G: Record<number, number> = {
-  1: 42, 7: 180, 14: 430, 21: 830, 28: 1330, 35: 1920, 42: 2570, 49: 3200, 56: 3800,
+type Linhagem = keyof typeof CURVAS_BASE;
+type Sexo = "macho" | "femea" | "misto";
+// Multiplicadores de sexo aplicados ao base (misto = curva original; macho >, fêmea <)
+const SEXO_MULT: Record<Sexo, { peso: number; consumo: number }> = {
+  macho: { peso: 1.06, consumo: 1.05 },
+  misto: { peso: 1.00, consumo: 1.00 },
+  femea: { peso: 0.94, consumo: 0.95 },
 };
+
 function interp(tbl: Record<number, number>, idade: number) {
   const keys = Object.keys(tbl).map(Number).sort((a, b) => a - b);
   if (idade <= keys[0]) return tbl[keys[0]];
@@ -41,17 +53,35 @@ function interp(tbl: Record<number, number>, idade: number) {
   }
   return tbl[keys[keys.length - 1]];
 }
-const consumoAcumGPorAve = (idade: number) => interp(CONSUMO_ACUM_G, idade);
-const pesoMedioGPorAve = (idade: number) => interp(PESO_MEDIO_G, idade);
-const consumoDiarioGPorAve = (idade: number) =>
-  Math.max(0, consumoAcumGPorAve(idade) - consumoAcumGPorAve(Math.max(1, idade - 1)));
+const consumoAcumGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  interp(CURVAS_BASE[lin].consumo, idade) * SEXO_MULT[sx].consumo;
+const pesoMedioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  interp(CURVAS_BASE[lin].peso, idade) * SEXO_MULT[sx].peso;
+const consumoDiarioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(1, idade - 1), lin, sx));
+// CA alvo = consumo acumulado / peso (mesma unidade)
+const caAlvo = (idade: number, lin: Linhagem, sx: Sexo) => {
+  const p = pesoMedioGPorAve(idade, lin, sx);
+  return p > 0 ? consumoAcumGPorAve(idade, lin, sx) / p : 0;
+};
+function classificaCA(real: number, alvo: number): { label: string; cor: string; desc: string } {
+  if (!real || !alvo) return { label: "—", cor: "bg-muted text-muted-foreground", desc: "Sem dados suficientes" };
+  const d = real - alvo;
+  if (d <= -0.05) return { label: "Excelente", cor: "bg-emerald-600 text-white", desc: `Abaixo do alvo (${alvo.toFixed(3)}). Lote convertendo muito bem.` };
+  if (d <= 0.05)  return { label: "Bom",        cor: "bg-emerald-500 text-white", desc: `Dentro do alvo (${alvo.toFixed(3)}). Lote saudável.` };
+  if (d <= 0.15)  return { label: "Regular",    cor: "bg-amber-500 text-white",   desc: `Acima do alvo (${alvo.toFixed(3)}). Revisar ração/ambiência.` };
+  return            { label: "Ruim",       cor: "bg-destructive text-destructive-foreground", desc: `Muito acima do alvo (${alvo.toFixed(3)}). Investigar manejo, água e sanidade.` };
+}
 
 type LoteCfg = {
-  dataAlojamento: string;   // ISO
-  qtdInicial: number;       // aves alojadas
-  mortalidadeAcum: number;  // aves mortas/eliminadas até hoje
+  dataAlojamento: string;
+  qtdInicial: number;
+  mortalidadeAcum: number;
+  linhagem: Linhagem;
+  sexo: Sexo;
 };
 const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
+
 
 export const Route = createFileRoute("/entregas-racao")({
   head: () => ({
