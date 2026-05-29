@@ -449,27 +449,30 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
 
   const calc = useMemo(() => {
     if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
+    const lin = cfg.linhagem, sx = cfg.sexo;
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const aloj = new Date(cfg.dataAlojamento + "T00:00");
     const idade = Math.max(1, Math.round((hoje.getTime() - aloj.getTime()) / 86400000) + 1);
     const avesVivas = Math.max(0, cfg.qtdInicial - (cfg.mortalidadeAcum || 0));
-    // Consumo médio considerando que houve perdas — usa média entre vivos e iniciais
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
-    const consumoAcumKg = (consumoAcumGPorAve(idade) * avesMediasParaConsumo) / 1000;
-    const consumoHojeKg = (consumoDiarioGPorAve(idade) * avesVivas) / 1000;
+    const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
+    const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    const pesoMedioKg = pesoMedioGPorAve(idade) / 1000;
+    const pesoMedioKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
-    // Dias restantes de estoque
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
+    // Conversão alimentar real (CA) — apenas com ração já entregue/consumida
+    const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
+    const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
+    const caTarget = caAlvo(idade, lin, sx);
+    const caStatus = classificaCA(caReal, caTarget);
 
-    // Projeção próximos 14 dias
     const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
     let estoque = estoqueKg;
     for (let i = 0; i < 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
-      const c = (consumoDiarioGPorAve(idd) * avesVivas) / 1000;
+      const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
       estoque -= c;
       proj.push({
         dia: d.toISOString().slice(5, 10).split("-").reverse().join("/"),
@@ -478,8 +481,9 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         estoque: Math.round(estoque),
       });
     }
-    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj };
+    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus };
   }, [cfg, totalEntregueKg]);
+
 
   return (
     <Card className="p-4 space-y-4">
