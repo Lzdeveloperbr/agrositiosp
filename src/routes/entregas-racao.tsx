@@ -393,3 +393,159 @@ function exportarRelatorio(entregas: Entrega[]) {
   const filename = `racao-${todayISO()}.pdf`;
   savePdf(doc, filename, { titulo: "Entregas de Ração", modulo: "racao" });
 }
+
+// ===== Estoque estimado de ração baseado em idade/consumo =====
+function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
+  const { fazendaId } = useFazenda();
+  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0 });
+  const [editing, setEditing] = useState(false);
+
+  // Carregar/salvar config local por fazenda
+  useEffect(() => {
+    if (!fazendaId) return;
+    try {
+      const raw = localStorage.getItem(CFG_KEY(fazendaId));
+      if (raw) setCfg(JSON.parse(raw));
+    } catch {}
+  }, [fazendaId]);
+  useEffect(() => {
+    if (!fazendaId) return;
+    localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify(cfg));
+  }, [cfg, fazendaId]);
+
+  const calc = useMemo(() => {
+    if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const aloj = new Date(cfg.dataAlojamento + "T00:00");
+    const idade = Math.max(1, Math.round((hoje.getTime() - aloj.getTime()) / 86400000) + 1);
+    const avesVivas = Math.max(0, cfg.qtdInicial - (cfg.mortalidadeAcum || 0));
+    // Consumo médio considerando que houve perdas — usa média entre vivos e iniciais
+    const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
+    const consumoAcumKg = (consumoAcumGPorAve(idade) * avesMediasParaConsumo) / 1000;
+    const consumoHojeKg = (consumoDiarioGPorAve(idade) * avesVivas) / 1000;
+    const estoqueKg = totalEntregueKg - consumoAcumKg;
+    const pesoMedioKg = pesoMedioGPorAve(idade) / 1000;
+    const pesoTotalLoteKg = pesoMedioKg * avesVivas;
+    // Dias restantes de estoque
+    const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
+
+    // Projeção próximos 14 dias
+    const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
+    let estoque = estoqueKg;
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(); d.setDate(d.getDate() + i);
+      const idd = idade + i;
+      const c = (consumoDiarioGPorAve(idd) * avesVivas) / 1000;
+      estoque -= c;
+      proj.push({
+        dia: d.toISOString().slice(5, 10).split("-").reverse().join("/"),
+        idade: idd,
+        consumo: Math.round(c),
+        estoque: Math.round(estoque),
+      });
+    }
+    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj };
+  }, [cfg, totalEntregueKg]);
+
+  return (
+    <Card className="p-4 space-y-4">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h3 className="font-display text-lg font-bold flex items-center gap-2">
+            <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
+          </h3>
+          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas).</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => setEditing(v => !v)}>
+          <Settings2 className="h-4 w-4 mr-1" /> {editing ? "Fechar" : "Configurar lote"}
+        </Button>
+      </div>
+
+      {editing && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
+          <div>
+            <Label className="text-xs">Data de alojamento</Label>
+            <Input type="date" value={cfg.dataAlojamento}
+              onChange={e => setCfg({ ...cfg, dataAlojamento: e.target.value })} />
+          </div>
+          <div>
+            <Label className="text-xs">Aves alojadas (início)</Label>
+            <Input type="number" inputMode="numeric" value={cfg.qtdInicial || ""}
+              onChange={e => setCfg({ ...cfg, qtdInicial: Number(e.target.value) || 0 })} placeholder="Ex: 25000" />
+          </div>
+          <div>
+            <Label className="text-xs">Mortalidade acumulada</Label>
+            <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
+              onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves perdidas" />
+          </div>
+        </div>
+      )}
+
+      {!calc ? (
+        <p className="text-sm text-muted-foreground text-center p-6">
+          Clique em <b>Configurar lote</b> e informe a data de alojamento e o número de aves para ver o estoque estimado.
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard label="Idade do lote" value={`${calc.idade}d`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas`} icon={CalIcon} tone="primary" />
+            <StatCard label="Peso médio" value={`${calc.pesoMedioKg.toFixed(3)} kg`} hint={`Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`} icon={Scale} tone="accent" />
+            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade))} g/ave/dia`} icon={Drumstick} tone="muted" />
+            <StatCard
+              label="Estoque estimado"
+              value={fmtKg(Math.max(0, Math.round(calc.estoqueKg)))}
+              hint={calc.estoqueKg < 0
+                ? `Faltaram ${fmtKg(Math.round(-calc.estoqueKg))}`
+                : `≈ ${calc.diasRestantes.toFixed(1)} dias`}
+              icon={Boxes}
+              tone={calc.estoqueKg <= 0 ? "destructive" : calc.diasRestantes < 2 ? "destructive" : "primary"}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs">
+            <div className="p-3 rounded bg-muted/30">
+              <p className="text-muted-foreground">Entregue total</p>
+              <p className="font-display font-bold text-base">{fmtKg(Math.round(totalEntregueKg))}</p>
+            </div>
+            <div className="p-3 rounded bg-muted/30">
+              <p className="text-muted-foreground">Consumo acumulado estimado</p>
+              <p className="font-display font-bold text-base">{fmtKg(Math.round(calc.consumoAcumKg))}</p>
+            </div>
+            <div className="p-3 rounded bg-muted/30">
+              <p className="text-muted-foreground">Saldo (entregue − consumido)</p>
+              <p className={`font-display font-bold text-base ${calc.estoqueKg < 0 ? "text-destructive" : ""}`}>
+                {fmtKg(Math.round(calc.estoqueKg))}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Projeção do estoque — próximos 14 dias</h4>
+            <div className="h-56">
+              <ResponsiveContainer>
+                <AreaChart data={calc.proj}>
+                  <defs>
+                    <linearGradient id="gEst" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="dia" fontSize={11} />
+                  <YAxis fontSize={11} />
+                  <Tooltip formatter={(v: any, n: any) => [fmtKg(Number(v)), n === "estoque" ? "Estoque" : "Consumo"]} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Area type="monotone" dataKey="estoque" name="Estoque" stroke="hsl(var(--primary))" fill="url(#gEst)" strokeWidth={2} />
+                  <Line type="monotone" dataKey="consumo" name="Consumo/dia" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              Curva de referência: frango de corte misto (Cobb/Ross). Valores são estimativas — confira na pesagem real.
+            </p>
+          </div>
+        </>
+      )}
+    </Card>
+  );
+}
