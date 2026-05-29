@@ -196,6 +196,9 @@ function EntregasRacaoPage() {
           </div>
         </Card>
 
+        <EstoqueEstimado totalEntregueKg={stats.total} />
+
+
         <Card className="p-3 space-y-3">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
