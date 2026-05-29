@@ -19,15 +19,27 @@ import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
 
-// ===== Curvas de referência (frango de corte misto Cobb/Ross — médias práticas) =====
-// Consumo ACUMULADO por ave (g) por idade em dias
-const CONSUMO_ACUM_G: Record<number, number> = {
-  1: 13, 7: 165, 14: 490, 21: 990, 28: 1640, 35: 2400, 42: 3250, 49: 4180, 56: 5100,
+// ===== Curvas de referência por linhagem (base = misto) =====
+// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308.
+const CURVAS_BASE = {
+  cobb500: {
+    consumo: { 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
+    peso:    { 1: 42, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
+  },
+  ross308: {
+    consumo: { 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
+    peso:    { 1: 43, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+  },
 };
-// Peso médio (g) por idade em dias
-const PESO_MEDIO_G: Record<number, number> = {
-  1: 42, 7: 180, 14: 430, 21: 830, 28: 1330, 35: 1920, 42: 2570, 49: 3200, 56: 3800,
+type Linhagem = keyof typeof CURVAS_BASE;
+type Sexo = "macho" | "femea" | "misto";
+// Multiplicadores de sexo aplicados ao base (misto = curva original; macho >, fêmea <)
+const SEXO_MULT: Record<Sexo, { peso: number; consumo: number }> = {
+  macho: { peso: 1.06, consumo: 1.05 },
+  misto: { peso: 1.00, consumo: 1.00 },
+  femea: { peso: 0.94, consumo: 0.95 },
 };
+
 function interp(tbl: Record<number, number>, idade: number) {
   const keys = Object.keys(tbl).map(Number).sort((a, b) => a - b);
   if (idade <= keys[0]) return tbl[keys[0]];
@@ -41,17 +53,35 @@ function interp(tbl: Record<number, number>, idade: number) {
   }
   return tbl[keys[keys.length - 1]];
 }
-const consumoAcumGPorAve = (idade: number) => interp(CONSUMO_ACUM_G, idade);
-const pesoMedioGPorAve = (idade: number) => interp(PESO_MEDIO_G, idade);
-const consumoDiarioGPorAve = (idade: number) =>
-  Math.max(0, consumoAcumGPorAve(idade) - consumoAcumGPorAve(Math.max(1, idade - 1)));
+const consumoAcumGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  interp(CURVAS_BASE[lin].consumo, idade) * SEXO_MULT[sx].consumo;
+const pesoMedioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  interp(CURVAS_BASE[lin].peso, idade) * SEXO_MULT[sx].peso;
+const consumoDiarioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
+  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(1, idade - 1), lin, sx));
+// CA alvo = consumo acumulado / peso (mesma unidade)
+const caAlvo = (idade: number, lin: Linhagem, sx: Sexo) => {
+  const p = pesoMedioGPorAve(idade, lin, sx);
+  return p > 0 ? consumoAcumGPorAve(idade, lin, sx) / p : 0;
+};
+function classificaCA(real: number, alvo: number): { label: string; cor: string; desc: string } {
+  if (!real || !alvo) return { label: "—", cor: "bg-muted text-muted-foreground", desc: "Sem dados suficientes" };
+  const d = real - alvo;
+  if (d <= -0.05) return { label: "Excelente", cor: "bg-emerald-600 text-white", desc: `Abaixo do alvo (${alvo.toFixed(3)}). Lote convertendo muito bem.` };
+  if (d <= 0.05)  return { label: "Bom",        cor: "bg-emerald-500 text-white", desc: `Dentro do alvo (${alvo.toFixed(3)}). Lote saudável.` };
+  if (d <= 0.15)  return { label: "Regular",    cor: "bg-amber-500 text-white",   desc: `Acima do alvo (${alvo.toFixed(3)}). Revisar ração/ambiência.` };
+  return            { label: "Ruim",       cor: "bg-destructive text-destructive-foreground", desc: `Muito acima do alvo (${alvo.toFixed(3)}). Investigar manejo, água e sanidade.` };
+}
 
 type LoteCfg = {
-  dataAlojamento: string;   // ISO
-  qtdInicial: number;       // aves alojadas
-  mortalidadeAcum: number;  // aves mortas/eliminadas até hoje
+  dataAlojamento: string;
+  qtdInicial: number;
+  mortalidadeAcum: number;
+  linhagem: Linhagem;
+  sexo: Sexo;
 };
 const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
+
 
 export const Route = createFileRoute("/entregas-racao")({
   head: () => ({
@@ -397,7 +427,7 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
-  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0 });
+  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, linhagem: "cobb500", sexo: "misto" });
   const [editing, setEditing] = useState(false);
 
   // Carregar/salvar config local por fazenda
@@ -405,7 +435,10 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     if (!fazendaId) return;
     try {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
-      if (raw) setCfg(JSON.parse(raw));
+      if (raw) {
+        const p = JSON.parse(raw);
+        setCfg({ linhagem: "cobb500", sexo: "misto", ...p });
+      }
     } catch {}
   }, [fazendaId]);
   useEffect(() => {
@@ -413,29 +446,33 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify(cfg));
   }, [cfg, fazendaId]);
 
+
   const calc = useMemo(() => {
     if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
+    const lin = cfg.linhagem, sx = cfg.sexo;
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const aloj = new Date(cfg.dataAlojamento + "T00:00");
     const idade = Math.max(1, Math.round((hoje.getTime() - aloj.getTime()) / 86400000) + 1);
     const avesVivas = Math.max(0, cfg.qtdInicial - (cfg.mortalidadeAcum || 0));
-    // Consumo médio considerando que houve perdas — usa média entre vivos e iniciais
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
-    const consumoAcumKg = (consumoAcumGPorAve(idade) * avesMediasParaConsumo) / 1000;
-    const consumoHojeKg = (consumoDiarioGPorAve(idade) * avesVivas) / 1000;
+    const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
+    const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    const pesoMedioKg = pesoMedioGPorAve(idade) / 1000;
+    const pesoMedioKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
-    // Dias restantes de estoque
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
+    // Conversão alimentar real (CA) — apenas com ração já entregue/consumida
+    const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
+    const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
+    const caTarget = caAlvo(idade, lin, sx);
+    const caStatus = classificaCA(caReal, caTarget);
 
-    // Projeção próximos 14 dias
     const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
     let estoque = estoqueKg;
     for (let i = 0; i < 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
-      const c = (consumoDiarioGPorAve(idd) * avesVivas) / 1000;
+      const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
       estoque -= c;
       proj.push({
         dia: d.toISOString().slice(5, 10).split("-").reverse().join("/"),
@@ -444,8 +481,9 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         estoque: Math.round(estoque),
       });
     }
-    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj };
+    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus };
   }, [cfg, totalEntregueKg]);
+
 
   return (
     <Card className="p-4 space-y-4">
@@ -455,6 +493,11 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
           <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas).</p>
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <Badge variant="secondary">{cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}</Badge>
+            <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
+          </div>
+
         </div>
         <Button size="sm" variant="outline" onClick={() => setEditing(v => !v)}>
           <Settings2 className="h-4 w-4 mr-1" /> {editing ? "Fechar" : "Configurar lote"}
@@ -462,7 +505,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       </div>
 
       {editing && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
           <div>
             <Label className="text-xs">Data de alojamento</Label>
             <Input type="date" value={cfg.dataAlojamento}
@@ -478,8 +521,32 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
               onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves perdidas" />
           </div>
+          <div>
+            <Label className="text-xs">Linhagem</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              value={cfg.linhagem}
+              onChange={e => setCfg({ ...cfg, linhagem: e.target.value as Linhagem })}
+            >
+              <option value="cobb500">Cobb 500</option>
+              <option value="ross308">Ross 308</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Sexagem</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+              value={cfg.sexo}
+              onChange={e => setCfg({ ...cfg, sexo: e.target.value as Sexo })}
+            >
+              <option value="misto">Misto</option>
+              <option value="macho">Macho</option>
+              <option value="femea">Fêmea</option>
+            </select>
+          </div>
         </div>
       )}
+
 
       {!calc ? (
         <p className="text-sm text-muted-foreground text-center p-6">
@@ -490,7 +557,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Idade do lote" value={`${calc.idade}d`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas`} icon={CalIcon} tone="primary" />
             <StatCard label="Peso médio" value={`${calc.pesoMedioKg.toFixed(3)} kg`} hint={`Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`} icon={Scale} tone="accent" />
-            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade))} g/ave/dia`} icon={Drumstick} tone="muted" />
+            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
               label="Estoque estimado"
               value={fmtKg(Math.max(0, Math.round(calc.estoqueKg)))}
@@ -519,6 +586,40 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             </div>
           </div>
 
+          {/* Conversão alimentar (CA) */}
+          <div className="rounded-lg border p-4 bg-gradient-to-br from-muted/40 to-transparent">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" /> Conversão alimentar (CA)
+                </h4>
+                <p className="text-[11px] text-muted-foreground">kg de ração consumida ÷ kg de peso vivo produzido</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${calc.caStatus.cor}`}>
+                {calc.caStatus.label}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mt-3">
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">CA real</p>
+                <p className="font-display text-xl font-bold">{calc.caReal ? calc.caReal.toFixed(3) : "—"}</p>
+              </div>
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">CA alvo</p>
+                <p className="font-display text-xl font-bold">{calc.caTarget.toFixed(3)}</p>
+              </div>
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">Desvio</p>
+                <p className={`font-display text-xl font-bold ${calc.caReal - calc.caTarget > 0.05 ? "text-destructive" : calc.caReal && calc.caReal - calc.caTarget < -0.05 ? "text-emerald-600" : ""}`}>
+                  {calc.caReal ? (calc.caReal - calc.caTarget >= 0 ? "+" : "") + (calc.caReal - calc.caTarget).toFixed(3) : "—"}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">{calc.caStatus.desc}</p>
+          </div>
+
+
+
           <div>
             <h4 className="text-sm font-semibold mb-2">Projeção do estoque — próximos 14 dias</h4>
             <div className="h-56">
@@ -541,7 +642,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               </ResponsiveContainer>
             </div>
             <p className="text-[11px] text-muted-foreground mt-2">
-              Curva de referência: frango de corte misto (Cobb/Ross). Valores são estimativas — confira na pesagem real.
+              Curva de referência: {cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"} — {cfg.sexo === "macho" ? "macho" : cfg.sexo === "femea" ? "fêmea" : "misto"}. Valores são estimativas — confira na pesagem real.
             </p>
           </div>
         </>
