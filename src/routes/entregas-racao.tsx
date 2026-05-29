@@ -586,6 +586,40 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             </div>
           </div>
 
+          {/* Conversão alimentar (CA) */}
+          <div className="rounded-lg border p-4 bg-gradient-to-br from-muted/40 to-transparent">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" /> Conversão alimentar (CA)
+                </h4>
+                <p className="text-[11px] text-muted-foreground">kg de ração consumida ÷ kg de peso vivo produzido</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${calc.caStatus.cor}`}>
+                {calc.caStatus.label}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mt-3">
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">CA real</p>
+                <p className="font-display text-xl font-bold">{calc.caReal ? calc.caReal.toFixed(3) : "—"}</p>
+              </div>
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">CA alvo</p>
+                <p className="font-display text-xl font-bold">{calc.caTarget.toFixed(3)}</p>
+              </div>
+              <div className="p-2 rounded bg-background/60 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase">Desvio</p>
+                <p className={`font-display text-xl font-bold ${calc.caReal - calc.caTarget > 0.05 ? "text-destructive" : calc.caReal && calc.caReal - calc.caTarget < -0.05 ? "text-emerald-600" : ""}`}>
+                  {calc.caReal ? (calc.caReal - calc.caTarget >= 0 ? "+" : "") + (calc.caReal - calc.caTarget).toFixed(3) : "—"}
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">{calc.caStatus.desc}</p>
+          </div>
+
+
+
           <div>
             <h4 className="text-sm font-semibold mb-2">Projeção do estoque — próximos 14 dias</h4>
             <div className="h-56">
