@@ -10,14 +10,48 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Truck, Package, Calendar as CalIcon, FileText, Plus, Upload, Download, Search, Eye, Trash2, BarChart3, Image as ImageIcon } from "lucide-react";
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
+import { Truck, Package, Calendar as CalIcon, FileText, Plus, Upload, Download, Search, Eye, Trash2, BarChart3, Image as ImageIcon, Drumstick, Scale, Boxes, Settings2 } from "lucide-react";
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Area, AreaChart, Legend } from "recharts";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
+
+// ===== Curvas de referência (frango de corte misto Cobb/Ross — médias práticas) =====
+// Consumo ACUMULADO por ave (g) por idade em dias
+const CONSUMO_ACUM_G: Record<number, number> = {
+  1: 13, 7: 165, 14: 490, 21: 990, 28: 1640, 35: 2400, 42: 3250, 49: 4180, 56: 5100,
+};
+// Peso médio (g) por idade em dias
+const PESO_MEDIO_G: Record<number, number> = {
+  1: 42, 7: 180, 14: 430, 21: 830, 28: 1330, 35: 1920, 42: 2570, 49: 3200, 56: 3800,
+};
+function interp(tbl: Record<number, number>, idade: number) {
+  const keys = Object.keys(tbl).map(Number).sort((a, b) => a - b);
+  if (idade <= keys[0]) return tbl[keys[0]];
+  if (idade >= keys[keys.length - 1]) return tbl[keys[keys.length - 1]];
+  for (let i = 0; i < keys.length - 1; i++) {
+    const a = keys[i], b = keys[i + 1];
+    if (idade >= a && idade <= b) {
+      const t = (idade - a) / (b - a);
+      return tbl[a] + (tbl[b] - tbl[a]) * t;
+    }
+  }
+  return tbl[keys[keys.length - 1]];
+}
+const consumoAcumGPorAve = (idade: number) => interp(CONSUMO_ACUM_G, idade);
+const pesoMedioGPorAve = (idade: number) => interp(PESO_MEDIO_G, idade);
+const consumoDiarioGPorAve = (idade: number) =>
+  Math.max(0, consumoAcumGPorAve(idade) - consumoAcumGPorAve(Math.max(1, idade - 1)));
+
+type LoteCfg = {
+  dataAlojamento: string;   // ISO
+  qtdInicial: number;       // aves alojadas
+  mortalidadeAcum: number;  // aves mortas/eliminadas até hoje
+};
+const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
 
 export const Route = createFileRoute("/entregas-racao")({
   head: () => ({
