@@ -552,7 +552,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Idade do lote" value={`${calc.idade}d`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas`} icon={CalIcon} tone="primary" />
             <StatCard label="Peso médio" value={`${calc.pesoMedioKg.toFixed(3)} kg`} hint={`Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`} icon={Scale} tone="accent" />
-            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade))} g/ave/dia`} icon={Drumstick} tone="muted" />
+            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
               label="Estoque estimado"
               value={fmtKg(Math.max(0, Math.round(calc.estoqueKg)))}
