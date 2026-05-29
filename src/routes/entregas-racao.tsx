@@ -493,6 +493,11 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
           <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas).</p>
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <Badge variant="secondary">{cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}</Badge>
+            <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
+          </div>
+
         </div>
         <Button size="sm" variant="outline" onClick={() => setEditing(v => !v)}>
           <Settings2 className="h-4 w-4 mr-1" /> {editing ? "Fechar" : "Configurar lote"}
