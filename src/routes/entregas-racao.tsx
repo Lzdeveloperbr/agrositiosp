@@ -427,7 +427,7 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
-  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0 });
+  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, linhagem: "cobb500", sexo: "misto" });
   const [editing, setEditing] = useState(false);
 
   // Carregar/salvar config local por fazenda
@@ -435,13 +435,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     if (!fazendaId) return;
     try {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
-      if (raw) setCfg(JSON.parse(raw));
+      if (raw) {
+        const p = JSON.parse(raw);
+        setCfg({ linhagem: "cobb500", sexo: "misto", ...p });
+      }
     } catch {}
   }, [fazendaId]);
   useEffect(() => {
     if (!fazendaId) return;
     localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify(cfg));
   }, [cfg, fazendaId]);
+
 
   const calc = useMemo(() => {
     if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
