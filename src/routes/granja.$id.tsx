@@ -108,7 +108,7 @@ function LoteDetalhe() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <KPI label="Inicial" value={lote.quantidadeInicial.toLocaleString("pt-BR")} />
           <KPI label="Vivas" value={vivas.toLocaleString("pt-BR")} />
-          <KPI label="Mort. %" value={`${((totalMort / lote.quantidadeInicial) * 100).toFixed(2)}%`} />
+          <KPI label="Mort.+Elim." value={`${((totalMort + totalElim) / lote.quantidadeInicial * 100).toFixed(2)}%`} />
           <KPI label="Peso vivo" value={`${pesoTotalKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
         </div>
 
