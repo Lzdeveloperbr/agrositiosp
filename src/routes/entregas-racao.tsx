@@ -20,19 +20,26 @@ import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
 
 // ===== Curvas de referência por linhagem (base = misto) =====
-// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308.
+// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308 / Ross AP 95.
+// Ross AP 95 = linhagem robusta, crescimento ~5% mais lento e CA ~3% pior que Ross 308.
 const CURVAS_BASE = {
   cobb500: {
-    consumo: { 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
-    peso:    { 1: 42, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
+    consumo: { 0: 0, 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
+    peso:    { 0: 42, 1: 50, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
   },
   ross308: {
-    consumo: { 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
-    peso:    { 1: 43, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+    consumo: { 0: 0, 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
+    peso:    { 0: 43, 1: 52, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+  },
+  ross_ap95: {
+    // Linhagem rústica/robusta (AP95) — peso ~5% menor, consumo ~2% maior → CA mais alta
+    consumo: { 0: 0, 1: 13, 7: 175, 14: 600, 21: 1305, 28: 2295, 35: 3590, 42: 5150, 49: 6820, 56: 8580 } as Record<number, number>,
+    peso:    { 0: 42, 1: 50, 7: 180, 14: 460, 21: 905, 28: 1485, 35: 2180, 42: 2900, 49: 3565, 56: 4160 } as Record<number, number>,
   },
 };
 type Linhagem = keyof typeof CURVAS_BASE;
 type Sexo = "macho" | "femea" | "misto";
+const LIN_LABEL: Record<Linhagem, string> = { cobb500: "Cobb 500", ross308: "Ross 308", ross_ap95: "Ross AP 95" };
 // Multiplicadores de sexo aplicados ao base (misto = curva original; macho >, fêmea <)
 const SEXO_MULT: Record<Sexo, { peso: number; consumo: number }> = {
   macho: { peso: 1.06, consumo: 1.05 },
@@ -58,7 +65,7 @@ const consumoAcumGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
 const pesoMedioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
   interp(CURVAS_BASE[lin].peso, idade) * SEXO_MULT[sx].peso;
 const consumoDiarioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
-  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(1, idade - 1), lin, sx));
+  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(0, idade - 1), lin, sx));
 // CA alvo = consumo acumulado / peso (mesma unidade)
 const caAlvo = (idade: number, lin: Linhagem, sx: Sexo) => {
   const p = pesoMedioGPorAve(idade, lin, sx);
@@ -77,10 +84,14 @@ type LoteCfg = {
   dataAlojamento: string;
   qtdInicial: number;
   mortalidadeAcum: number;
+  eliminadosAcum?: number;     // aves eliminadas/refugagem
   linhagem: Linhagem;
   sexo: Sexo;
+  pesoMedioRealG?: number;     // última pesagem real (g) — usa no CA se preenchido
+  pesoMedioRealData?: string;  // data da última pesagem real
 };
 const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
+
 
 
 export const Route = createFileRoute("/entregas-racao")({
