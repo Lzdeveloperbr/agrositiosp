@@ -35,6 +35,7 @@ function LoteDetalhe() {
   const [entry, setEntry] = useState({
     date: new Date().toISOString().slice(0, 10),
     mortalidade: 0,
+    eliminados: 0,
     pesoMedioG: undefined as number | undefined,
     observacoes: "",
   });
@@ -48,16 +49,18 @@ function LoteDetalhe() {
     );
   }
 
-  const totalMort = lote.entries.reduce((s, e) => s + e.mortalidade, 0);
-  const vivas = lote.quantidadeInicial - totalMort;
-  const dias = Math.floor((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000);
+  const totalMort = lote.entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
+  const totalElim = lote.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
+  const vivas = lote.quantidadeInicial - totalMort - totalElim;
+  // Idade começa em D0 (dia do alojamento)
+  const dias = Math.max(0, Math.round((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000));
   const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
   const pesoTotalKg = (vivas * ultPeso) / 1000;
   const previsao = new Date(new Date(lote.dataEntrada).getTime() + lote.previsaoAbateDias * 86400000);
 
   const adicionar = () => {
     setLotes((prev) => prev.map((l) => l.id === id ? { ...l, entries: [...l.entries, { ...entry }] } : l));
-    setEntry({ ...entry, mortalidade: 0, pesoMedioG: undefined, observacoes: "" });
+    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, observacoes: "" });
     toast.success("Lançamento registrado");
   };
 
@@ -91,7 +94,7 @@ function LoteDetalhe() {
                 <h1 className="text-3xl md:text-4xl font-display font-bold">Lote {lote.numero}</h1>
                 {lote.encerrado ? <Badge variant="secondary">Encerrado</Badge> : <Badge>Ativo</Badge>}
               </div>
-              <p className="text-muted-foreground mt-1">Entrada {new Date(lote.dataEntrada).toLocaleDateString("pt-BR")} · {dias} dias · {lote.integradora}</p>
+              <p className="text-muted-foreground mt-1">Entrada {new Date(lote.dataEntrada).toLocaleDateString("pt-BR")} · D{dias} · {lote.integradora}</p>
               <p className="text-xs text-muted-foreground">Previsão de abate: {previsao.toLocaleDateString("pt-BR")}</p>
             </div>
             <div className="flex gap-2">
@@ -105,7 +108,7 @@ function LoteDetalhe() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <KPI label="Inicial" value={lote.quantidadeInicial.toLocaleString("pt-BR")} />
           <KPI label="Vivas" value={vivas.toLocaleString("pt-BR")} />
-          <KPI label="Mort. %" value={`${((totalMort / lote.quantidadeInicial) * 100).toFixed(2)}%`} />
+          <KPI label="Mort.+Elim." value={`${((totalMort + totalElim) / lote.quantidadeInicial * 100).toFixed(2)}%`} />
           <KPI label="Peso vivo" value={`${pesoTotalKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
         </div>
 
@@ -134,9 +137,19 @@ function LoteDetalhe() {
             <div className="space-y-3">
               <Field label="Data"><Input type="date" value={entry.date} onChange={(e) => setEntry({ ...entry, date: e.target.value })} /></Field>
               <div className="grid grid-cols-2 gap-2">
-                <Field label="Mortalidade"><Input type="number" value={entry.mortalidade} onChange={(e) => setEntry({ ...entry, mortalidade: +e.target.value })} /></Field>
-                <Field label="Peso médio (g)"><Input type="number" value={entry.pesoMedioG ?? ""} onChange={(e) => setEntry({ ...entry, pesoMedioG: e.target.value ? +e.target.value : undefined })} /></Field>
+                <Field label="Mortalidade">
+                  <Input type="number" inputMode="numeric" min={0} value={entry.mortalidade || ""}
+                    onChange={(e) => setEntry({ ...entry, mortalidade: Number(e.target.value) || 0 })} placeholder="0" />
+                </Field>
+                <Field label="Eliminados">
+                  <Input type="number" inputMode="numeric" min={0} value={entry.eliminados || ""}
+                    onChange={(e) => setEntry({ ...entry, eliminados: Number(e.target.value) || 0 })} placeholder="0" />
+                </Field>
               </div>
+              <Field label="Peso médio (g)">
+                <Input type="number" inputMode="decimal" min={0} value={entry.pesoMedioG ?? ""}
+                  onChange={(e) => setEntry({ ...entry, pesoMedioG: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 1850" />
+              </Field>
               <Field label="Observações"><Textarea rows={2} value={entry.observacoes} onChange={(e) => setEntry({ ...entry, observacoes: e.target.value })} /></Field>
               <Button onClick={adicionar} className="w-full"><Plus className="h-4 w-4 mr-1" /> Lançar</Button>
             </div>
@@ -154,6 +167,7 @@ function LoteDetalhe() {
                   <tr className="border-b border-border">
                     <th className="text-left py-2">Data</th>
                     <th className="text-right py-2">Mort.</th>
+                    <th className="text-right py-2">Elim.</th>
                     <th className="text-right py-2">Peso (g)</th>
                     <th className="text-left py-2 pl-4">Obs</th>
                     <th></th>
@@ -166,6 +180,7 @@ function LoteDetalhe() {
                       <tr key={idx} className="border-b border-border/50">
                         <td className="py-2">{new Date(e.date).toLocaleDateString("pt-BR")}</td>
                         <td className="py-2 text-right tabular-nums">{e.mortalidade}</td>
+                        <td className="py-2 text-right tabular-nums">{e.eliminados ?? 0}</td>
                         <td className="py-2 text-right tabular-nums">{e.pesoMedioG ?? "—"}</td>
                         <td className="py-2 pl-4 text-muted-foreground">{e.observacoes ?? ""}</td>
                         <td className="py-2 text-right"><Button size="icon" variant="ghost" onClick={() => removerEntry(realIdx)}><Trash2 className="h-3.5 w-3.5" /></Button></td>

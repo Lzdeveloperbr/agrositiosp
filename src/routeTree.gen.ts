@@ -33,6 +33,7 @@ import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
+import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
 import { Route as AmbienciaRouteImport } from './routes/ambiencia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
@@ -160,6 +161,11 @@ const AutomacoesRoute = AutomacoesRouteImport.update({
   path: '/automacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnaliseAvesRoute = AnaliseAvesRouteImport.update({
+  id: '/analise-aves',
+  path: '/analise-aves',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AmbienciaRoute = AmbienciaRouteImport.update({
   id: '/ambiencia',
   path: '/ambiencia',
@@ -194,6 +200,7 @@ const GadoIdRoute = GadoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ambiencia': typeof AmbienciaRoute
+  '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ambiencia': typeof AmbienciaRoute
+  '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ambiencia': typeof AmbienciaRoute
+  '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/ambiencia'
+    | '/analise-aves'
     | '/automacoes'
     | '/backup'
     | '/checklist-granja'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/ambiencia'
+    | '/analise-aves'
     | '/automacoes'
     | '/backup'
     | '/checklist-granja'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/ambiencia'
+    | '/analise-aves'
     | '/automacoes'
     | '/backup'
     | '/checklist-granja'
@@ -390,6 +402,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AmbienciaRoute: typeof AmbienciaRoute
+  AnaliseAvesRoute: typeof AnaliseAvesRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
@@ -590,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analise-aves': {
+      id: '/analise-aves'
+      path: '/analise-aves'
+      fullPath: '/analise-aves'
+      preLoaderRoute: typeof AnaliseAvesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ambiencia': {
       id: '/ambiencia'
       path: '/ambiencia'
@@ -638,6 +658,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AmbienciaRoute: AmbienciaRoute,
+  AnaliseAvesRoute: AnaliseAvesRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,

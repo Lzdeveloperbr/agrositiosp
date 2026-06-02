@@ -117,3 +117,106 @@ Seja técnico, direto, sem encheção. Não invente dados que não estão no con
     return { texto };
   });
 
+
+// ===== Análise veterinária de aves por foto =====
+export type AnaliseAvesInput = {
+  context: string;   // JSON: idade, linhagem, sexo, qtd, mortalidade, peso médio, observações
+  fotos: string[];   // dataUrls (jpeg/png base64) — máx 8
+};
+
+export const analisarAvesFoto = createServerFn({ method: "POST" })
+  .inputValidator((d: AnaliseAvesInput) => {
+    if (!d || typeof d.context !== "string") throw new Error("context obrigatório");
+    if (d.context.length > 12000) throw new Error("contexto grande demais");
+    if (!Array.isArray(d.fotos) || d.fotos.length === 0) throw new Error("envie ao menos 1 foto");
+    if (d.fotos.length > 8) throw new Error("máximo 8 fotos");
+    for (const f of d.fotos) {
+      if (typeof f !== "string" || !f.startsWith("data:image/")) throw new Error("foto inválida");
+      if (f.length > 3_000_000) throw new Error("foto grande demais (>3MB) — comprima antes de enviar");
+    }
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const key = process.env.LOVABLE_API_KEY;
+    if (!key) throw new Error("LOVABLE_API_KEY ausente");
+
+    const system = `Você é um MÉDICO VETERINÁRIO especialista em avicultura industrial (frango de corte) e EXTENSIONISTA RURAL sênior, com 25+ anos em granjas integradas (Cobb, Ross 308, Ross AP 95). Está produzindo um LAUDO TÉCNICO PROFISSIONAL a partir de fotos do lote enviadas pelo granjeiro.
+
+Você recebe:
+- JSON com idade do lote, linhagem, sexo, quantidade alojada, mortalidade/eliminados acumulados, peso médio real (se houver) e observações do granjeiro.
+- 1 a 8 fotos do galpão / aves / cama / bebedouros / comedouros.
+
+ANALISE COM RIGOR TÉCNICO. Cada foto deve ser inspecionada minuciosamente. Avalie:
+
+1. COMPORTAMENTO E DISTRIBUIÇÃO DAS AVES
+   - Distribuição no galpão (aglomeração? aves no canto? indica frio/calor/corrente de ar)
+   - Atividade (alertas, comendo, bebendo, deitadas em descanso normal × prostradas)
+   - Postura, plumagem (uniforme? arrepiada? suja?)
+   - Sinais de estresse térmico (ofegação, asas abertas)
+   - Sinais respiratórios (bicos abertos sem calor, espirros visíveis)
+   - Uniformidade do lote (tamanho, refugagem)
+
+2. CAMA / AMBIÊNCIA
+   - Umidade da cama (empastada, seca demais, ideal)
+   - Cor (escura/úmida indica problema)
+   - Empacotamento próximo a bebedouros (vazamentos)
+   - Presença de fezes diarreicas, sangue, parasitas visíveis
+
+3. EQUIPAMENTOS
+   - Bebedouros (limpos, altura correta para idade, vazamentos)
+   - Comedouros (cheios, vazios, altura)
+   - Ventilação aparente (cortinas, exaustores)
+   - Iluminação
+
+4. SINAIS CLÍNICOS
+   - Sinais de Newcastle, Gumboro, coccidiose, colibacilose, ascite, problemas locomotores, dermatite
+   - Lesões visíveis em pele, patas (pododermatite), olhos
+   - Diferenças de tamanho entre aves (uniformidade)
+
+5. INTERPRETAÇÃO TÉCNICA conforme idade × linhagem × peso médio informados
+   - Performance esperada vs observada
+   - Riscos imediatos
+   - Riscos para os próximos 7 dias
+
+Escreva em PORTUGUÊS, Markdown limpo (use **negrito** e listas, sem H1), EXATAMENTE com estas seções nesta ordem:
+
+**1. Laudo Resumido** (3-5 linhas — diagnóstico geral em uma olhada)
+**2. Análise Foto a Foto** (1 bloco por foto: "**Foto N:** descrição técnica do que se vê + interpretação clínica/manejo")
+**3. Avaliação Comportamental** (distribuição, conforto térmico aparente, atividade, uniformidade)
+**4. Avaliação da Cama e Ambiência**
+**5. Avaliação Sanitária** (sinais clínicos, suspeitas de enfermidade, gravidade)
+**6. Performance Zootécnica** (compare peso/idade/linhagem com curva esperada; comente CA esperado)
+**7. Plano de Ação Imediato** (próximas 24h — ações concretas e numeradas)
+**8. Plano para 7 Dias** (manejo, sanidade, ambiência)
+**9. Quando Acionar Veterinário Presencialmente** (critérios objetivos)
+**10. Indicadores a Monitorar Diariamente**
+
+Seja técnico, direto, use TERMOS TÉCNICOS corretos (CA, GPD, viabilidade, refugagem, pododermatite, ascite, etc). Cite números reais quando houver. NUNCA invente patologia sem evidência visual. Se a foto não permitir afirmar algo, diga "Não é possível avaliar com base na foto".`;
+
+    const userParts: any[] = [
+      { type: "text", text: `Dados do lote (JSON):\n${data.context}\n\nAnalise as ${data.fotos.length} foto(s) abaixo e gere o laudo completo conforme as instruções.` },
+      ...data.fotos.map((url) => ({ type: "image_url", image_url: { url } })),
+    ];
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-pro",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: userParts },
+        ],
+      }),
+    });
+
+    if (res.status === 429) throw new Error("Limite de IA atingido — tente novamente em alguns minutos.");
+    if (res.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos nas configurações.");
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      throw new Error(`Falha IA (${res.status}) ${t.slice(0, 120)}`);
+    }
+    const j: any = await res.json();
+    const texto = j?.choices?.[0]?.message?.content ?? "";
+    return { texto };
+  });

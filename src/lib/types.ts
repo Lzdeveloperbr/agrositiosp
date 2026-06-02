@@ -2,6 +2,7 @@
 export type DailyEntry = {
   date: string;
   mortalidade: number;
+  eliminados?: number;
   pesoMedioG?: number;
   observacoes?: string;
 };

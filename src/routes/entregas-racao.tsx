@@ -20,19 +20,26 @@ import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
 
 // ===== Curvas de referência por linhagem (base = misto) =====
-// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308.
+// Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308 / Ross AP 95.
+// Ross AP 95 = linhagem robusta, crescimento ~5% mais lento e CA ~3% pior que Ross 308.
 const CURVAS_BASE = {
   cobb500: {
-    consumo: { 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
-    peso:    { 1: 42, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
+    consumo: { 0: 0, 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
+    peso:    { 0: 42, 1: 50, 7: 185, 14: 470, 21: 925, 28: 1520, 35: 2230, 42: 2980, 49: 3680, 56: 4300 } as Record<number, number>,
   },
   ross308: {
-    consumo: { 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
-    peso:    { 1: 43, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+    consumo: { 0: 0, 1: 13, 7: 170, 14: 580, 21: 1265, 28: 2230, 35: 3490, 42: 5010, 49: 6640, 56: 8350 } as Record<number, number>,
+    peso:    { 0: 43, 1: 52, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
+  },
+  ross_ap95: {
+    // Linhagem rústica/robusta (AP95) — peso ~5% menor, consumo ~2% maior → CA mais alta
+    consumo: { 0: 0, 1: 13, 7: 175, 14: 600, 21: 1305, 28: 2295, 35: 3590, 42: 5150, 49: 6820, 56: 8580 } as Record<number, number>,
+    peso:    { 0: 42, 1: 50, 7: 180, 14: 460, 21: 905, 28: 1485, 35: 2180, 42: 2900, 49: 3565, 56: 4160 } as Record<number, number>,
   },
 };
 type Linhagem = keyof typeof CURVAS_BASE;
 type Sexo = "macho" | "femea" | "misto";
+const LIN_LABEL: Record<Linhagem, string> = { cobb500: "Cobb 500", ross308: "Ross 308", ross_ap95: "Ross AP 95" };
 // Multiplicadores de sexo aplicados ao base (misto = curva original; macho >, fêmea <)
 const SEXO_MULT: Record<Sexo, { peso: number; consumo: number }> = {
   macho: { peso: 1.06, consumo: 1.05 },
@@ -58,7 +65,7 @@ const consumoAcumGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
 const pesoMedioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
   interp(CURVAS_BASE[lin].peso, idade) * SEXO_MULT[sx].peso;
 const consumoDiarioGPorAve = (idade: number, lin: Linhagem, sx: Sexo) =>
-  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(1, idade - 1), lin, sx));
+  Math.max(0, consumoAcumGPorAve(idade, lin, sx) - consumoAcumGPorAve(Math.max(0, idade - 1), lin, sx));
 // CA alvo = consumo acumulado / peso (mesma unidade)
 const caAlvo = (idade: number, lin: Linhagem, sx: Sexo) => {
   const p = pesoMedioGPorAve(idade, lin, sx);
@@ -77,10 +84,14 @@ type LoteCfg = {
   dataAlojamento: string;
   qtdInicial: number;
   mortalidadeAcum: number;
+  eliminadosAcum?: number;     // aves eliminadas/refugagem
   linhagem: Linhagem;
   sexo: Sexo;
+  pesoMedioRealG?: number;     // última pesagem real (g) — usa no CA se preenchido
+  pesoMedioRealData?: string;  // data da última pesagem real
 };
 const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
+
 
 
 export const Route = createFileRoute("/entregas-racao")({
@@ -427,7 +438,7 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
-  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, linhagem: "cobb500", sexo: "misto" });
+  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, eliminadosAcum: 0, linhagem: "ross_ap95", sexo: "misto" });
   const [editing, setEditing] = useState(false);
 
   // Carregar/salvar config local por fazenda
@@ -437,7 +448,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
       if (raw) {
         const p = JSON.parse(raw);
-        setCfg({ linhagem: "cobb500", sexo: "misto", ...p });
+        setCfg({ linhagem: "ross_ap95", sexo: "misto", eliminadosAcum: 0, ...p });
       }
     } catch {}
   }, [fazendaId]);
@@ -452,24 +463,33 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const lin = cfg.linhagem, sx = cfg.sexo;
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const aloj = new Date(cfg.dataAlojamento + "T00:00");
-    const idade = Math.max(1, Math.round((hoje.getTime() - aloj.getTime()) / 86400000) + 1);
-    const avesVivas = Math.max(0, cfg.qtdInicial - (cfg.mortalidadeAcum || 0));
+    // Idade começa em 0 (dia do alojamento = D0)
+    const idade = Math.max(0, Math.round((hoje.getTime() - aloj.getTime()) / 86400000));
+    const baixas = (cfg.mortalidadeAcum || 0) + (cfg.eliminadosAcum || 0);
+    const avesVivas = Math.max(0, cfg.qtdInicial - baixas);
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
     const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
     const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    const pesoMedioKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
+    // Peso médio: prioriza pesagem real informada
+    const pesoMedioCurvaKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
+    const pesoMedioRealKg = cfg.pesoMedioRealG ? cfg.pesoMedioRealG / 1000 : undefined;
+    const pesoMedioKg = pesoMedioRealKg ?? pesoMedioCurvaKg;
+    const usandoPesoReal = !!pesoMedioRealKg;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
-    // Conversão alimentar real (CA) — apenas com ração já entregue/consumida
+    // CA real = ração consumida ÷ peso vivo produzido (usa peso real quando disponível)
     const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
     const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
     const caTarget = caAlvo(idade, lin, sx);
     const caStatus = classificaCA(caReal, caTarget);
+    const desvioPesoPct = pesoMedioRealKg && pesoMedioCurvaKg > 0
+      ? ((pesoMedioRealKg - pesoMedioCurvaKg) / pesoMedioCurvaKg) * 100
+      : null;
 
     const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
     let estoque = estoqueKg;
-    for (let i = 0; i < 14; i++) {
+    for (let i = 1; i <= 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
       const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
@@ -481,7 +501,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         estoque: Math.round(estoque),
       });
     }
-    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus };
+    return { idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus, usandoPesoReal, desvioPesoPct };
   }, [cfg, totalEntregueKg]);
 
 
@@ -492,10 +512,12 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <h3 className="font-display text-lg font-bold flex items-center gap-2">
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
-          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas).</p>
+          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem).</p>
           <div className="flex gap-2 mt-2 flex-wrap">
-            <Badge variant="secondary">{cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}</Badge>
+            <Badge variant="secondary">{LIN_LABEL[cfg.linhagem]}</Badge>
             <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
+            {calc?.usandoPesoReal && <Badge className="bg-emerald-600 text-white">Peso real informado</Badge>}
+            {calc && <Badge variant="outline">D{calc.idade}</Badge>}
           </div>
 
         </div>
@@ -507,7 +529,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       {editing && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
           <div>
-            <Label className="text-xs">Data de alojamento</Label>
+            <Label className="text-xs">Data de alojamento (D0)</Label>
             <Input type="date" value={cfg.dataAlojamento}
               onChange={e => setCfg({ ...cfg, dataAlojamento: e.target.value })} />
           </div>
@@ -519,7 +541,12 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <div>
             <Label className="text-xs">Mortalidade acumulada</Label>
             <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
-              onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves perdidas" />
+              onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves mortas" />
+          </div>
+          <div>
+            <Label className="text-xs">Eliminados acumulado</Label>
+            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""}
+              onChange={e => setCfg({ ...cfg, eliminadosAcum: Number(e.target.value) || 0 })} placeholder="Refugagem / sacrifício" />
           </div>
           <div>
             <Label className="text-xs">Linhagem</Label>
@@ -528,8 +555,9 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               value={cfg.linhagem}
               onChange={e => setCfg({ ...cfg, linhagem: e.target.value as Linhagem })}
             >
-              <option value="cobb500">Cobb 500</option>
+              <option value="ross_ap95">Ross AP 95</option>
               <option value="ross308">Ross 308</option>
+              <option value="cobb500">Cobb 500</option>
             </select>
           </div>
           <div>
@@ -544,6 +572,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               <option value="femea">Fêmea</option>
             </select>
           </div>
+          <div className="sm:col-span-2">
+            <Label className="text-xs">Peso médio REAL (g) — última pesagem</Label>
+            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""}
+              onChange={e => setCfg({ ...cfg, pesoMedioRealG: Number(e.target.value) || undefined })} placeholder="Ex: 2200 — deixe vazio para usar curva" />
+            <p className="text-[10px] text-muted-foreground mt-1">Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque.</p>
+          </div>
+          <div>
+            <Label className="text-xs">Data da pesagem real</Label>
+            <Input type="date" value={cfg.pesoMedioRealData || ""}
+              onChange={e => setCfg({ ...cfg, pesoMedioRealData: e.target.value || undefined })} />
+          </div>
         </div>
       )}
 
@@ -555,8 +594,16 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard label="Idade do lote" value={`${calc.idade}d`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas`} icon={CalIcon} tone="primary" />
-            <StatCard label="Peso médio" value={`${calc.pesoMedioKg.toFixed(3)} kg`} hint={`Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`} icon={Scale} tone="accent" />
+            <StatCard label="Idade do lote" value={`D${calc.idade}`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas${calc.baixas ? ` · ${calc.baixas} baixas` : ""}`} icon={CalIcon} tone="primary" />
+            <StatCard
+              label={calc.usandoPesoReal ? "Peso médio (real)" : "Peso médio (curva)"}
+              value={`${calc.pesoMedioKg.toFixed(3)} kg`}
+              hint={calc.desvioPesoPct != null
+                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
+                : `Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`}
+              icon={Scale}
+              tone="accent"
+            />
             <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
               label="Estoque estimado"
@@ -568,6 +615,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               tone={calc.estoqueKg <= 0 ? "destructive" : calc.diasRestantes < 2 ? "destructive" : "primary"}
             />
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs">
             <div className="p-3 rounded bg-muted/30">
@@ -642,7 +690,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               </ResponsiveContainer>
             </div>
             <p className="text-[11px] text-muted-foreground mt-2">
-              Curva de referência: {cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"} — {cfg.sexo === "macho" ? "macho" : cfg.sexo === "femea" ? "fêmea" : "misto"}. Valores são estimativas — confira na pesagem real.
+              Curva: {LIN_LABEL[cfg.linhagem]} — {cfg.sexo === "macho" ? "macho" : cfg.sexo === "femea" ? "fêmea" : "misto"}. {calc.usandoPesoReal ? "CA usando peso REAL informado." : "Informe o peso real da última pesagem para um CA mais preciso."}
             </p>
           </div>
         </>
