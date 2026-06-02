@@ -438,7 +438,7 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
-  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, linhagem: "cobb500", sexo: "misto" });
+  const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, eliminadosAcum: 0, linhagem: "ross_ap95", sexo: "misto" });
   const [editing, setEditing] = useState(false);
 
   // Carregar/salvar config local por fazenda
@@ -448,7 +448,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
       if (raw) {
         const p = JSON.parse(raw);
-        setCfg({ linhagem: "cobb500", sexo: "misto", ...p });
+        setCfg({ linhagem: "ross_ap95", sexo: "misto", eliminadosAcum: 0, ...p });
       }
     } catch {}
   }, [fazendaId]);
@@ -463,24 +463,33 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const lin = cfg.linhagem, sx = cfg.sexo;
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const aloj = new Date(cfg.dataAlojamento + "T00:00");
-    const idade = Math.max(1, Math.round((hoje.getTime() - aloj.getTime()) / 86400000) + 1);
-    const avesVivas = Math.max(0, cfg.qtdInicial - (cfg.mortalidadeAcum || 0));
+    // Idade começa em 0 (dia do alojamento = D0)
+    const idade = Math.max(0, Math.round((hoje.getTime() - aloj.getTime()) / 86400000));
+    const baixas = (cfg.mortalidadeAcum || 0) + (cfg.eliminadosAcum || 0);
+    const avesVivas = Math.max(0, cfg.qtdInicial - baixas);
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
     const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
     const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    const pesoMedioKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
+    // Peso médio: prioriza pesagem real informada
+    const pesoMedioCurvaKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
+    const pesoMedioRealKg = cfg.pesoMedioRealG ? cfg.pesoMedioRealG / 1000 : undefined;
+    const pesoMedioKg = pesoMedioRealKg ?? pesoMedioCurvaKg;
+    const usandoPesoReal = !!pesoMedioRealKg;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
-    // Conversão alimentar real (CA) — apenas com ração já entregue/consumida
+    // CA real = ração consumida ÷ peso vivo produzido (usa peso real quando disponível)
     const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
     const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
     const caTarget = caAlvo(idade, lin, sx);
     const caStatus = classificaCA(caReal, caTarget);
+    const desvioPesoPct = pesoMedioRealKg && pesoMedioCurvaKg > 0
+      ? ((pesoMedioRealKg - pesoMedioCurvaKg) / pesoMedioCurvaKg) * 100
+      : null;
 
     const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
     let estoque = estoqueKg;
-    for (let i = 0; i < 14; i++) {
+    for (let i = 1; i <= 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
       const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
@@ -492,7 +501,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         estoque: Math.round(estoque),
       });
     }
-    return { idade, avesVivas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus };
+    return { idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus, usandoPesoReal, desvioPesoPct };
   }, [cfg, totalEntregueKg]);
 
 
@@ -503,10 +512,12 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <h3 className="font-display text-lg font-bold flex items-center gap-2">
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
-          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas).</p>
+          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem).</p>
           <div className="flex gap-2 mt-2 flex-wrap">
-            <Badge variant="secondary">{cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}</Badge>
+            <Badge variant="secondary">{LIN_LABEL[cfg.linhagem]}</Badge>
             <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
+            {calc?.usandoPesoReal && <Badge className="bg-emerald-600 text-white">Peso real informado</Badge>}
+            {calc && <Badge variant="outline">D{calc.idade}</Badge>}
           </div>
 
         </div>
@@ -518,7 +529,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       {editing && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
           <div>
-            <Label className="text-xs">Data de alojamento</Label>
+            <Label className="text-xs">Data de alojamento (D0)</Label>
             <Input type="date" value={cfg.dataAlojamento}
               onChange={e => setCfg({ ...cfg, dataAlojamento: e.target.value })} />
           </div>
@@ -530,7 +541,12 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <div>
             <Label className="text-xs">Mortalidade acumulada</Label>
             <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
-              onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves perdidas" />
+              onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves mortas" />
+          </div>
+          <div>
+            <Label className="text-xs">Eliminados acumulado</Label>
+            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""}
+              onChange={e => setCfg({ ...cfg, eliminadosAcum: Number(e.target.value) || 0 })} placeholder="Refugagem / sacrifício" />
           </div>
           <div>
             <Label className="text-xs">Linhagem</Label>
@@ -539,8 +555,9 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               value={cfg.linhagem}
               onChange={e => setCfg({ ...cfg, linhagem: e.target.value as Linhagem })}
             >
-              <option value="cobb500">Cobb 500</option>
+              <option value="ross_ap95">Ross AP 95</option>
               <option value="ross308">Ross 308</option>
+              <option value="cobb500">Cobb 500</option>
             </select>
           </div>
           <div>
@@ -554,6 +571,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               <option value="macho">Macho</option>
               <option value="femea">Fêmea</option>
             </select>
+          </div>
+          <div className="sm:col-span-2">
+            <Label className="text-xs">Peso médio REAL (g) — última pesagem</Label>
+            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""}
+              onChange={e => setCfg({ ...cfg, pesoMedioRealG: Number(e.target.value) || undefined })} placeholder="Ex: 2200 — deixe vazio para usar curva" />
+            <p className="text-[10px] text-muted-foreground mt-1">Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque.</p>
+          </div>
+          <div>
+            <Label className="text-xs">Data da pesagem real</Label>
+            <Input type="date" value={cfg.pesoMedioRealData || ""}
+              onChange={e => setCfg({ ...cfg, pesoMedioRealData: e.target.value || undefined })} />
           </div>
         </div>
       )}
