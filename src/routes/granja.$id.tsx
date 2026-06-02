@@ -167,6 +167,7 @@ function LoteDetalhe() {
                   <tr className="border-b border-border">
                     <th className="text-left py-2">Data</th>
                     <th className="text-right py-2">Mort.</th>
+                    <th className="text-right py-2">Elim.</th>
                     <th className="text-right py-2">Peso (g)</th>
                     <th className="text-left py-2 pl-4">Obs</th>
                     <th></th>
@@ -179,6 +180,7 @@ function LoteDetalhe() {
                       <tr key={idx} className="border-b border-border/50">
                         <td className="py-2">{new Date(e.date).toLocaleDateString("pt-BR")}</td>
                         <td className="py-2 text-right tabular-nums">{e.mortalidade}</td>
+                        <td className="py-2 text-right tabular-nums">{e.eliminados ?? 0}</td>
                         <td className="py-2 text-right tabular-nums">{e.pesoMedioG ?? "—"}</td>
                         <td className="py-2 pl-4 text-muted-foreground">{e.observacoes ?? ""}</td>
                         <td className="py-2 text-right"><Button size="icon" variant="ghost" onClick={() => removerEntry(realIdx)}><Trash2 className="h-3.5 w-3.5" /></Button></td>
