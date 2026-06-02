@@ -137,9 +137,19 @@ function LoteDetalhe() {
             <div className="space-y-3">
               <Field label="Data"><Input type="date" value={entry.date} onChange={(e) => setEntry({ ...entry, date: e.target.value })} /></Field>
               <div className="grid grid-cols-2 gap-2">
-                <Field label="Mortalidade"><Input type="number" value={entry.mortalidade} onChange={(e) => setEntry({ ...entry, mortalidade: +e.target.value })} /></Field>
-                <Field label="Peso médio (g)"><Input type="number" value={entry.pesoMedioG ?? ""} onChange={(e) => setEntry({ ...entry, pesoMedioG: e.target.value ? +e.target.value : undefined })} /></Field>
+                <Field label="Mortalidade">
+                  <Input type="number" inputMode="numeric" min={0} value={entry.mortalidade || ""}
+                    onChange={(e) => setEntry({ ...entry, mortalidade: Number(e.target.value) || 0 })} placeholder="0" />
+                </Field>
+                <Field label="Eliminados">
+                  <Input type="number" inputMode="numeric" min={0} value={entry.eliminados || ""}
+                    onChange={(e) => setEntry({ ...entry, eliminados: Number(e.target.value) || 0 })} placeholder="0" />
+                </Field>
               </div>
+              <Field label="Peso médio (g)">
+                <Input type="number" inputMode="decimal" min={0} value={entry.pesoMedioG ?? ""}
+                  onChange={(e) => setEntry({ ...entry, pesoMedioG: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 1850" />
+              </Field>
               <Field label="Observações"><Textarea rows={2} value={entry.observacoes} onChange={(e) => setEntry({ ...entry, observacoes: e.target.value })} /></Field>
               <Button onClick={adicionar} className="w-full"><Plus className="h-4 w-4 mr-1" /> Lançar</Button>
             </div>
