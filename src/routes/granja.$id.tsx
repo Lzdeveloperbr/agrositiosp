@@ -94,7 +94,7 @@ function LoteDetalhe() {
                 <h1 className="text-3xl md:text-4xl font-display font-bold">Lote {lote.numero}</h1>
                 {lote.encerrado ? <Badge variant="secondary">Encerrado</Badge> : <Badge>Ativo</Badge>}
               </div>
-              <p className="text-muted-foreground mt-1">Entrada {new Date(lote.dataEntrada).toLocaleDateString("pt-BR")} · {dias} dias · {lote.integradora}</p>
+              <p className="text-muted-foreground mt-1">Entrada {new Date(lote.dataEntrada).toLocaleDateString("pt-BR")} · D{dias} · {lote.integradora}</p>
               <p className="text-xs text-muted-foreground">Previsão de abate: {previsao.toLocaleDateString("pt-BR")}</p>
             </div>
             <div className="flex gap-2">
