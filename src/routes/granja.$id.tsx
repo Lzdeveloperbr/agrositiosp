@@ -35,6 +35,7 @@ function LoteDetalhe() {
   const [entry, setEntry] = useState({
     date: new Date().toISOString().slice(0, 10),
     mortalidade: 0,
+    eliminados: 0,
     pesoMedioG: undefined as number | undefined,
     observacoes: "",
   });
@@ -48,16 +49,18 @@ function LoteDetalhe() {
     );
   }
 
-  const totalMort = lote.entries.reduce((s, e) => s + e.mortalidade, 0);
-  const vivas = lote.quantidadeInicial - totalMort;
-  const dias = Math.floor((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000);
+  const totalMort = lote.entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
+  const totalElim = lote.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
+  const vivas = lote.quantidadeInicial - totalMort - totalElim;
+  // Idade começa em D0 (dia do alojamento)
+  const dias = Math.max(0, Math.round((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000));
   const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
   const pesoTotalKg = (vivas * ultPeso) / 1000;
   const previsao = new Date(new Date(lote.dataEntrada).getTime() + lote.previsaoAbateDias * 86400000);
 
   const adicionar = () => {
     setLotes((prev) => prev.map((l) => l.id === id ? { ...l, entries: [...l.entries, { ...entry }] } : l));
-    setEntry({ ...entry, mortalidade: 0, pesoMedioG: undefined, observacoes: "" });
+    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, observacoes: "" });
     toast.success("Lançamento registrado");
   };
 
