@@ -690,7 +690,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               </ResponsiveContainer>
             </div>
             <p className="text-[11px] text-muted-foreground mt-2">
-              Curva de referência: {cfg.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"} — {cfg.sexo === "macho" ? "macho" : cfg.sexo === "femea" ? "fêmea" : "misto"}. Valores são estimativas — confira na pesagem real.
+              Curva: {LIN_LABEL[cfg.linhagem]} — {cfg.sexo === "macho" ? "macho" : cfg.sexo === "femea" ? "fêmea" : "misto"}. {calc.usandoPesoReal ? "CA usando peso REAL informado." : "Informe o peso real da última pesagem para um CA mais preciso."}
             </p>
           </div>
         </>
