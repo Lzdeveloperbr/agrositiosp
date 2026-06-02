@@ -594,8 +594,16 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatCard label="Idade do lote" value={`${calc.idade}d`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas`} icon={CalIcon} tone="primary" />
-            <StatCard label="Peso médio" value={`${calc.pesoMedioKg.toFixed(3)} kg`} hint={`Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`} icon={Scale} tone="accent" />
+            <StatCard label="Idade do lote" value={`D${calc.idade}`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas${calc.baixas ? ` · ${calc.baixas} baixas` : ""}`} icon={CalIcon} tone="primary" />
+            <StatCard
+              label={calc.usandoPesoReal ? "Peso médio (real)" : "Peso médio (curva)"}
+              value={`${calc.pesoMedioKg.toFixed(3)} kg`}
+              hint={calc.desvioPesoPct != null
+                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
+                : `Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`}
+              icon={Scale}
+              tone="accent"
+            />
             <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
               label="Estoque estimado"
@@ -607,6 +615,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               tone={calc.estoqueKg <= 0 ? "destructive" : calc.diasRestantes < 2 ? "destructive" : "primary"}
             />
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs">
             <div className="p-3 rounded bg-muted/30">
