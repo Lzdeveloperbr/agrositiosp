@@ -29,6 +29,7 @@ const groups: { label: string; items: Item[] }[] = [
     items: [
       { to: "/granja", label: "Granja", icon: Bird },
       { to: "/checklist-granja", label: "Checklist Diário", icon: ClipboardCheck },
+      { to: "/analise-aves", label: "Análise IA Aves", icon: Stethoscope },
       { to: "/manejo", label: "Manejo Frango", icon: BookOpen },
       { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList },
       { to: "/ambiencia", label: "Ambiência Aviário", icon: Wind },
