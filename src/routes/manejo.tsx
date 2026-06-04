@@ -110,9 +110,43 @@ function aguaParaIdade(d: number): AguaRef {
   return AGUA[6];
 }
 
+// ============ LUZ: programa profissional com horários de liga/desliga ============
+type LuzRef = {
+  faseDia: string;
+  horasLuz: number;
+  horasEscuro: number;
+  lux: number;
+  pctBrilho: number; // % do dimmer
+  acende: string;   // horário de acender a luz
+  apaga: string;    // horário de apagar (início do escuro)
+  cor: string;      // cor recomendada da lâmpada
+  obj: string;
+};
+const LUZ: LuzRef[] = [
+  { faseDia: "D0–D1",   horasLuz: 23, horasEscuro: 1,  lux: 30, pctBrilho: 100, acende: "00:00", apaga: "23:00", cor: "Branca fria 6500K", obj: "Estimular consumo · localizar comida/água" },
+  { faseDia: "D2–D3",   horasLuz: 22, horasEscuro: 2,  lux: 25, pctBrilho: 80,  acende: "01:00", apaga: "23:00", cor: "Branca fria 6500K", obj: "Iniciar percepção de escuro" },
+  { faseDia: "D4–D7",   horasLuz: 20, horasEscuro: 4,  lux: 20, pctBrilho: 70,  acende: "02:00", apaga: "22:00", cor: "Branca neutra 4000K", obj: "Reduzir gradualmente, primeiro descanso real" },
+  { faseDia: "D8–D14",  horasLuz: 18, horasEscuro: 6,  lux: 15, pctBrilho: 60,  acende: "04:00", apaga: "22:00", cor: "Branca neutra 4000K", obj: "Bem-estar · regular ritmo circadiano" },
+  { faseDia: "D15–D21", horasLuz: 18, horasEscuro: 6,  lux: 10, pctBrilho: 40,  acende: "04:00", apaga: "22:00", cor: "Branca quente 3000K", obj: "Reduzir agitação · controle de consumo" },
+  { faseDia: "D22–D35", horasLuz: 18, horasEscuro: 6,  lux: 10, pctBrilho: 40,  acende: "04:00", apaga: "22:00", cor: "Branca quente 3000K", obj: "Manter ritmo · maximizar ganho" },
+  { faseDia: "D36–D40", horasLuz: 20, horasEscuro: 4,  lux: 10, pctBrilho: 40,  acende: "03:00", apaga: "23:00", cor: "Branca quente 3000K", obj: "Aumentar consumo final" },
+  { faseDia: "Pré-apanha", horasLuz: 24, horasEscuro: 0, lux: 5, pctBrilho: 20, acende: "—",     apaga: "—",     cor: "Azul (acalmar)",      obj: "Acalmar 4h antes do embarque" },
+];
+
+function luzParaIdade(d: number): LuzRef {
+  if (d <= 1) return LUZ[0];
+  if (d <= 3) return LUZ[1];
+  if (d <= 7) return LUZ[2];
+  if (d <= 14) return LUZ[3];
+  if (d <= 21) return LUZ[4];
+  if (d <= 35) return LUZ[5];
+  return LUZ[6];
+}
+
 // Bater cama: a cada 3 dias a partir de D6 (após formação inicial da cama)
 function deveBaterCama(d: number): boolean {
   return d >= 6 && (d - 6) % 3 === 0;
+
 }
 
 function ManejoPage() {
