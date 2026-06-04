@@ -83,28 +83,60 @@ const PROTOCOLO: DiaProtocolo[] = [
   { dia: 42, tempAr: [19, 22], tempCama: [19, 22], umidade: [50, 60], luzHoras: 18, luzLux: 10, racao: "Retirada",    consumoG: 305,  pesoG: 3460, caEsperado: 2.18, manejo: ["⚠️ ABATE — meta 3.400-3.500g · CA ≤ 1.75 (real)"] },
 ];
 
+// Idade em dias começando em D0 (dia do alojamento = 0).
+function idadeDias(dataEntrada: string): number {
+  return Math.max(0, Math.floor((Date.now() - new Date(dataEntrada).getTime()) / 86400000));
+}
+
+// ============ ÁGUA: vazão, pressão e altura dos equipamentos por idade ============
+type AguaRef = { faseDia: string; vazaoNipple: string; vazaoAve: string; pressaoCmH2O: string; alturaNipple: string; alturaPrato: string };
+const AGUA: AguaRef[] = [
+  { faseDia: "D0–D3",   vazaoNipple: "30–40 ml/min", vazaoAve: "30–50 ml/dia",   pressaoCmH2O: "10–15 cm H₂O", alturaNipple: "altura do OLHO", alturaPrato: "borda no chão (bandeja)" },
+  { faseDia: "D4–D7",   vazaoNipple: "40–50 ml/min", vazaoAve: "60–110 ml/dia",  pressaoCmH2O: "15–20 cm H₂O", alturaNipple: "entre olho e dorso", alturaPrato: "borda 2–3 cm do piso" },
+  { faseDia: "D8–D14",  vazaoNipple: "50–60 ml/min", vazaoAve: "120–220 ml/dia", pressaoCmH2O: "20–25 cm H₂O", alturaNipple: "altura do DORSO",  alturaPrato: "borda na altura do dorso" },
+  { faseDia: "D15–D21", vazaoNipple: "60–70 ml/min", vazaoAve: "240–340 ml/dia", pressaoCmH2O: "25–30 cm H₂O", alturaNipple: "bico erguido 30°", alturaPrato: "subir para nível do dorso" },
+  { faseDia: "D22–D28", vazaoNipple: "70–80 ml/min", vazaoAve: "350–470 ml/dia", pressaoCmH2O: "30–35 cm H₂O", alturaNipple: "bico erguido 45°", alturaPrato: "borda no nível do dorso" },
+  { faseDia: "D29–D35", vazaoNipple: "80–90 ml/min", vazaoAve: "480–580 ml/dia", pressaoCmH2O: "35–40 cm H₂O", alturaNipple: "bico erguido 45°", alturaPrato: "borda no nível do dorso" },
+  { faseDia: "D36–D42", vazaoNipple: "80–100 ml/min", vazaoAve: "580–700 ml/dia", pressaoCmH2O: "35–45 cm H₂O", alturaNipple: "bico erguido 45–60°", alturaPrato: "borda no nível do dorso" },
+];
+
+function aguaParaIdade(d: number): AguaRef {
+  if (d <= 3) return AGUA[0];
+  if (d <= 7) return AGUA[1];
+  if (d <= 14) return AGUA[2];
+  if (d <= 21) return AGUA[3];
+  if (d <= 28) return AGUA[4];
+  if (d <= 35) return AGUA[5];
+  return AGUA[6];
+}
+
+// Bater cama: a cada 3 dias a partir de D6 (após formação inicial da cama)
+function deveBaterCama(d: number): boolean {
+  return d >= 6 && (d - 6) % 3 === 0;
+}
+
 function ManejoPage() {
   const [lotes] = useLotes();
   const ativos = lotes.filter((l) => !l.encerrado);
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
   const lote = ativos.find((l) => l.id === loteId);
 
-  const diaAtual = useMemo(() => {
-    if (!lote) return 1;
-    return Math.max(1, Math.min(42, Math.floor((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000) + 1));
-  }, [lote]);
-
-  const [diaSel, setDiaSel] = useState<number>(diaAtual);
-  const dia = PROTOCOLO.find((p) => p.dia === diaSel) ?? PROTOCOLO[0];
+  // idade D0 = 0. Protocolo interno usa dia 1..42, então protoIdx = idadeReal.
+  const idadeReal = useMemo(() => (lote ? idadeDias(lote.dataEntrada) : 0), [lote]);
+  const [diaSel, setDiaSel] = useState<number>(idadeReal); // dia exibido (0..41)
+  const protoIdx = Math.max(0, Math.min(41, diaSel));
+  const dia = PROTOCOLO[protoIdx];
+  const diaDisplay = diaSel;
+  const agua = aguaParaIdade(diaDisplay);
 
   // CA real do lote (se houver dados)
   const caReal = useMemo(() => {
     if (!lote) return null;
     const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
     if (!ultPeso) return null;
-    const idade = Math.floor((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000) + 1;
-    const consAcum = PROTOCOLO.slice(0, idade).reduce((s, p) => s + p.consumoG, 0);
-    return { peso: ultPeso, ca: consAcum / ultPeso, idade };
+    const id = idadeDias(lote.dataEntrada);
+    const consAcum = PROTOCOLO.slice(0, id + 1).reduce((s, p) => s + p.consumoG, 0);
+    return { peso: ultPeso, ca: consAcum / ultPeso, idade: id };
   }, [lote]);
 
   return (
@@ -115,12 +147,12 @@ function ManejoPage() {
             <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2">
               <BookOpen className="h-7 w-7 text-primary" /> Manejo do Frango
             </h1>
-            <p className="text-muted-foreground mt-1">Protocolo profissional dia a dia · padrão Cobb/Ross</p>
+            <p className="text-muted-foreground mt-1">Protocolo profissional dia a dia · D0 = alojamento · padrão Cobb/Ross</p>
           </div>
           {ativos.length > 0 && (
-            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(Math.max(1, Math.min(42, Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000) + 1))); }}>
+            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(idadeDias(l.dataEntrada)); }}>
               <SelectTrigger className="w-56"><SelectValue placeholder="Selecionar lote" /></SelectTrigger>
-              <SelectContent>{ativos.map((l) => <SelectItem key={l.id} value={l.id}>Lote {l.numero} · {Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000) + 1}d</SelectItem>)}</SelectContent>
+              <SelectContent>{ativos.map((l) => <SelectItem key={l.id} value={l.id}>Lote {l.numero} · D{idadeDias(l.dataEntrada)}</SelectItem>)}</SelectContent>
             </Select>
           )}
         </header>
@@ -128,11 +160,11 @@ function ManejoPage() {
         {/* CA real */}
         {lote && caReal && (
           <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
-            <div className="flex items-center gap-2 mb-2 opacity-90"><TrendingUp className="h-5 w-5" /><span className="font-display font-semibold">Lote {lote.numero} · Dia {caReal.idade}</span></div>
+            <div className="flex items-center gap-2 mb-2 opacity-90"><TrendingUp className="h-5 w-5" /><span className="font-display font-semibold">Lote {lote.numero} · D{caReal.idade}</span></div>
             <div className="grid grid-cols-3 gap-4">
               <div><p className="text-xs opacity-80">Peso real</p><p className="text-2xl font-display font-bold">{caReal.peso}g</p></div>
               <div><p className="text-xs opacity-80">CA real (estim.)</p><p className="text-2xl font-display font-bold">{caReal.ca.toFixed(2)}</p></div>
-              <div><p className="text-xs opacity-80">CA esperado</p><p className="text-2xl font-display font-bold">{PROTOCOLO[caReal.idade - 1]?.caEsperado.toFixed(2)}</p></div>
+              <div><p className="text-xs opacity-80">CA esperado</p><p className="text-2xl font-display font-bold">{PROTOCOLO[caReal.idade]?.caEsperado.toFixed(2)}</p></div>
             </div>
           </Card>
         )}
@@ -141,24 +173,27 @@ function ManejoPage() {
         <Card className="p-4" style={{ background: "var(--gradient-surface)" }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold">Selecionar dia do lote</h2>
-            <Badge variant="outline">Dia {diaSel} / 42</Badge>
+            <Badge variant="outline">D{diaDisplay} / D41</Badge>
           </div>
           <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-14 gap-1.5">
-            {PROTOCOLO.map((p) => {
-              const isPesagem = p.dia % 7 === 0 || p.dia === 7;
+            {PROTOCOLO.map((p, idx) => {
+              const d = idx; // 0..41
+              const isPesagem = d > 0 && d % 7 === 0;
               const isTroca = p.manejo.some((m) => m.includes("TROCA") || m.includes("INICIAR ração"));
+              const isCama = deveBaterCama(d);
               return (
                 <button
                   key={p.dia}
-                  onClick={() => setDiaSel(p.dia)}
+                  onClick={() => setDiaSel(d)}
                   className={`aspect-square rounded-md text-xs font-semibold tabular-nums border transition ${
-                    diaSel === p.dia ? "bg-primary text-primary-foreground border-primary" :
+                    diaSel === d ? "bg-primary text-primary-foreground border-primary" :
                     isPesagem ? "bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30" :
                     isTroca ? "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30" :
+                    isCama ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25" :
                     "bg-muted/40 border-border hover:bg-muted"
                   }`}
                 >
-                  {p.dia}
+                  {d}
                 </button>
               );
             })}
@@ -166,6 +201,7 @@ function ManejoPage() {
           <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-amber-500/40" /> Pesagem semanal</span>
             <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-blue-500/40" /> Troca de ração / fase</span>
+            <span className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-500/40" /> Bater cama (3/3 dias)</span>
           </div>
         </Card>
 
