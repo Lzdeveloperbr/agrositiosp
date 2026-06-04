@@ -213,30 +213,51 @@ function ManejoPage() {
           <ParamCard icon={<Utensils className="h-5 w-5" />} label="Ração" value={dia.racao} hint={`${dia.consumoG}g/ave · meta ${dia.pesoG}g`} />
         </div>
 
+        {/* Água & altura dos equipamentos do dia */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <ParamCard icon={<Waves className="h-5 w-5" />} label="Vazão nipple" value={agua.vazaoNipple} hint={`~ ${agua.vazaoAve} por ave`} />
+          <ParamCard icon={<Droplets className="h-5 w-5" />} label="Pressão linha" value={agua.pressaoCmH2O} hint="Coluna d'água no regulador" />
+          <ParamCard icon={<Ruler className="h-5 w-5" />} label="Altura nipple" value={agua.alturaNipple} hint="Ajustar diariamente" />
+          <ParamCard icon={<Ruler className="h-5 w-5" />} label="Altura prato/comedouro" value={agua.alturaPrato} hint="Borda no nível certo evita desperdício" />
+        </div>
+
         <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
-          <h3 className="font-display font-semibold text-lg mb-3 flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" /> Manejo do dia {dia.dia}</h3>
-          {dia.manejo.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Manutenção da rotina. Monitorar temperatura, água e ração.</p>
-          ) : (
-            <ul className="space-y-2">
-              {dia.manejo.map((m, i) => (
+          <h3 className="font-display font-semibold text-lg mb-3 flex items-center gap-2"><Flame className="h-5 w-5 text-orange-500" /> Manejo do D{diaDisplay}</h3>
+          <ul className="space-y-2">
+            {deveBaterCama(diaDisplay) && (
+              <li className="text-sm flex gap-2 font-semibold text-emerald-700 dark:text-emerald-400">
+                <Sparkles className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>BATER CAMA hoje (rotina 3 em 3 dias) — revolver toda a área, soltar torrões, equalizar umidade. Reduz amônia, pododermatite e coccidiose.</span>
+              </li>
+            )}
+            <li className="text-sm flex gap-2">
+              <Waves className="h-4 w-4 shrink-0 mt-0.5 text-sky-500" />
+              <span>Conferir vazão dos nipples ({agua.vazaoNipple}), pressão ({agua.pressaoCmH2O}) e altura ({agua.alturaNipple}). Lavar linha 1× por semana.</span>
+            </li>
+            {dia.manejo.length === 0 ? (
+              <li className="text-sm text-muted-foreground">Manutenção da rotina. Monitorar temperatura, água e ração.</li>
+            ) : (
+              dia.manejo.map((m, i) => (
                 <li key={i} className={`text-sm flex gap-2 ${m.startsWith("⚠️") ? "font-semibold text-amber-600 dark:text-amber-400" : ""}`}>
                   <ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
                   <span>{m}</span>
                 </li>
-              ))}
-            </ul>
-          )}
+              ))
+            )}
+          </ul>
         </Card>
 
         {/* Tabs com guias completos */}
         <Tabs defaultValue="semanal">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="semanal">Semanal</TabsTrigger>
             <TabsTrigger value="equipamentos">Equipamentos</TabsTrigger>
+            <TabsTrigger value="agua">Água & Cama</TabsTrigger>
             <TabsTrigger value="luz">Luz</TabsTrigger>
-            <TabsTrigger value="ca">Conv. Alimentar</TabsTrigger>
+            <TabsTrigger value="ca">CA</TabsTrigger>
           </TabsList>
+
+
 
           <TabsContent value="semanal" className="mt-4">
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
