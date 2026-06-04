@@ -110,9 +110,43 @@ function aguaParaIdade(d: number): AguaRef {
   return AGUA[6];
 }
 
+// ============ LUZ: programa profissional com horários de liga/desliga ============
+type LuzRef = {
+  faseDia: string;
+  horasLuz: number;
+  horasEscuro: number;
+  lux: number;
+  pctBrilho: number; // % do dimmer
+  acende: string;   // horário de acender a luz
+  apaga: string;    // horário de apagar (início do escuro)
+  cor: string;      // cor recomendada da lâmpada
+  obj: string;
+};
+const LUZ: LuzRef[] = [
+  { faseDia: "D0–D1",   horasLuz: 23, horasEscuro: 1,  lux: 30, pctBrilho: 100, acende: "00:00", apaga: "23:00", cor: "Branca fria 6500K", obj: "Estimular consumo · localizar comida/água" },
+  { faseDia: "D2–D3",   horasLuz: 22, horasEscuro: 2,  lux: 25, pctBrilho: 80,  acende: "01:00", apaga: "23:00", cor: "Branca fria 6500K", obj: "Iniciar percepção de escuro" },
+  { faseDia: "D4–D7",   horasLuz: 20, horasEscuro: 4,  lux: 20, pctBrilho: 70,  acende: "02:00", apaga: "22:00", cor: "Branca neutra 4000K", obj: "Reduzir gradualmente, primeiro descanso real" },
+  { faseDia: "D8–D14",  horasLuz: 18, horasEscuro: 6,  lux: 15, pctBrilho: 60,  acende: "04:00", apaga: "22:00", cor: "Branca neutra 4000K", obj: "Bem-estar · regular ritmo circadiano" },
+  { faseDia: "D15–D21", horasLuz: 18, horasEscuro: 6,  lux: 10, pctBrilho: 40,  acende: "04:00", apaga: "22:00", cor: "Branca quente 3000K", obj: "Reduzir agitação · controle de consumo" },
+  { faseDia: "D22–D35", horasLuz: 18, horasEscuro: 6,  lux: 10, pctBrilho: 40,  acende: "04:00", apaga: "22:00", cor: "Branca quente 3000K", obj: "Manter ritmo · maximizar ganho" },
+  { faseDia: "D36–D40", horasLuz: 20, horasEscuro: 4,  lux: 10, pctBrilho: 40,  acende: "03:00", apaga: "23:00", cor: "Branca quente 3000K", obj: "Aumentar consumo final" },
+  { faseDia: "Pré-apanha", horasLuz: 24, horasEscuro: 0, lux: 5, pctBrilho: 20, acende: "—",     apaga: "—",     cor: "Azul (acalmar)",      obj: "Acalmar 4h antes do embarque" },
+];
+
+function luzParaIdade(d: number): LuzRef {
+  if (d <= 1) return LUZ[0];
+  if (d <= 3) return LUZ[1];
+  if (d <= 7) return LUZ[2];
+  if (d <= 14) return LUZ[3];
+  if (d <= 21) return LUZ[4];
+  if (d <= 35) return LUZ[5];
+  return LUZ[6];
+}
+
 // Bater cama: a cada 3 dias a partir de D6 (após formação inicial da cama)
 function deveBaterCama(d: number): boolean {
   return d >= 6 && (d - 6) % 3 === 0;
+
 }
 
 function ManejoPage() {
@@ -209,7 +243,7 @@ function ManejoPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
           <ParamCard icon={<Thermometer className="h-5 w-5" />} label="Temp. ambiente" value={`${dia.tempAr[0]}–${dia.tempAr[1]}°C`} hint={`Cama: ${dia.tempCama[0]}–${dia.tempCama[1]}°C`} />
           <ParamCard icon={<Droplets className="h-5 w-5" />} label="Umidade" value={`${dia.umidade[0]}–${dia.umidade[1]}%`} hint="Relativa do ar" />
-          <ParamCard icon={<Lightbulb className="h-5 w-5" />} label="Luz" value={`${dia.luzHoras}h / ${dia.luzLux} lux`} hint={`${24 - dia.luzHoras}h escuro`} />
+          <ParamCard icon={<Lightbulb className="h-5 w-5" />} label="Luz" value={`${luzParaIdade(diaDisplay).horasLuz}h · ${luzParaIdade(diaDisplay).pctBrilho}%`} hint={`${luzParaIdade(diaDisplay).lux} lux · acende ${luzParaIdade(diaDisplay).acende} / apaga ${luzParaIdade(diaDisplay).apaga}`} />
           <ParamCard icon={<Utensils className="h-5 w-5" />} label="Ração" value={dia.racao} hint={`${dia.consumoG}g/ave · meta ${dia.pesoG}g`} />
         </div>
 
@@ -249,11 +283,12 @@ function ManejoPage() {
 
         {/* Tabs com guias completos */}
         <Tabs defaultValue="semanal">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full">
             <TabsTrigger value="semanal">Semanal</TabsTrigger>
-            <TabsTrigger value="equipamentos">Equipamentos</TabsTrigger>
+            <TabsTrigger value="equipamentos">Equip.</TabsTrigger>
             <TabsTrigger value="agua">Água & Cama</TabsTrigger>
             <TabsTrigger value="luz">Luz</TabsTrigger>
+            <TabsTrigger value="excelencia">Excelência</TabsTrigger>
             <TabsTrigger value="ca">CA</TabsTrigger>
           </TabsList>
 
@@ -379,39 +414,150 @@ function ManejoPage() {
               </ul>
             </Card>
           </TabsContent>
-          <TabsContent value="luz" className="mt-4">
-
+          <TabsContent value="luz" className="mt-4 space-y-3">
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
-              <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-500" /> Programa de luz</h3>
+              <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-500" /> Programa de luz profissional (horários, brilho e cor)</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="text-xs text-muted-foreground uppercase">
-                    <tr className="border-b border-border"><th className="text-left py-2">Período</th><th className="text-right py-2">Horas luz</th><th className="text-right py-2">Lux</th><th className="text-right py-2">% intensidade</th><th className="text-left py-2 pl-3">Objetivo</th></tr>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2">Fase</th>
+                      <th className="text-right py-2">Luz</th>
+                      <th className="text-right py-2">Escuro</th>
+                      <th className="text-right py-2">Lux</th>
+                      <th className="text-right py-2">Brilho</th>
+                      <th className="text-center py-2 px-2">Acende</th>
+                      <th className="text-center py-2 px-2">Apaga</th>
+                      <th className="text-left py-2 pl-2">Cor lâmpada</th>
+                      <th className="text-left py-2 pl-3">Objetivo</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { p: "Dia 1-2", h: 23, lux: 30, pct: "100%", obj: "Estimular consumo · localizar comida/água" },
-                      { p: "Dia 3-7", h: "22→20", lux: 25, pct: "80%", obj: "Reduzir gradualmente" },
-                      { p: "Dia 8-13", h: "19→18", lux: 15, pct: "60%", obj: "Acostumar com escuro" },
-                      { p: "Dia 14-21", h: 18, lux: 10, pct: "40%", obj: "Bem-estar · controle de consumo" },
-                      { p: "Dia 22-42", h: 18, lux: 10, pct: "40%", obj: "Manter ritmo até abate" },
-                      { p: "Pré-apanha", h: 24, lux: 5, pct: "20%", obj: "Acalmar antes do embarque" },
-                    ].map((r, i) => (
+                    {LUZ.map((r, i) => (
                       <tr key={i} className="border-b border-border/50">
-                        <td className="py-2 font-medium">{r.p}</td><td className="py-2 text-right tabular-nums">{r.h}h</td>
-                        <td className="py-2 text-right tabular-nums">{r.lux}</td><td className="py-2 text-right tabular-nums">{r.pct}</td>
+                        <td className="py-2 font-bold">{r.faseDia}</td>
+                        <td className="py-2 text-right tabular-nums">{r.horasLuz}h</td>
+                        <td className="py-2 text-right tabular-nums">{r.horasEscuro}h</td>
+                        <td className="py-2 text-right tabular-nums">{r.lux}</td>
+                        <td className="py-2 text-right tabular-nums font-semibold text-amber-600">{r.pctBrilho}%</td>
+                        <td className="py-2 text-center font-mono">{r.acende}</td>
+                        <td className="py-2 text-center font-mono">{r.apaga}</td>
+                        <td className="py-2 pl-2">{r.cor}</td>
                         <td className="py-2 pl-3 text-muted-foreground">{r.obj}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <div className="mt-4 p-3 rounded-md bg-amber-500/10 border border-amber-500/30 text-sm">
-                <strong>Dica pro:</strong> intervalo de escuro contínuo (4-6h, ex: 22h–04h) melhora ganho de peso e bem-estar.
-                Use dimmer para reduzir intensidade gradualmente — nunca apagar de uma vez.
+              <div className="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/30">
+                  <strong>Regra do dimmer:</strong> nunca apagar de uma vez. Reduzir o brilho ao longo de 15–30 min antes do escuro e subir aos poucos ao acender. Ave assustada com apagão repentino se amontoa e morre por sufocação.
+                </div>
+                <div className="p-3 rounded-md bg-sky-500/10 border border-sky-500/30">
+                  <strong>Escuro contínuo:</strong> bloco único de 4–6 h (ex.: 22h–04h) melhora ganho de peso, imunidade e reduz pododermatite. Evite escuros fracionados depois de D14.
+                </div>
+                <div className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/30">
+                  <strong>Uniformidade:</strong> medir lux em 5 pontos do galpão (entradas, meio, fundo). Variação máxima ±20%. Sombra/canto escuro = aglomeração e refugo.
+                </div>
+                <div className="p-3 rounded-md bg-purple-500/10 border border-purple-500/30">
+                  <strong>Cor da lâmpada:</strong> branca fria (6500K) estimula consumo no início; quente (3000K) acalma na fase final. Luz azul/verde só na pré-apanha para reduzir estresse.
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-2">Programa do D{diaDisplay}</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div><p className="text-xs text-muted-foreground uppercase">Horas de luz</p><p className="text-xl font-bold">{luzParaIdade(diaDisplay).horasLuz}h</p></div>
+                <div><p className="text-xs text-muted-foreground uppercase">Brilho dimmer</p><p className="text-xl font-bold text-amber-600">{luzParaIdade(diaDisplay).pctBrilho}%</p></div>
+                <div><p className="text-xs text-muted-foreground uppercase">Acende</p><p className="text-xl font-bold font-mono">{luzParaIdade(diaDisplay).acende}</p></div>
+                <div><p className="text-xs text-muted-foreground uppercase">Apaga</p><p className="text-xl font-bold font-mono">{luzParaIdade(diaDisplay).apaga}</p></div>
               </div>
             </Card>
           </TabsContent>
+
+          <TabsContent value="excelencia" className="mt-4 space-y-3">
+            <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+              <h3 className="font-display font-semibold mb-1 flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Os 10 fatores para um lote excelente</h3>
+              <p className="text-sm opacity-90">Acompanhe e ajuste DIARIAMENTE. Falhar em 1 só já tira 50–150g do peso final e sobe 5–10 pontos na CA.</p>
+            </Card>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-3">KPIs alvo (lote de excelência)</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted-foreground uppercase">
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2">Indicador</th>
+                      <th className="text-right py-2">Excelente</th>
+                      <th className="text-right py-2">Aceitável</th>
+                      <th className="text-right py-2">Ruim</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { k: "Viabilidade (D42)",     e: "≥ 97%",   b: "94–97%",   r: "< 94%" },
+                      { k: "CA real (D42)",          e: "≤ 1,55",  b: "1,55–1,70", r: "> 1,70" },
+                      { k: "Peso médio D42",         e: "≥ 3.000g", b: "2.800–3.000g", r: "< 2.800g" },
+                      { k: "GPD (ganho/dia)",        e: "≥ 72g",   b: "65–72g",   r: "< 65g" },
+                      { k: "IEP (índice eficiência)", e: "≥ 420",  b: "380–420",  r: "< 380" },
+                      { k: "Uniformidade (CV)",      e: "≤ 8%",    b: "8–12%",    r: "> 12%" },
+                      { k: "Mortalidade 1ª semana",  e: "≤ 0,8%",  b: "0,8–1,5%", r: "> 1,5%" },
+                      { k: "Refugagem",              e: "≤ 1%",    b: "1–2%",     r: "> 2%" },
+                      { k: "Água/Ração (relação)",   e: "1,7–1,9", b: "1,6–2,0",  r: "fora" },
+                      { k: "Amônia (ppm)",           e: "≤ 10",    b: "10–20",    r: "> 20" },
+                      { k: "CO₂ (ppm)",              e: "≤ 3.000", b: "3.000–5.000", r: "> 5.000" },
+                      { k: "Pododermatite (esc. 0-2)", e: "0",     b: "1",        r: "2" },
+                    ].map((m, i) => (
+                      <tr key={i} className="border-b border-border/50">
+                        <td className="py-2 font-medium">{m.k}</td>
+                        <td className="py-2 text-right text-green-600 font-semibold tabular-nums">{m.e}</td>
+                        <td className="py-2 text-right tabular-nums">{m.b}</td>
+                        <td className="py-2 text-right text-destructive tabular-nums">{m.r}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                <strong>IEP</strong> = (Peso médio kg × Viabilidade %) ÷ (Idade × CA) × 100 — métrica integradora que JBS/BRF usa para ranquear granjas.
+              </p>
+            </Card>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-3">Checklist diário do operador (5 min)</h3>
+              <ul className="space-y-2 text-sm">
+                {[
+                  "Conferir temperatura em 3 pontos (entrada, meio, fundo) e comparar com a meta do dia.",
+                  "Olhar comportamento: ave espalhada = conforto; amontoada = frio; ofegante = calor; encostada na parede = corrente de ar.",
+                  "Testar vazão de 3 nipples (início, meio, fim da linha) com copo de 60s.",
+                  "Verificar altura de nipples e pratos — ajustar se mais de 10% das aves estiver desconfortável.",
+                  "Caminhar todo o galpão, retirar mortas e eliminar refugos visíveis.",
+                  "Conferir cama: úmida na linha do bebedouro? bater nesse dia.",
+                  "Olhar consumo de ração e água (leitura do silo / hidrômetro) e comparar com o dia anterior.",
+                  "Programa de luz: confirmar horários no quadro/controlador e brilho do dimmer.",
+                  "Ventilação mínima rodando à noite mesmo no frio (evita CO₂ e amônia).",
+                  "Anotar tudo no Quiz Diário e fotos no Diário — base para o PDF do lote.",
+                ].map((t, i) => (
+                  <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-3">Janelas críticas (não erre nessas)</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>Primeiras 24h:</strong> 95% das aves com papo cheio às 6h de alojadas. Sem isso, o lote já nasce ruim.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>D7:</strong> peso meta 180–210g. Atraso aqui custa 200g no D42.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>D14:</strong> liberar 100% do galpão e iniciar escuro de 6h. Uniformidade decide aqui.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>D21–28:</strong> fase de máximo crescimento — qualquer estresse térmico destrói a CA.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>D35+:</strong> manejo de calor é prioridade absoluta. Aves grandes morrem de hipertermia em 2h.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span><strong>Pré-apanha:</strong> jejum de 8–10h, água até 3h antes, luz azul/baixa, cama seca. Erro aqui = condenação no frigorífico.</span></li>
+              </ul>
+            </Card>
+          </TabsContent>
+
+
 
           <TabsContent value="ca" className="mt-4 space-y-3">
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
