@@ -243,7 +243,7 @@ function ManejoPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
           <ParamCard icon={<Thermometer className="h-5 w-5" />} label="Temp. ambiente" value={`${dia.tempAr[0]}–${dia.tempAr[1]}°C`} hint={`Cama: ${dia.tempCama[0]}–${dia.tempCama[1]}°C`} />
           <ParamCard icon={<Droplets className="h-5 w-5" />} label="Umidade" value={`${dia.umidade[0]}–${dia.umidade[1]}%`} hint="Relativa do ar" />
-          <ParamCard icon={<Lightbulb className="h-5 w-5" />} label="Luz" value={`${dia.luzHoras}h / ${dia.luzLux} lux`} hint={`${24 - dia.luzHoras}h escuro`} />
+          <ParamCard icon={<Lightbulb className="h-5 w-5" />} label="Luz" value={`${luzParaIdade(diaDisplay).horasLuz}h · ${luzParaIdade(diaDisplay).pctBrilho}%`} hint={`${luzParaIdade(diaDisplay).lux} lux · acende ${luzParaIdade(diaDisplay).acende} / apaga ${luzParaIdade(diaDisplay).apaga}`} />
           <ParamCard icon={<Utensils className="h-5 w-5" />} label="Ração" value={dia.racao} hint={`${dia.consumoG}g/ave · meta ${dia.pesoG}g`} />
         </div>
 
