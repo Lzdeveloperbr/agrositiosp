@@ -331,7 +331,56 @@ function ManejoPage() {
             ]} />
           </TabsContent>
 
-          <TabsContent value="luz" className="mt-4">
+          <TabsContent value="agua" className="mt-4 space-y-3">
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Waves className="h-5 w-5 text-sky-500" /> Água: vazão, pressão e altura por idade</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted-foreground uppercase">
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2">Fase</th>
+                      <th className="text-left py-2 pl-3">Vazão nipple</th>
+                      <th className="text-left py-2 pl-3">Consumo/ave</th>
+                      <th className="text-left py-2 pl-3">Pressão</th>
+                      <th className="text-left py-2 pl-3">Altura nipple</th>
+                      <th className="text-left py-2 pl-3">Altura prato</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {AGUA.map((a, i) => (
+                      <tr key={i} className="border-b border-border/50">
+                        <td className="py-2 font-bold">{a.faseDia}</td>
+                        <td className="py-2 pl-3">{a.vazaoNipple}</td>
+                        <td className="py-2 pl-3">{a.vazaoAve}</td>
+                        <td className="py-2 pl-3">{a.pressaoCmH2O}</td>
+                        <td className="py-2 pl-3">{a.alturaNipple}</td>
+                        <td className="py-2 pl-3">{a.alturaPrato}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 p-3 rounded-md bg-sky-500/10 border border-sky-500/30 text-sm space-y-1">
+                <p><strong>Regra de ouro:</strong> consumo de água = ~1,8× consumo de ração. Queda &gt; 20% em 24h = alerta sanitário.</p>
+                <p><strong>Teste de vazão:</strong> medir com copo graduado por 60s em 3 pontos da linha (início, meio, fim). Diferença &gt; 10% indica entupimento ou pressão desregulada.</p>
+                <p><strong>Higiene:</strong> flush diário das linhas nos primeiros 7 dias; sanitização semanal (peróxido ou ácido orgânico) durante todo o lote.</p>
+              </div>
+            </Card>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Sparkles className="h-5 w-5 text-emerald-500" /> Manejo da cama (bater cama 3 em 3 dias)</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>D0 ao D5:</strong> não revolver. Apenas retirar torrões úmidos pontuais embaixo de nipples.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>D6 em diante:</strong> bater cama a cada 3 dias (D6, D9, D12, D15…) com enxada ou rotativa leve, soltando torrões e equalizando umidade (ideal 20–25%).</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>Linhas de bebedouro:</strong> revolver diariamente — é onde acumula mais umidade e amônia.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>Indicadores de cama ruim:</strong> amônia &gt; 20 ppm (arde no olho), torrões duros, pododermatite (lesão na pata), peito sujo.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>Correção:</strong> umidade alta → aumentar ventilação + cal virgem na linha do bebedouro (200 g/m²). Cama muito seca/poeira → leve umidificação por nebulizador.</span></li>
+                <li className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span><strong>Última semana:</strong> manter cama o mais seca possível, suspender bater cama 3 dias antes da apanha.</span></li>
+              </ul>
+            </Card>
+          </TabsContent>
+
+
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
               <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-500" /> Programa de luz</h3>
               <div className="overflow-x-auto">
