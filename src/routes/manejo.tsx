@@ -379,7 +379,7 @@ function ManejoPage() {
               </ul>
             </Card>
           </TabsContent>
-
+          <TabsContent value="luz" className="mt-4">
 
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
               <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-500" /> Programa de luz</h3>
