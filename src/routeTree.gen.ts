@@ -23,6 +23,7 @@ import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
+import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
 import { Route as EnergiaRouteImport } from './routes/energia'
@@ -109,6 +110,11 @@ const FinanceiroRoute = FinanceiroRouteImport.update({
 const FichaLoteRoute = FichaLoteRouteImport.update({
   id: '/ficha-lote',
   path: '/ficha-lote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExcelenciaLoteRoute = ExcelenciaLoteRouteImport.update({
+  id: '/excelencia-lote',
+  path: '/excelencia-lote',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EstoqueRoute = EstoqueRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/energia': typeof EnergiaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
+  '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/energia': typeof EnergiaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
+  '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/energia': typeof EnergiaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
   '/estoque': typeof EstoqueRoute
+  '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/leite': typeof LeiteRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/entregas-racao'
     | '/estoque'
+    | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/leite'
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/entregas-racao'
     | '/estoque'
+    | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/leite'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/entregas-racao'
     | '/estoque'
+    | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/leite'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   EnergiaRoute: typeof EnergiaRoute
   EntregasRacaoRoute: typeof EntregasRacaoRoute
   EstoqueRoute: typeof EstoqueRoute
+  ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
   LeiteRoute: typeof LeiteRoute
@@ -531,6 +544,13 @@ declare module '@tanstack/react-router' {
       path: '/ficha-lote'
       fullPath: '/ficha-lote'
       preLoaderRoute: typeof FichaLoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/excelencia-lote': {
+      id: '/excelencia-lote'
+      path: '/excelencia-lote'
+      fullPath: '/excelencia-lote'
+      preLoaderRoute: typeof ExcelenciaLoteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/estoque': {
@@ -669,6 +689,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnergiaRoute: EnergiaRoute,
   EntregasRacaoRoute: EntregasRacaoRoute,
   EstoqueRoute: EstoqueRoute,
+  ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
   LeiteRoute: LeiteRoute,
