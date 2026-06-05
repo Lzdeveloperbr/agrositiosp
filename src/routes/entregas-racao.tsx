@@ -21,7 +21,7 @@ import { savePdf } from "@/lib/pdfHistory";
 
 // ===== Curvas de referência por linhagem (base = misto) =====
 // Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308 / Ross AP 95.
-// Ross AP 95 = linhagem robusta, crescimento ~5% mais lento e CA ~3% pior que Ross 308.
+// Ross AP 95 = pesos OFICIAIS da Bello Alimentos (programação de ração).
 const CURVAS_BASE = {
   cobb500: {
     consumo: { 0: 0, 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
@@ -32,9 +32,10 @@ const CURVAS_BASE = {
     peso:    { 0: 43, 1: 52, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
   },
   ross_ap95: {
-    // Linhagem rústica/robusta (AP95) — peso ~5% menor, consumo ~2% maior → CA mais alta
-    consumo: { 0: 0, 1: 13, 7: 175, 14: 600, 21: 1305, 28: 2295, 35: 3590, 42: 5150, 49: 6820, 56: 8580 } as Record<number, number>,
-    peso:    { 0: 42, 1: 50, 7: 180, 14: 460, 21: 905, 28: 1485, 35: 2180, 42: 2900, 49: 3565, 56: 4160 } as Record<number, number>,
+    // Pesos esperados oficiais Bello/AP95: D4 123g · D7 211g · D14 523g · D21 1036g · D28 1699g · D35 2446g · D42 3205g
+    // Consumo recalculado a partir de CA alvo AP95 (D7≈0,95 / D14≈1,18 / D21≈1,30 / D28≈1,40 / D35≈1,52 / D42≈1,62).
+    consumo: { 0: 0, 1: 14, 4: 75, 7: 200, 14: 617, 21: 1347, 28: 2379, 35: 3718, 42: 5192, 49: 6708, 56: 8420 } as Record<number, number>,
+    peso:    { 0: 44, 1: 55, 4: 123, 7: 211, 14: 523, 21: 1036, 28: 1699, 35: 2446, 42: 3205, 49: 3900, 56: 4550 } as Record<number, number>,
   },
 };
 type Linhagem = keyof typeof CURVAS_BASE;
@@ -667,6 +668,58 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           </div>
 
 
+
+          {/* Tabela diária de peso esperado x consumo (curva oficial Bello / AP95) */}
+          <div>
+            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Scale className="h-4 w-4 text-primary" /> Peso esperado por dia — {LIN_LABEL[cfg.linhagem]} ({cfg.sexo})
+            </h4>
+            <p className="text-[11px] text-muted-foreground mb-2">
+              Interpolação diária a partir das idades-marco (D4, D7, D14, D21, D28, D35, D42). GPD = ganho de peso/dia. CA alvo = consumo acumulado ÷ peso vivo.
+            </p>
+            <div className="overflow-x-auto rounded border">
+              <table className="w-full text-[11px]">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left">Idade</th>
+                    <th className="px-2 py-1.5 text-right">Peso esperado</th>
+                    <th className="px-2 py-1.5 text-right">GPD</th>
+                    <th className="px-2 py-1.5 text-right">Ração/dia</th>
+                    <th className="px-2 py-1.5 text-right">Ração acum.</th>
+                    <th className="px-2 py-1.5 text-right">CA alvo</th>
+                    <th className="px-2 py-1.5 text-right">Lote/dia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 50 }, (_, d) => {
+                    const pesoAve = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const pesoOnt = d > 0 ? pesoMedioGPorAve(d - 1, cfg.linhagem, cfg.sexo) : pesoAve;
+                    const gpd = pesoAve - pesoOnt;
+                    const racDia = consumoDiarioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const racAcum = consumoAcumGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const ca = caAlvo(d, cfg.linhagem, cfg.sexo);
+                    const loteDiaKg = (racDia * calc.avesVivas) / 1000;
+                    const idadeAtual = d === calc.idade;
+                    const marco = [0, 4, 7, 14, 21, 28, 35, 42, 49].includes(d);
+                    return (
+                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : marco ? "bg-muted/20" : ""}`}>
+                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}</td>
+                        <td className="px-2 py-1 text-right">{Math.round(pesoAve)} g</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{gpd > 0 ? `+${Math.round(gpd)} g` : "—"}</td>
+                        <td className="px-2 py-1 text-right">{Math.round(racDia)} g</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{(racAcum / 1000).toFixed(2)} kg</td>
+                        <td className="px-2 py-1 text-right">{ca ? ca.toFixed(3) : "—"}</td>
+                        <td className="px-2 py-1 text-right font-mono">{loteDiaKg >= 1000 ? `${(loteDiaKg/1000).toFixed(2)} t` : `${Math.round(loteDiaKg)} kg`}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Linhas destacadas em azul = idade atual do lote · cinza = idades-marco da ficha técnica.
+            </p>
+          </div>
 
           <div>
             <h4 className="text-sm font-semibold mb-2">Projeção do estoque — próximos 14 dias</h4>
