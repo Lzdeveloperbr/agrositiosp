@@ -21,7 +21,7 @@ import { savePdf } from "@/lib/pdfHistory";
 
 // ===== Curvas de referência por linhagem (base = misto) =====
 // Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308 / Ross AP 95.
-// Ross AP 95 = linhagem robusta, crescimento ~5% mais lento e CA ~3% pior que Ross 308.
+// Ross AP 95 = pesos OFICIAIS da Bello Alimentos (programação de ração).
 const CURVAS_BASE = {
   cobb500: {
     consumo: { 0: 0, 1: 13, 7: 165, 14: 565, 21: 1240, 28: 2185, 35: 3415, 42: 4905, 49: 6510, 56: 8200 } as Record<number, number>,
@@ -32,9 +32,10 @@ const CURVAS_BASE = {
     peso:    { 0: 43, 1: 52, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 } as Record<number, number>,
   },
   ross_ap95: {
-    // Linhagem rústica/robusta (AP95) — peso ~5% menor, consumo ~2% maior → CA mais alta
-    consumo: { 0: 0, 1: 13, 7: 175, 14: 600, 21: 1305, 28: 2295, 35: 3590, 42: 5150, 49: 6820, 56: 8580 } as Record<number, number>,
-    peso:    { 0: 42, 1: 50, 7: 180, 14: 460, 21: 905, 28: 1485, 35: 2180, 42: 2900, 49: 3565, 56: 4160 } as Record<number, number>,
+    // Pesos esperados oficiais Bello/AP95: D4 123g · D7 211g · D14 523g · D21 1036g · D28 1699g · D35 2446g · D42 3205g
+    // Consumo recalculado a partir de CA alvo AP95 (D7≈0,95 / D14≈1,18 / D21≈1,30 / D28≈1,40 / D35≈1,52 / D42≈1,62).
+    consumo: { 0: 0, 1: 14, 4: 75, 7: 200, 14: 617, 21: 1347, 28: 2379, 35: 3718, 42: 5192, 49: 6708, 56: 8420 } as Record<number, number>,
+    peso:    { 0: 44, 1: 55, 4: 123, 7: 211, 14: 523, 21: 1036, 28: 1699, 35: 2446, 42: 3205, 49: 3900, 56: 4550 } as Record<number, number>,
   },
 };
 type Linhagem = keyof typeof CURVAS_BASE;
