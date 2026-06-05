@@ -669,6 +669,58 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
 
 
 
+          {/* Tabela diária de peso esperado x consumo (curva oficial Bello / AP95) */}
+          <div>
+            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Scale className="h-4 w-4 text-primary" /> Peso esperado por dia — {LIN_LABEL[cfg.linhagem]} ({cfg.sexo})
+            </h4>
+            <p className="text-[11px] text-muted-foreground mb-2">
+              Interpolação diária a partir das idades-marco (D4, D7, D14, D21, D28, D35, D42). GPD = ganho de peso/dia. CA alvo = consumo acumulado ÷ peso vivo.
+            </p>
+            <div className="overflow-x-auto rounded border">
+              <table className="w-full text-[11px]">
+                <thead className="bg-muted/50 text-muted-foreground">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left">Idade</th>
+                    <th className="px-2 py-1.5 text-right">Peso esperado</th>
+                    <th className="px-2 py-1.5 text-right">GPD</th>
+                    <th className="px-2 py-1.5 text-right">Ração/dia</th>
+                    <th className="px-2 py-1.5 text-right">Ração acum.</th>
+                    <th className="px-2 py-1.5 text-right">CA alvo</th>
+                    <th className="px-2 py-1.5 text-right">Lote/dia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 50 }, (_, d) => {
+                    const pesoAve = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const pesoOnt = d > 0 ? pesoMedioGPorAve(d - 1, cfg.linhagem, cfg.sexo) : pesoAve;
+                    const gpd = pesoAve - pesoOnt;
+                    const racDia = consumoDiarioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const racAcum = consumoAcumGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const ca = caAlvo(d, cfg.linhagem, cfg.sexo);
+                    const loteDiaKg = (racDia * calc.avesVivas) / 1000;
+                    const idadeAtual = d === calc.idade;
+                    const marco = [0, 4, 7, 14, 21, 28, 35, 42, 49].includes(d);
+                    return (
+                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : marco ? "bg-muted/20" : ""}`}>
+                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}</td>
+                        <td className="px-2 py-1 text-right">{Math.round(pesoAve)} g</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{gpd > 0 ? `+${Math.round(gpd)} g` : "—"}</td>
+                        <td className="px-2 py-1 text-right">{Math.round(racDia)} g</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{(racAcum / 1000).toFixed(2)} kg</td>
+                        <td className="px-2 py-1 text-right">{ca ? ca.toFixed(3) : "—"}</td>
+                        <td className="px-2 py-1 text-right font-mono">{loteDiaKg >= 1000 ? `${(loteDiaKg/1000).toFixed(2)} t` : `${Math.round(loteDiaKg)} kg`}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Linhas destacadas em azul = idade atual do lote · cinza = idades-marco da ficha técnica.
+            </p>
+          </div>
+
           <div>
             <h4 className="text-sm font-semibold mb-2">Projeção do estoque — próximos 14 dias</h4>
             <div className="h-56">
