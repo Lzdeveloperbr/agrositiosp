@@ -213,6 +213,59 @@ export type Database = {
           },
         ]
       }
+      cotacoes: {
+        Row: {
+          created_at: string
+          data: string
+          fazenda_id: string
+          fonte: string | null
+          id: string
+          observacao: string | null
+          praca: string | null
+          produto: string
+          unidade: string
+          updated_at: string
+          valor: number
+          variacao_pct: number | null
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          fazenda_id: string
+          fonte?: string | null
+          id?: string
+          observacao?: string | null
+          praca?: string | null
+          produto: string
+          unidade?: string
+          updated_at?: string
+          valor: number
+          variacao_pct?: number | null
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          fazenda_id?: string
+          fonte?: string | null
+          id?: string
+          observacao?: string | null
+          praca?: string | null
+          produto?: string
+          unidade?: string
+          updated_at?: string
+          valor?: number
+          variacao_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotacoes_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diario: {
         Row: {
           autor: string | null
