@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
   Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck, ClipboardCheck, Trophy,
+  BarChart3,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -58,6 +59,7 @@ const groups: { label: string; items: Item[] }[] = [
     label: "Gestão",
     items: [
       { to: "/financeiro", label: "Finanças", icon: Wallet },
+      { to: "/mercado", label: "Mercado Agro", icon: BarChart3 },
       { to: "/custos", label: "Custos por Lote", icon: TrendingUp },
       { to: "/automacoes", label: "Automações", icon: Sparkles },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
