@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCloudCollection } from "@/lib/cloud/useCloudCollection";
-import { buscarNoticiasAgro, buscarCotacoesMoedas, type Noticia, type CotacaoMoeda } from "@/lib/mercado.functions";
-import { TrendingUp, TrendingDown, Plus, Trash2, ExternalLink, Newspaper, DollarSign, BarChart3, RefreshCw, MapPin } from "lucide-react";
+import { TrendingUp, TrendingDown, Plus, Trash2, BarChart3, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/mercado")({
   head: () => ({
@@ -52,17 +49,7 @@ function MercadoPage() {
           </div>
         </header>
 
-        <Tabs defaultValue="cotacoes" className="space-y-4">
-          <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-            <TabsTrigger value="cotacoes"><BarChart3 className="h-4 w-4 mr-1.5" /> Cotações</TabsTrigger>
-            <TabsTrigger value="moedas"><DollarSign className="h-4 w-4 mr-1.5" /> Moedas</TabsTrigger>
-            <TabsTrigger value="noticias"><Newspaper className="h-4 w-4 mr-1.5" /> Notícias</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="cotacoes" className="space-y-4"><CotacoesTab /></TabsContent>
-          <TabsContent value="moedas"><MoedasTab /></TabsContent>
-          <TabsContent value="noticias"><NoticiasTab /></TabsContent>
-        </Tabs>
+        <CotacoesTab />
       </div>
     </AppShell>
   );
@@ -177,103 +164,3 @@ function CotacaoCard({ cot, onRemove }: { cot: Cotacao; onRemove: () => void }) 
   );
 }
 
-function MoedasTab() {
-  const fetchMoedas = useServerFn(buscarCotacoesMoedas);
-  const [data, setData] = useState<CotacaoMoeda[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    try { setData(await fetchMoedas()); } finally { setLoading(false); }
-  };
-  useEffect(() => { load(); }, []);
-
-  return (
-    <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="font-display font-semibold text-lg">Moedas ao vivo</h2>
-          <p className="text-xs text-muted-foreground">Fonte: AwesomeAPI · atualização automática</p>
-        </div>
-        <Button size="sm" variant="outline" onClick={load} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
-        </Button>
-      </div>
-      {!data && loading ? (
-        <div className="grid sm:grid-cols-3 gap-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}</div>
-      ) : !data || data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Não foi possível carregar as cotações.</p>
-      ) : (
-        <div className="grid sm:grid-cols-3 gap-3">
-          {data.map((m) => {
-            const up = m.variacao_pct >= 0;
-            return (
-              <Card key={m.codigo} className="p-4">
-                <p className="text-xs text-muted-foreground">{m.nome}</p>
-                <p className="text-2xl font-display font-bold tabular-nums mt-1">
-                  R$ {m.valor.toLocaleString("pt-BR", { minimumFractionDigits: m.codigo === "BTC" ? 0 : 4 })}
-                </p>
-                <Badge variant="secondary" className={`mt-2 ${up ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive"}`}>
-                  {up ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                  {up ? "+" : ""}{m.variacao_pct.toFixed(2)}%
-                </Badge>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function NoticiasTab() {
-  const fetchNews = useServerFn(buscarNoticiasAgro);
-  const [data, setData] = useState<Noticia[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [q, setQ] = useState("");
-
-  const load = async () => {
-    setLoading(true);
-    try { setData(await fetchNews()); } finally { setLoading(false); }
-  };
-  useEffect(() => { load(); }, []);
-
-  const filtradas = (data ?? []).filter((n) => !q || n.titulo.toLowerCase().includes(q.toLowerCase()) || n.resumo.toLowerCase().includes(q.toLowerCase()));
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Input placeholder="Buscar notícia…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
-        <Button size="sm" variant="outline" onClick={load} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
-        </Button>
-      </div>
-      {!data && loading ? (
-        <div className="grid md:grid-cols-2 gap-3">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32" />)}</div>
-      ) : filtradas.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma notícia disponível no momento.</p>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-3">
-          {filtradas.map((n, i) => (
-            <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="group">
-              <Card className="p-4 h-full hover:border-primary/50 transition-colors flex gap-3" style={{ boxShadow: "var(--shadow-soft)" }}>
-                {n.imagem && (
-                  <img src={n.imagem} alt="" className="h-20 w-20 rounded-md object-cover shrink-0" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-[10px]">{n.fonte}</Badge>
-                    {n.data && <span className="text-[10px] text-muted-foreground">{new Date(n.data).toLocaleDateString("pt-BR")}</span>}
-                  </div>
-                  <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2">{n.titulo}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{n.resumo}</p>
-                  <ExternalLink className="h-3 w-3 text-muted-foreground mt-1 inline" />
-                </div>
-              </Card>
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
