@@ -49,17 +49,7 @@ function MercadoPage() {
           </div>
         </header>
 
-        <Tabs defaultValue="cotacoes" className="space-y-4">
-          <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-            <TabsTrigger value="cotacoes"><BarChart3 className="h-4 w-4 mr-1.5" /> Cotações</TabsTrigger>
-            <TabsTrigger value="moedas"><DollarSign className="h-4 w-4 mr-1.5" /> Moedas</TabsTrigger>
-            <TabsTrigger value="noticias"><Newspaper className="h-4 w-4 mr-1.5" /> Notícias</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="cotacoes" className="space-y-4"><CotacoesTab /></TabsContent>
-          <TabsContent value="moedas"><MoedasTab /></TabsContent>
-          <TabsContent value="noticias"><NoticiasTab /></TabsContent>
-        </Tabs>
+        <CotacoesTab />
       </div>
     </AppShell>
   );
