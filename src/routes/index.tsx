@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing } from "lucide-react";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
