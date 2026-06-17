@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCloudCollection } from "@/lib/cloud/useCloudCollection";
-import { buscarNoticiasAgro, buscarCotacoesMoedas, type Noticia, type CotacaoMoeda } from "@/lib/mercado.functions";
-import { TrendingUp, TrendingDown, Plus, Trash2, ExternalLink, Newspaper, DollarSign, BarChart3, RefreshCw, MapPin } from "lucide-react";
+import { TrendingUp, TrendingDown, Plus, Trash2, BarChart3, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/mercado")({
   head: () => ({
