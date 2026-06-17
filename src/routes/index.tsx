@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [lotes] = useLotes();
-  const [medidores] = useMedidores();
+  useMedidores();
   const [animais] = useAnimais();
   const [tarefas] = useTarefas();
   const [estoque] = useEstoque();
