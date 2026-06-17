@@ -220,12 +220,7 @@ function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <NoticiasAgro limit={6} />
-          </div>
-          <NoticiasAgro limit={5} compact />
-        </div>
+        <NoticiasAgro limit={6} />
       </div>
     </AppShell>
   );
