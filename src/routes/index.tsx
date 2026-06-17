@@ -11,6 +11,7 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
+import { NoticiasAgro } from "@/components/NoticiasAgro";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 
@@ -218,6 +219,8 @@ function Dashboard() {
             </ul>
           </Card>
         </div>
+
+        <NoticiasAgro limit={6} />
       </div>
     </AppShell>
   );
