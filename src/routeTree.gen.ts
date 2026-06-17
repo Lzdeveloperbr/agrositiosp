@@ -17,6 +17,7 @@ import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
+import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
@@ -80,6 +81,11 @@ const PlantiosRoute = PlantiosRouteImport.update({
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
   id: '/monitoramento',
   path: '/monitoramento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MercadoRoute = MercadoRouteImport.update({
+  id: '/mercado',
+  path: '/mercado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MaquinasRoute = MaquinasRouteImport.update({
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/mercado'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -363,6 +373,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/mercado'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/mercado'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -432,6 +444,7 @@ export interface RootRouteChildren {
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
   MaquinasRoute: typeof MaquinasRoute
+  MercadoRoute: typeof MercadoRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
   QuizRoute: typeof QuizRoute
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       path: '/monitoramento'
       fullPath: '/monitoramento'
       preLoaderRoute: typeof MonitoramentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mercado': {
+      id: '/mercado'
+      path: '/mercado'
+      fullPath: '/mercado'
+      preLoaderRoute: typeof MercadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/maquinas': {
@@ -696,6 +716,7 @@ const rootRouteChildren: RootRouteChildren = {
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
   MaquinasRoute: MaquinasRoute,
+  MercadoRoute: MercadoRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
   QuizRoute: QuizRoute,
