@@ -5,8 +5,8 @@ import { StatCard } from "@/components/StatCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLotes, useMedidores, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
-import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing } from "lucide-react";
+import { useLotes, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
+import { Bird, Skull, Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
@@ -28,13 +28,13 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const [lotes] = useLotes();
-  const [medidores] = useMedidores();
+  
   const [animais] = useAnimais();
   const [tarefas] = useTarefas();
   const [estoque] = useEstoque();
   const [financ] = useFinanceiro();
   const [plantios] = usePlantios();
-  const { fazendaId } = useFazenda();
+  const { fazendaId, fazendaNome, operador } = useFazenda();
   const [lembretes] = useLembretes(fazendaId);
   const plantiosAtivos = plantios.filter((p) => p.status !== "encerrado");
 
@@ -51,7 +51,6 @@ function Dashboard() {
     verificarENotificar(fazendaId);
   }, [fazendaId]);
   const diaLeitura = today?.getDate() === 30;
-  const ultLeitura = medidores.flatMap((m) => m.leituras).sort((a, b) => b.data.localeCompare(a.data))[0];
   const lembretesHoje = today ? lembretesDoDia(lembretes, today) : [];
   const lembretesProximos = today ? proximosLembretes(lembretes, 7, today) : [];
 
@@ -63,6 +62,19 @@ function Dashboard() {
   const contasAtrasadas = contasVencendo.filter((l) => l.vencimento! < hojeStr);
   const totalAVencer = contasVencendo.reduce((s, l) => s + (l.tipo === "despesa" ? l.valor : -l.valor), 0);
 
+  // Resumo financeiro mensal
+  const mesAtual = today ? today.toISOString().slice(0, 7) : "";
+  const lancMes = financ.filter((l) => (l.data ?? l.vencimento ?? "").startsWith(mesAtual));
+  const receitas = lancMes.filter((l) => l.tipo === "receita").reduce((s, l) => s + l.valor, 0);
+  const despesas = lancMes.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0);
+  const lucro = receitas - despesas;
+  const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+  const hora = today?.getHours() ?? 12;
+  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  const emoji = hora < 12 ? "🌅" : hora < 18 ? "☀️" : "🌙";
+  const nomeOperador = operador?.split(" ")[0] || "granjeiro";
+
   const chartData = ativo
     ? [...ativo.entries]
         .sort((a, b) => a.date.localeCompare(b.date))
@@ -71,22 +83,33 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="space-y-8">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground capitalize min-h-[20px]">
-              {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
-            </p>
-            <h1 className="text-3xl md:text-4xl font-display font-bold mt-1">Bom dia, granjeiro 🌱</h1>
-            <p className="text-muted-foreground mt-1">Resumo do dia no sítio.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <InstallAppButton />
-            <Button asChild variant="outline" size="sm"><Link to="/lembretes">Lembretes</Link></Button>
-            <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
-            <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
+      <div className="space-y-6 md:space-y-8">
+        <header
+          className="relative overflow-hidden rounded-2xl border border-border/60 p-5 md:p-7"
+          style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-soft)" }}
+        >
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs md:text-sm text-muted-foreground capitalize min-h-[18px]">
+                {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
+              </p>
+              <h1 className="text-2xl md:text-4xl font-display font-bold mt-1 truncate">
+                {saudacao}, {nomeOperador} {emoji}
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-1 truncate">
+                {fazendaNome ? `${fazendaNome} · Resumo de hoje no sítio` : "Resumo de hoje no sítio"}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <InstallAppButton />
+              <Button asChild variant="outline" size="sm"><Link to="/lembretes">Lembretes</Link></Button>
+              <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
+              <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
+            </div>
           </div>
         </header>
+
 
         {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0 || lembretesHoje.length > 0) && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -147,11 +170,17 @@ function Dashboard() {
           })} />
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="Aves vivas" value={vivas.toLocaleString("pt-BR")} hint={ativo ? `Lote ${ativo.numero}` : "Sem lote ativo"} icon={Bird} tone="primary" />
           <StatCard label="Mortalidade" value={`${mortPct.toFixed(2)}%`} hint={`${totalMort.toLocaleString("pt-BR")} aves`} icon={Skull} tone={mortPct > 5 ? "destructive" : "muted"} />
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />
           <StatCard label="Plantios ativos" value={plantiosAtivos.length.toString()} hint={`${plantiosAtivos.reduce((s, p) => s + p.areaHa, 0).toFixed(1)} ha`} icon={Sprout} tone="primary" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          <StatCard label="Receitas (mês)" value={fmtBRL(receitas)} hint={`${lancMes.filter(l => l.tipo === "receita").length} lançamentos`} icon={TrendingUp} tone="primary" />
+          <StatCard label="Despesas (mês)" value={fmtBRL(despesas)} hint={`${lancMes.filter(l => l.tipo === "despesa").length} lançamentos`} icon={TrendingDown} tone="destructive" />
+          <StatCard label="Lucro estimado" value={fmtBRL(lucro)} hint={lucro >= 0 ? "Positivo no mês" : "Negativo no mês"} icon={DollarSign} tone={lucro >= 0 ? "accent" : "destructive"} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
