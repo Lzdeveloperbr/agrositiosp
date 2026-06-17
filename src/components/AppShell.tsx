@@ -59,6 +59,7 @@ const groups: { label: string; items: Item[] }[] = [
     label: "Gestão",
     items: [
       { to: "/financeiro", label: "Finanças", icon: Wallet },
+      { to: "/mercado", label: "Mercado Agro", icon: BarChart3 },
       { to: "/custos", label: "Custos por Lote", icon: TrendingUp },
       { to: "/automacoes", label: "Automações", icon: Sparkles },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
