@@ -40,9 +40,7 @@ function Dashboard() {
   const plantiosAtivos = plantios.filter((p) => p.status !== "encerrado");
 
   const ativo = lotes.find((l) => !l.encerrado);
-  const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
-  const vivas = ativo ? ativo.quantidadeInicial - totalMort : 0;
-  const mortPct = ativo ? (totalMort / ativo.quantidadeInicial) * 100 : 0;
+
 
   const ativosGado = animais.filter((a) => a.status === "ativo");
   const [today, setToday] = useState<Date | null>(null);
