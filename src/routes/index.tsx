@@ -12,6 +12,7 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { NoticiasAgro } from "@/components/NoticiasAgro";
+import { PainelLoteAtivo } from "@/components/PainelLoteAtivo";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 
