@@ -544,13 +544,20 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <h3 className="font-display text-lg font-bold flex items-center gap-2">
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
-          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem).</p>
+          <p className="text-xs text-muted-foreground">
+            {loteAtivo && !manual
+              ? <>Sincronizado automaticamente com o <b>Lote {loteAtivo.numero}</b> da Granja (mortalidade, eliminados e peso médio).</>
+              : "Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem)."}
+          </p>
           <div className="flex gap-2 mt-2 flex-wrap">
+            {loteAtivo && !manual && <Badge className="bg-emerald-600 text-white">Auto · Lote {loteAtivo.numero}</Badge>}
+            {manual && <Badge variant="destructive">Modo manual</Badge>}
             <Badge variant="secondary">{LIN_LABEL[cfg.linhagem]}</Badge>
             <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
             {calc?.usandoPesoReal && <Badge className="bg-emerald-600 text-white">Peso real informado</Badge>}
             {calc && <Badge variant="outline">D{calc.idade}</Badge>}
           </div>
+
 
         </div>
         <Button size="sm" variant="outline" onClick={() => setEditing(v => !v)}>
