@@ -14,6 +14,7 @@ import { Truck, Package, Calendar as CalIcon, FileText, Plus, Upload, Download, 
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Area, AreaChart, Legend } from "recharts";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
+import { useLotes } from "@/lib/state";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
@@ -439,24 +440,54 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
+  const [lotes] = useLotes();
   const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, eliminadosAcum: 0, linhagem: "ross_ap95", sexo: "misto" });
   const [editing, setEditing] = useState(false);
+  const [manual, setManual] = useState(false);
 
-  // Carregar/salvar config local por fazenda
+  // Lote ativo (não encerrado mais recente) — usado para auto-preencher
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter(l => !l.encerrado);
+    const lista = ativos.length ? ativos : lotes;
+    return [...lista].sort((a, b) => (b.dataEntrada || "").localeCompare(a.dataEntrada || ""))[0];
+  }, [lotes]);
+
+  // Carregar/salvar config local por fazenda (linhagem/sexo + flag manual)
   useEffect(() => {
     if (!fazendaId) return;
     try {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
       if (raw) {
         const p = JSON.parse(raw);
-        setCfg({ linhagem: "ross_ap95", sexo: "misto", eliminadosAcum: 0, ...p });
+        setCfg((prev) => ({ ...prev, linhagem: p.linhagem ?? "ross_ap95", sexo: p.sexo ?? "misto", ...(p.manual ? p : {}) }));
+        setManual(!!p.manual);
       }
     } catch {}
   }, [fazendaId]);
   useEffect(() => {
     if (!fazendaId) return;
-    localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify(cfg));
-  }, [cfg, fazendaId]);
+    localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify({ ...cfg, manual }));
+  }, [cfg, manual, fazendaId]);
+
+  // Auto-preencher a partir do lote ativo (mortalidade/peso/eliminados vêm dos lançamentos da Granja)
+  useEffect(() => {
+    if (manual || !loteAtivo) return;
+    const mort = loteAtivo.entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
+    const elim = loteAtivo.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
+    const ultimaPesagem = [...loteAtivo.entries]
+      .filter(e => e.pesoMedioG)
+      .sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0];
+    setCfg(prev => ({
+      ...prev,
+      dataAlojamento: loteAtivo.dataEntrada,
+      qtdInicial: loteAtivo.quantidadeInicial,
+      mortalidadeAcum: mort,
+      eliminadosAcum: elim,
+      pesoMedioRealG: ultimaPesagem?.pesoMedioG,
+      pesoMedioRealData: ultimaPesagem?.date,
+    }));
+  }, [loteAtivo, manual]);
+
 
 
   const calc = useMemo(() => {
@@ -513,13 +544,20 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           <h3 className="font-display text-lg font-bold flex items-center gap-2">
             <Boxes className="h-5 w-5 text-primary" /> Estoque estimado de ração
           </h3>
-          <p className="text-xs text-muted-foreground">Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem).</p>
+          <p className="text-xs text-muted-foreground">
+            {loteAtivo && !manual
+              ? <>Sincronizado automaticamente com o <b>Lote {loteAtivo.numero}</b> da Granja (mortalidade, eliminados e peso médio).</>
+              : "Cálculo automático pelo consumo médio do lote (idade × aves vivas × linhagem)."}
+          </p>
           <div className="flex gap-2 mt-2 flex-wrap">
+            {loteAtivo && !manual && <Badge className="bg-emerald-600 text-white">Auto · Lote {loteAtivo.numero}</Badge>}
+            {manual && <Badge variant="destructive">Modo manual</Badge>}
             <Badge variant="secondary">{LIN_LABEL[cfg.linhagem]}</Badge>
             <Badge variant="outline">{cfg.sexo === "macho" ? "Macho" : cfg.sexo === "femea" ? "Fêmea" : "Misto"}</Badge>
             {calc?.usandoPesoReal && <Badge className="bg-emerald-600 text-white">Peso real informado</Badge>}
             {calc && <Badge variant="outline">D{calc.idade}</Badge>}
           </div>
+
 
         </div>
         <Button size="sm" variant="outline" onClick={() => setEditing(v => !v)}>
@@ -528,25 +566,41 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       </div>
 
       {editing && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
+        <div className="space-y-3 p-3 rounded-md bg-muted/30">
+          {loteAtivo && (
+            <div className="flex items-center justify-between gap-2 p-2 rounded bg-background border">
+              <div className="text-xs">
+                <p className="font-semibold">Vínculo com a Granja</p>
+                <p className="text-muted-foreground">
+                  {manual
+                    ? "Editando manualmente. Os dados do lote da Granja estão ignorados."
+                    : <>Puxando automaticamente do <b>Lote {loteAtivo.numero}</b>.</>}
+                </p>
+              </div>
+              <Button size="sm" variant={manual ? "default" : "outline"} onClick={() => setManual(v => !v)}>
+                {manual ? "Voltar ao automático" : "Editar manualmente"}
+              </Button>
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div>
             <Label className="text-xs">Data de alojamento (D0)</Label>
-            <Input type="date" value={cfg.dataAlojamento}
+            <Input type="date" value={cfg.dataAlojamento} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, dataAlojamento: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Aves alojadas (início)</Label>
-            <Input type="number" inputMode="numeric" value={cfg.qtdInicial || ""}
+            <Input type="number" inputMode="numeric" value={cfg.qtdInicial || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, qtdInicial: Number(e.target.value) || 0 })} placeholder="Ex: 25000" />
           </div>
           <div>
             <Label className="text-xs">Mortalidade acumulada</Label>
-            <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
+            <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves mortas" />
           </div>
           <div>
             <Label className="text-xs">Eliminados acumulado</Label>
-            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""}
+            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, eliminadosAcum: Number(e.target.value) || 0 })} placeholder="Refugagem / sacrifício" />
           </div>
           <div>
@@ -575,17 +629,24 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           </div>
           <div className="sm:col-span-2">
             <Label className="text-xs">Peso médio REAL (g) — última pesagem</Label>
-            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""}
+            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, pesoMedioRealG: Number(e.target.value) || undefined })} placeholder="Ex: 2200 — deixe vazio para usar curva" />
-            <p className="text-[10px] text-muted-foreground mt-1">Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque.</p>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {!manual && loteAtivo
+                ? "Puxado da última pesagem registrada na Granja."
+                : "Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque."}
+            </p>
           </div>
           <div>
             <Label className="text-xs">Data da pesagem real</Label>
-            <Input type="date" value={cfg.pesoMedioRealData || ""}
+            <Input type="date" value={cfg.pesoMedioRealData || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, pesoMedioRealData: e.target.value || undefined })} />
+          </div>
           </div>
         </div>
       )}
+
+
 
 
       {!calc ? (
