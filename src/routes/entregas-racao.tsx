@@ -440,24 +440,54 @@ function exportarRelatorio(entregas: Entrega[]) {
 // ===== Estoque estimado de ração baseado em idade/consumo =====
 function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
   const { fazendaId } = useFazenda();
+  const [lotes] = useLotes();
   const [cfg, setCfg] = useState<LoteCfg>({ dataAlojamento: todayISO(), qtdInicial: 0, mortalidadeAcum: 0, eliminadosAcum: 0, linhagem: "ross_ap95", sexo: "misto" });
   const [editing, setEditing] = useState(false);
+  const [manual, setManual] = useState(false);
 
-  // Carregar/salvar config local por fazenda
+  // Lote ativo (não encerrado mais recente) — usado para auto-preencher
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter(l => !l.encerrado);
+    const lista = ativos.length ? ativos : lotes;
+    return [...lista].sort((a, b) => (b.dataEntrada || "").localeCompare(a.dataEntrada || ""))[0];
+  }, [lotes]);
+
+  // Carregar/salvar config local por fazenda (linhagem/sexo + flag manual)
   useEffect(() => {
     if (!fazendaId) return;
     try {
       const raw = localStorage.getItem(CFG_KEY(fazendaId));
       if (raw) {
         const p = JSON.parse(raw);
-        setCfg({ linhagem: "ross_ap95", sexo: "misto", eliminadosAcum: 0, ...p });
+        setCfg((prev) => ({ ...prev, linhagem: p.linhagem ?? "ross_ap95", sexo: p.sexo ?? "misto", ...(p.manual ? p : {}) }));
+        setManual(!!p.manual);
       }
     } catch {}
   }, [fazendaId]);
   useEffect(() => {
     if (!fazendaId) return;
-    localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify(cfg));
-  }, [cfg, fazendaId]);
+    localStorage.setItem(CFG_KEY(fazendaId), JSON.stringify({ ...cfg, manual }));
+  }, [cfg, manual, fazendaId]);
+
+  // Auto-preencher a partir do lote ativo (mortalidade/peso/eliminados vêm dos lançamentos da Granja)
+  useEffect(() => {
+    if (manual || !loteAtivo) return;
+    const mort = loteAtivo.entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
+    const elim = loteAtivo.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
+    const ultimaPesagem = [...loteAtivo.entries]
+      .filter(e => e.pesoMedioG)
+      .sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0];
+    setCfg(prev => ({
+      ...prev,
+      dataAlojamento: loteAtivo.dataEntrada,
+      qtdInicial: loteAtivo.quantidadeInicial,
+      mortalidadeAcum: mort,
+      eliminadosAcum: elim,
+      pesoMedioRealG: ultimaPesagem?.pesoMedioG,
+      pesoMedioRealData: ultimaPesagem?.date,
+    }));
+  }, [loteAtivo, manual]);
+
 
 
   const calc = useMemo(() => {
