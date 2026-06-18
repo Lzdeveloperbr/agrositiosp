@@ -117,7 +117,7 @@ function useCloud<T extends { id: string }>(table: string, mapper: Mapper<T>) {
       setLocal(((data as any[]) || []).map(mapper.fromRow));
     });
 
-    const ch = client.channel(`rt:${table}:${fazendaId}`)
+    const ch = client.channel(`rt:${table}:${fazendaId}:${Math.random().toString(36).slice(2, 8)}`)
       .on("postgres_changes", { event: "*", schema: "public", table, filter: `fazenda_id=eq.${fazendaId}` }, (payload) => {
         setLocal((prev) => {
           if (payload.eventType === "INSERT") {
