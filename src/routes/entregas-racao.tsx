@@ -14,6 +14,7 @@ import { Truck, Package, Calendar as CalIcon, FileText, Plus, Upload, Download, 
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Area, AreaChart, Legend } from "recharts";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
+import { useLotes } from "@/lib/state";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
