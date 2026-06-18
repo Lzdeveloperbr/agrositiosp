@@ -172,42 +172,38 @@ function Dashboard() {
           })} />
         </div>
 
+        <PainelLoteAtivo />
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          <StatCard label="Aves vivas" value={vivas.toLocaleString("pt-BR")} hint={ativo ? `Lote ${ativo.numero}` : "Sem lote ativo"} icon={Bird} tone="primary" />
-          <StatCard label="Mortalidade" value={`${mortPct.toFixed(2)}%`} hint={`${totalMort.toLocaleString("pt-BR")} aves`} icon={Skull} tone={mortPct > 5 ? "destructive" : "muted"} />
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />
           <StatCard label="Plantios ativos" value={plantiosAtivos.length.toString()} hint={`${plantiosAtivos.reduce((s, p) => s + p.areaHa, 0).toFixed(1)} ha`} icon={Sprout} tone="primary" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           <StatCard label="Receitas (mês)" value={fmtBRL(receitas)} hint={`${lancMes.filter(l => l.tipo === "receita").length} lançamentos`} icon={TrendingUp} tone="primary" />
           <StatCard label="Despesas (mês)" value={fmtBRL(despesas)} hint={`${lancMes.filter(l => l.tipo === "despesa").length} lançamentos`} icon={TrendingDown} tone="destructive" />
-          <StatCard label="Lucro estimado" value={fmtBRL(lucro)} hint={lucro >= 0 ? "Positivo no mês" : "Negativo no mês"} icon={DollarSign} tone={lucro >= 0 ? "accent" : "destructive"} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4">
           <Card className="lg:col-span-2 p-6" style={{ background: "var(--gradient-surface)" }}>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-display font-semibold text-lg">Evolução do lote</h2>
-                <p className="text-sm text-muted-foreground">Peso médio (g) e mortalidade diária</p>
+                <h2 className="font-display font-semibold text-lg">Lucro do mês</h2>
+                <p className="text-sm text-muted-foreground">Receitas menos despesas em {mesAtual}</p>
               </div>
-              <Badge variant="secondary">{ativo ? `Lote ${ativo.numero}` : "—"}</Badge>
+              <Badge variant={lucro >= 0 ? "secondary" : "destructive"}>{fmtBRL(lucro)}</Badge>
             </div>
-            {chartData.length ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="dia" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8 }} />
-                  <Line type="monotone" dataKey="peso" stroke="var(--primary)" strokeWidth={2.5} dot={{ r: 3 }} name="Peso (g)" />
-                  <Line type="monotone" dataKey="mortalidade" stroke="var(--accent)" strokeWidth={2} dot={{ r: 3 }} name="Mortalidade" />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyChart />
-            )}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg p-3 bg-primary/10 border border-primary/30">
+                <p className="text-xs text-muted-foreground">Receitas</p>
+                <p className="font-display text-lg font-bold text-primary">{fmtBRL(receitas)}</p>
+              </div>
+              <div className="rounded-lg p-3 bg-destructive/10 border border-destructive/30">
+                <p className="text-xs text-muted-foreground">Despesas</p>
+                <p className="font-display text-lg font-bold text-destructive">{fmtBRL(despesas)}</p>
+              </div>
+              <div className={`rounded-lg p-3 border ${lucro >= 0 ? "bg-accent/10 border-accent/30" : "bg-muted border-border"}`}>
+                <p className="text-xs text-muted-foreground">Lucro</p>
+                <p className={`font-display text-lg font-bold ${lucro >= 0 ? "text-accent" : "text-destructive"}`}>{fmtBRL(lucro)}</p>
+              </div>
+            </div>
           </Card>
 
           <Card className="p-6" style={{ background: "var(--gradient-surface)" }}>
@@ -220,6 +216,7 @@ function Dashboard() {
             </ul>
           </Card>
         </div>
+
 
         <NoticiasAgro limit={6} />
       </div>
