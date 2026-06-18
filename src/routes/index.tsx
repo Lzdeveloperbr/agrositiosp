@@ -74,11 +74,10 @@ function Dashboard() {
   const emoji = hora < 12 ? "🌅" : hora < 18 ? "☀️" : "🌙";
   const nomeOperador = operador?.split(" ")[0] || "granjeiro";
 
-  const chartData = ativo
-    ? [...ativo.entries]
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .map((e, i) => ({ dia: `D${i + 1}`, peso: e.pesoMedioG ?? null, mortalidade: e.mortalidade }))
-    : [];
+  const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
+  const vivas = ativo ? ativo.quantidadeInicial - totalMort : 0;
+  const mortPct = ativo ? (totalMort / ativo.quantidadeInicial) * 100 : 0;
+
 
   return (
     <AppShell>
