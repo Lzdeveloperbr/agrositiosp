@@ -246,13 +246,3 @@ function Step({ icon: Icon, text, to }: { icon: any; text: string; to: string })
     </li>
   );
 }
-
-function EmptyChart() {
-  return (
-    <div className="h-[260px] flex flex-col items-center justify-center text-center text-muted-foreground border border-dashed border-border rounded-lg">
-      <Bird className="h-10 w-10 mb-2 opacity-40" />
-      <p className="text-sm">Cadastre um lote e adicione lançamentos diários</p>
-      <Button asChild size="sm" variant="link"><Link to="/granja">Ir para Granja</Link></Button>
-    </div>
-  );
-}
