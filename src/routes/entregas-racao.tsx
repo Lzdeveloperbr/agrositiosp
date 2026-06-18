@@ -566,25 +566,41 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
       </div>
 
       {editing && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3 rounded-md bg-muted/30">
+        <div className="space-y-3 p-3 rounded-md bg-muted/30">
+          {loteAtivo && (
+            <div className="flex items-center justify-between gap-2 p-2 rounded bg-background border">
+              <div className="text-xs">
+                <p className="font-semibold">Vínculo com a Granja</p>
+                <p className="text-muted-foreground">
+                  {manual
+                    ? "Editando manualmente. Os dados do lote da Granja estão ignorados."
+                    : <>Puxando automaticamente do <b>Lote {loteAtivo.numero}</b>.</>}
+                </p>
+              </div>
+              <Button size="sm" variant={manual ? "default" : "outline"} onClick={() => setManual(v => !v)}>
+                {manual ? "Voltar ao automático" : "Editar manualmente"}
+              </Button>
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div>
             <Label className="text-xs">Data de alojamento (D0)</Label>
-            <Input type="date" value={cfg.dataAlojamento}
+            <Input type="date" value={cfg.dataAlojamento} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, dataAlojamento: e.target.value })} />
           </div>
           <div>
             <Label className="text-xs">Aves alojadas (início)</Label>
-            <Input type="number" inputMode="numeric" value={cfg.qtdInicial || ""}
+            <Input type="number" inputMode="numeric" value={cfg.qtdInicial || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, qtdInicial: Number(e.target.value) || 0 })} placeholder="Ex: 25000" />
           </div>
           <div>
             <Label className="text-xs">Mortalidade acumulada</Label>
-            <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""}
+            <Input type="number" inputMode="numeric" value={cfg.mortalidadeAcum || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, mortalidadeAcum: Number(e.target.value) || 0 })} placeholder="Aves mortas" />
           </div>
           <div>
             <Label className="text-xs">Eliminados acumulado</Label>
-            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""}
+            <Input type="number" inputMode="numeric" value={cfg.eliminadosAcum || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, eliminadosAcum: Number(e.target.value) || 0 })} placeholder="Refugagem / sacrifício" />
           </div>
           <div>
@@ -613,17 +629,24 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
           </div>
           <div className="sm:col-span-2">
             <Label className="text-xs">Peso médio REAL (g) — última pesagem</Label>
-            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""}
+            <Input type="number" inputMode="decimal" value={cfg.pesoMedioRealG || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, pesoMedioRealG: Number(e.target.value) || undefined })} placeholder="Ex: 2200 — deixe vazio para usar curva" />
-            <p className="text-[10px] text-muted-foreground mt-1">Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque.</p>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {!manual && loteAtivo
+                ? "Puxado da última pesagem registrada na Granja."
+                : "Se informado, sobrescreve a curva no cálculo de CA, peso vivo e estoque."}
+            </p>
           </div>
           <div>
             <Label className="text-xs">Data da pesagem real</Label>
-            <Input type="date" value={cfg.pesoMedioRealData || ""}
+            <Input type="date" value={cfg.pesoMedioRealData || ""} disabled={!manual && !!loteAtivo}
               onChange={e => setCfg({ ...cfg, pesoMedioRealData: e.target.value || undefined })} />
+          </div>
           </div>
         </div>
       )}
+
+
 
 
       {!calc ? (
