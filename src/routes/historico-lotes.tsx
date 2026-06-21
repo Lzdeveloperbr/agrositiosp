@@ -18,7 +18,7 @@ export const Route = createFileRoute("/historico-lotes")({
       { property: "og:description", content: "Evolução histórica dos lotes da granja com média móvel, recorde de melhor lote e comparação contra o benchmark da fazenda." },
     ],
   }),
-  component: HistoricoLotes;
+  component: HistoricoLotes,
 });
 
 function HistoricoLotes() {
