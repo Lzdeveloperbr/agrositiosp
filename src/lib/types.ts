@@ -17,6 +17,7 @@ export type Lote = {
   percentualLucro: number;
   precoKgVivo?: number;
   entries: DailyEntry[];
+  aplicacoes?: import("./calendarioSanitario").AplicacaoSanitaria[];
   encerrado?: boolean;
 };
 

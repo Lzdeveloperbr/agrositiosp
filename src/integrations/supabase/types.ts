@@ -601,6 +601,7 @@ export type Database = {
       }
       lotes: {
         Row: {
+          aplicacoes: Json
           autor: string | null
           created_at: string
           data_entrada: string
@@ -617,6 +618,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aplicacoes?: Json
           autor?: string | null
           created_at?: string
           data_entrada: string
@@ -633,6 +635,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aplicacoes?: Json
           autor?: string | null
           created_at?: string
           data_entrada?: string

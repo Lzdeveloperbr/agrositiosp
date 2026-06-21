@@ -1,0 +1,1 @@
+ALTER TABLE public.lotes ADD COLUMN IF NOT EXISTS aplicacoes jsonb NOT NULL DEFAULT '[]'::jsonb;
