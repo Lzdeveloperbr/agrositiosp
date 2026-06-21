@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLotes } from "@/lib/state";
 import { fechamentoLote, type FechamentoLote } from "@/lib/fechamentoLote";
-import { Trophy, ArrowRight, TrendingUp, TrendingDown, Bird, Scale, Skull, Target, Wheat } from "lucide-react";
+import { gerarComparativoLotesPDF } from "@/lib/pdf";
+import { Trophy, ArrowRight, TrendingUp, TrendingDown, Bird, Scale, Skull, Target, Wheat, FileText } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 export const Route = createFileRoute("/comparativo-lotes")({
@@ -72,6 +73,9 @@ function Comparativo() {
             <p className="text-muted-foreground mt-1">Ranking automático de desempenho e rentabilidade.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => gerarComparativoLotesPDF(sorted)} disabled={!sorted.length}>
+              <FileText className="h-4 w-4 mr-1" /> PDF
+            </Button>
             <select value={filtro} onChange={(e) => setFiltro(e.target.value as any)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm">
               <option value="todos">Todos os lotes</option>
               <option value="ativos">Apenas ativos</option>
