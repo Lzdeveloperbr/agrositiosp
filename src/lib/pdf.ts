@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 import { savePdf } from "./pdfHistory";
+import type { FechamentoLote, FaseRacao } from "./fechamentoLote";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
@@ -335,4 +336,100 @@ export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string)
 
   footer(doc);
   savePdf(doc, `livro-caixa-${periodoLabel.replace(/\s+/g, "-").toLowerCase()}.pdf`, { titulo: `Livro Caixa — ${periodoLabel}`, modulo: "Financeiro", ref: periodoLabel });
+}
+
+export function gerarFechamentoPDF(lote: Lote, f: FechamentoLote, fases: FaseRacao[]) {
+  const doc = new jsPDF();
+  const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 2 });
+  header(doc, `Fechamento — Lote ${lote.numero}`, `${f.encerrado ? "Lote encerrado" : `D${f.idade}/${f.diasPrevistos}`} · ${lote.integradora || "—"}`);
+
+  autoTable(doc, {
+    startY: 62, theme: "grid",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Indicador zootécnico", "Valor"]],
+    body: [
+      ["Aves alojadas", f.inicial.toLocaleString("pt-BR")],
+      ["Aves vivas", f.vivas.toLocaleString("pt-BR")],
+      ["Baixas (mort. + elim.)", `${f.baixas.toLocaleString("pt-BR")} (${f.mortPct.toFixed(2)}%)`],
+      ["Viabilidade", `${f.viabilidade.toFixed(2)}%`],
+      ["Peso médio", f.pesoMedioG ? `${f.pesoMedioG.toLocaleString("pt-BR")} g (meta ${Math.round(f.pesoMetaG)} g · ${f.pesoVsMetaPct >= 0 ? "+" : ""}${f.pesoVsMetaPct.toFixed(1)}%)` : "—"],
+      ["Peso vivo total", `${f.pesoVivoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`],
+      ["Conversão alimentar (estim.)", f.caEstimado.toFixed(2)],
+      ["Ração consumida (estim.)", `${f.racaoConsumidaKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`],
+      ["Ração total prevista", `${f.racaoTotalKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`],
+    ],
+  });
+
+  autoTable(doc, {
+    startY: (doc as any).lastAutoTable.finalY + 8, theme: "grid",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Fechamento financeiro", "Valor"]],
+    body: [
+      ["Receita estimada", fmt(f.receitaEstimada)],
+      ["Custo pintinhos", fmt(f.custoPintinhos)],
+      ["Custo ração", fmt(f.custoRacao)],
+      ["Outros custos", fmt(f.custoOutros)],
+      ["Custo total", fmt(f.custoTotal)],
+      [f.lucroLiquido >= 0 ? "Lucro líquido" : "Prejuízo", fmt(f.lucroLiquido)],
+      ["Margem", `${f.margemPct.toFixed(2)}%`],
+      ["R$ por ave viva", fmt(f.lucroPorAve)],
+    ],
+  });
+
+  autoTable(doc, {
+    startY: (doc as any).lastAutoTable.finalY + 8, theme: "striped",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Fase", "Período", "g/ave", "Total no lote"]],
+    body: fases.map((fa) => [
+      fa.nome,
+      `D${fa.diaInicio}–D${fa.diaFim}`,
+      `${fa.gPorAve} g`,
+      `${((fa.gPorAve / 1000) * lote.quantidadeInicial).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`,
+    ]),
+  });
+
+  footer(doc);
+  savePdf(doc, `fechamento-lote-${lote.numero}.pdf`, { titulo: `Fechamento do Lote ${lote.numero}`, modulo: "Granja", ref: `Lote ${lote.numero}` });
+}
+
+export function gerarComparativoLotesPDF(dados: FechamentoLote[]) {
+  const doc = new jsPDF({ orientation: "landscape" });
+  const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  header(doc, "Comparativo de Lotes", `${dados.length} lote(s)`);
+
+  const totReceita = dados.reduce((s, d) => s + d.receitaEstimada, 0);
+  const totCusto = dados.reduce((s, d) => s + d.custoTotal, 0);
+  autoTable(doc, {
+    startY: 62, theme: "grid",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Resumo", "Valor"]],
+    body: [
+      ["Receita total estimada", fmt(totReceita)],
+      ["Custo total", fmt(totCusto)],
+      ["Resultado", fmt(totReceita - totCusto)],
+    ],
+  });
+
+  autoTable(doc, {
+    startY: (doc as any).lastAutoTable.finalY + 8, theme: "striped",
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
+    head: [["Lote", "Status", "Aves", "Mort.", "Viab.", "Peso", "CA", "Receita", "Custo", "Lucro", "R$/ave"]],
+    body: dados.map((d) => [
+      d.numero,
+      d.encerrado ? "Encerrado" : `D${d.idade}/${d.diasPrevistos}`,
+      d.vivas.toLocaleString("pt-BR"),
+      `${d.mortPct.toFixed(2)}%`,
+      `${d.viabilidade.toFixed(2)}%`,
+      d.pesoMedioG ? `${d.pesoMedioG} g` : "—",
+      d.caEstimado.toFixed(2),
+      fmt(d.receitaEstimada),
+      fmt(d.custoTotal),
+      fmt(d.lucroLiquido),
+      fmt(d.lucroPorAve),
+    ]),
+    styles: { fontSize: 8 },
+  });
+
+  footer(doc);
+  savePdf(doc, `comparativo-lotes-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Comparativo de Lotes", modulo: "Granja" });
 }

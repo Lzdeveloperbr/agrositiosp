@@ -31,6 +31,7 @@ import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
 import { Route as CustosRouteImport } from './routes/custos'
 import { Route as ComprasRouteImport } from './routes/compras'
+import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -153,6 +154,11 @@ const ComprasRoute = ComprasRouteImport.update({
   path: '/compras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComparativoLotesRoute = ComparativoLotesRouteImport.update({
+  id: '/comparativo-lotes',
+  path: '/comparativo-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChuvasRoute = ChuvasRouteImport.update({
   id: '/chuvas',
   path: '/chuvas',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
+  '/comparativo-lotes': typeof ComparativoLotesRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
+  '/comparativo-lotes': typeof ComparativoLotesRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
+  '/comparativo-lotes': typeof ComparativoLotesRoute
   '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/checklist-granja'
     | '/chuvas'
+    | '/comparativo-lotes'
     | '/compras'
     | '/custos'
     | '/diario'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/checklist-granja'
     | '/chuvas'
+    | '/comparativo-lotes'
     | '/compras'
     | '/custos'
     | '/diario'
@@ -395,6 +406,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/checklist-granja'
     | '/chuvas'
+    | '/comparativo-lotes'
     | '/compras'
     | '/custos'
     | '/diario'
@@ -431,6 +443,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ChuvasRoute: typeof ChuvasRoute
+  ComparativoLotesRoute: typeof ComparativoLotesRoute
   ComprasRoute: typeof ComprasRoute
   CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
@@ -615,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComprasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/comparativo-lotes': {
+      id: '/comparativo-lotes'
+      path: '/comparativo-lotes'
+      fullPath: '/comparativo-lotes'
+      preLoaderRoute: typeof ComparativoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chuvas': {
       id: '/chuvas'
       path: '/chuvas'
@@ -703,6 +723,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
   ChuvasRoute: ChuvasRoute,
+  ComparativoLotesRoute: ComparativoLotesRoute,
   ComprasRoute: ComprasRoute,
   CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
@@ -733,12 +754,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
