@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 import { savePdf } from "./pdfHistory";
+import type { FechamentoLote, FaseRacao } from "./fechamentoLote";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
