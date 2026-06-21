@@ -22,11 +22,13 @@ const loteMap: Mapper<Lote> = {
     id: l.id, numero: l.numero, data_entrada: l.dataEntrada, quantidade_inicial: l.quantidadeInicial,
     integradora: l.integradora, previsao_abate_dias: l.previsaoAbateDias, percentual_lucro: l.percentualLucro,
     preco_kg_vivo: l.precoKgVivo ?? null, encerrado: !!l.encerrado, entries: l.entries,
+    aplicacoes: l.aplicacoes ?? [],
   }),
   fromRow: (r) => ({
     id: r.id, numero: r.numero, dataEntrada: r.data_entrada, quantidadeInicial: r.quantidade_inicial,
     integradora: r.integradora ?? "", previsaoAbateDias: r.previsao_abate_dias, percentualLucro: Number(r.percentual_lucro),
     precoKgVivo: r.preco_kg_vivo ?? undefined, encerrado: !!r.encerrado, entries: r.entries ?? [],
+    aplicacoes: r.aplicacoes ?? [],
   }),
 };
 
