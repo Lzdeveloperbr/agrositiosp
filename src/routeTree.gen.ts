@@ -22,6 +22,7 @@ import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
+import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
@@ -34,6 +35,7 @@ import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
+import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
@@ -109,6 +111,11 @@ const LeiteRoute = LeiteRouteImport.update({
   path: '/leite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
+  id: '/historico-lotes',
+  path: '/historico-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -169,6 +176,11 @@ const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
   path: '/checklist-granja',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
+  id: '/calendario-sanitario',
+  path: '/calendario-sanitario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BackupRoute = BackupRouteImport.update({
   id: '/backup',
   path: '/backup',
@@ -221,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -233,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -257,6 +271,7 @@ export interface FileRoutesByTo {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -269,6 +284,7 @@ export interface FileRoutesByTo {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -294,6 +310,7 @@ export interface FileRoutesById {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -306,6 +323,7 @@ export interface FileRoutesById {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -332,6 +350,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -344,6 +363,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/historico-lotes'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -368,6 +388,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -380,6 +401,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/historico-lotes'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -404,6 +426,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -416,6 +439,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/historico-lotes'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -441,6 +465,7 @@ export interface RootRouteChildren {
   AnaliseAvesRoute: typeof AnaliseAvesRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
+  CalendarioSanitarioRoute: typeof CalendarioSanitarioRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ChuvasRoute: typeof ChuvasRoute
   ComparativoLotesRoute: typeof ComparativoLotesRoute
@@ -453,6 +478,7 @@ export interface RootRouteChildren {
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  HistoricoLotesRoute: typeof HistoricoLotesRoute
   LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
@@ -565,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeiteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/historico-lotes': {
+      id: '/historico-lotes'
+      path: '/historico-lotes'
+      fullPath: '/historico-lotes'
+      preLoaderRoute: typeof HistoricoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/financeiro': {
       id: '/financeiro'
       path: '/financeiro'
@@ -649,6 +682,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChecklistGranjaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calendario-sanitario': {
+      id: '/calendario-sanitario'
+      path: '/calendario-sanitario'
+      fullPath: '/calendario-sanitario'
+      preLoaderRoute: typeof CalendarioSanitarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/backup': {
       id: '/backup'
       path: '/backup'
@@ -721,6 +761,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnaliseAvesRoute: AnaliseAvesRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
+  CalendarioSanitarioRoute: CalendarioSanitarioRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
   ChuvasRoute: ChuvasRoute,
   ComparativoLotesRoute: ComparativoLotesRoute,
@@ -733,6 +774,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
+  HistoricoLotesRoute: HistoricoLotesRoute,
   LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
