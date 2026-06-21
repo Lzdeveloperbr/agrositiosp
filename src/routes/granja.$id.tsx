@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useLotes } from "@/lib/state";
+import { useLotes, useEstoque } from "@/lib/state";
 import { ArrowLeft, Plus, FileText, Trash2 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { gerarRelatorioLote } from "@/lib/pdf";
+import { FechamentoLoteCard } from "@/components/FechamentoLoteCard";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/granja/$id")({
@@ -30,7 +31,9 @@ function LoteDetalhe() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const [lotes, setLotes] = useLotes();
+  const [estoque] = useEstoque();
   const lote = lotes.find((l) => l.id === id);
+  const estoqueRacaoKg = estoque.filter((i) => i.categoria === "racao").reduce((s, i) => s + (i.quantidade || 0), 0);
 
   const [entry, setEntry] = useState({
     date: new Date().toISOString().slice(0, 10),
@@ -155,6 +158,8 @@ function LoteDetalhe() {
             </div>
           </Card>
         </div>
+
+        <FechamentoLoteCard lote={lote} estoqueRacaoKg={estoqueRacaoKg} />
 
         <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
           <h2 className="font-display font-semibold text-lg mb-3">Histórico</h2>

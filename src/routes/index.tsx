@@ -12,6 +12,7 @@ import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { NoticiasAgro } from "@/components/NoticiasAgro";
 import { PainelLoteAtivo } from "@/components/PainelLoteAtivo";
+import { NotificationsManager } from "@/components/NotificationsManager";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 
@@ -167,6 +168,8 @@ function Dashboard() {
             tarefas_pendentes: tarefasPend.length,
           })} />
         </div>
+
+        <NotificationsManager />
 
         <PainelLoteAtivo />
 
