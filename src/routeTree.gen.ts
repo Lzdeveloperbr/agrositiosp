@@ -18,6 +18,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as MercadoRouteImport } from './routes/mercado'
+import { Route as MedirAreaRouteImport } from './routes/medir-area'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
@@ -36,6 +37,7 @@ import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
 import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
+import { Route as CalculadoraAgroRouteImport } from './routes/calculadora-agro'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
@@ -89,6 +91,11 @@ const MonitoramentoRoute = MonitoramentoRouteImport.update({
 const MercadoRoute = MercadoRouteImport.update({
   id: '/mercado',
   path: '/mercado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedirAreaRoute = MedirAreaRouteImport.update({
+  id: '/medir-area',
+  path: '/medir-area',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MaquinasRoute = MaquinasRouteImport.update({
@@ -181,6 +188,11 @@ const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
   path: '/calendario-sanitario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculadoraAgroRoute = CalculadoraAgroRouteImport.update({
+  id: '/calculadora-agro',
+  path: '/calculadora-agro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BackupRoute = BackupRouteImport.update({
   id: '/backup',
   path: '/backup',
@@ -233,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
@@ -251,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
@@ -271,6 +285,7 @@ export interface FileRoutesByTo {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
@@ -289,6 +304,7 @@ export interface FileRoutesByTo {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
@@ -310,6 +326,7 @@ export interface FileRoutesById {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
+  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
@@ -328,6 +345,7 @@ export interface FileRoutesById {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/maquinas': typeof MaquinasRoute
+  '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
@@ -350,6 +368,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
@@ -368,6 +387,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/medir-area'
     | '/mercado'
     | '/monitoramento'
     | '/plantios'
@@ -388,6 +408,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
@@ -406,6 +427,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/medir-area'
     | '/mercado'
     | '/monitoramento'
     | '/plantios'
@@ -426,6 +448,7 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
+    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/checklist-granja'
     | '/chuvas'
@@ -444,6 +467,7 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/maquinas'
+    | '/medir-area'
     | '/mercado'
     | '/monitoramento'
     | '/plantios'
@@ -465,6 +489,7 @@ export interface RootRouteChildren {
   AnaliseAvesRoute: typeof AnaliseAvesRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
+  CalculadoraAgroRoute: typeof CalculadoraAgroRoute
   CalendarioSanitarioRoute: typeof CalendarioSanitarioRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ChuvasRoute: typeof ChuvasRoute
@@ -483,6 +508,7 @@ export interface RootRouteChildren {
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
   MaquinasRoute: typeof MaquinasRoute
+  MedirAreaRoute: typeof MedirAreaRoute
   MercadoRoute: typeof MercadoRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
@@ -561,6 +587,13 @@ declare module '@tanstack/react-router' {
       path: '/mercado'
       fullPath: '/mercado'
       preLoaderRoute: typeof MercadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medir-area': {
+      id: '/medir-area'
+      path: '/medir-area'
+      fullPath: '/medir-area'
+      preLoaderRoute: typeof MedirAreaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/maquinas': {
@@ -689,6 +722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarioSanitarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculadora-agro': {
+      id: '/calculadora-agro'
+      path: '/calculadora-agro'
+      fullPath: '/calculadora-agro'
+      preLoaderRoute: typeof CalculadoraAgroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/backup': {
       id: '/backup'
       path: '/backup'
@@ -761,6 +801,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnaliseAvesRoute: AnaliseAvesRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
+  CalculadoraAgroRoute: CalculadoraAgroRoute,
   CalendarioSanitarioRoute: CalendarioSanitarioRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
   ChuvasRoute: ChuvasRoute,
@@ -779,6 +820,7 @@ const rootRouteChildren: RootRouteChildren = {
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
   MaquinasRoute: MaquinasRoute,
+  MedirAreaRoute: MedirAreaRoute,
   MercadoRoute: MercadoRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
@@ -796,12 +838,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
