@@ -24,6 +24,7 @@ import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
+import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
@@ -121,6 +122,11 @@ const LeiteRoute = LeiteRouteImport.update({
 const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
   id: '/historico-lotes',
   path: '/historico-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuiaCultivoRoute = GuiaCultivoRouteImport.update({
+  id: '/guia-cultivo',
+  path: '/guia-cultivo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/guia-cultivo'
     | '/historico-lotes'
     | '/leite'
     | '/lembretes'
@@ -422,6 +432,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/guia-cultivo'
     | '/historico-lotes'
     | '/leite'
     | '/lembretes'
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/guia-cultivo'
     | '/historico-lotes'
     | '/leite'
     | '/lembretes'
@@ -503,6 +515,7 @@ export interface RootRouteChildren {
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
   LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
@@ -629,6 +642,13 @@ declare module '@tanstack/react-router' {
       path: '/historico-lotes'
       fullPath: '/historico-lotes'
       preLoaderRoute: typeof HistoricoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia-cultivo': {
+      id: '/guia-cultivo'
+      path: '/guia-cultivo'
+      fullPath: '/guia-cultivo'
+      preLoaderRoute: typeof GuiaCultivoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -815,6 +835,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
+  GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
   LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
