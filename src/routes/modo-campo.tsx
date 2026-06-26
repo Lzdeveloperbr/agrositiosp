@@ -108,12 +108,19 @@ function FotoGPS() {
   async function salvar() {
     if (!foto && !nota.trim() && !titulo.trim()) return toast.error("Adicione foto, título ou nota");
     const txt = [
-      titulo.trim() && `**${titulo.trim()}**`,
       nota.trim(),
       coords && `📍 ${coords.lat.toFixed(6)}, ${coords.lon.toFixed(6)} (±${coords.acc}m) — https://maps.google.com/?q=${coords.lat},${coords.lon}`,
     ].filter(Boolean).join("\n\n");
     setDiario((prev) => [
-      { id: uid(), data: new Date().toISOString().slice(0, 10), titulo: titulo.trim() || "Registro de campo", texto: txt, foto: foto ?? undefined, tags: ["campo"] } as any,
+      {
+        id: uid(),
+        data: new Date().toISOString().slice(0, 10),
+        titulo: titulo.trim() || "Registro de campo",
+        categoria: "geral",
+        texto: txt,
+        gps: coords ? { lat: coords.lat, lon: coords.lon } : undefined,
+        fotos: foto ? [{ id: uid(), dataUrl: foto, legenda: titulo.trim() || undefined }] : [],
+      },
       ...prev,
     ]);
     toast.success("Registro salvo no Diário");
@@ -337,7 +344,14 @@ function DitadoVoz() {
   function salvar() {
     if (!texto.trim()) return toast.error("Nada para salvar");
     setDiario((prev) => [
-      { id: uid(), data: new Date().toISOString().slice(0, 10), titulo: titulo.trim() || "Ditado de voz", texto, tags: ["campo", "voz"] } as any,
+      {
+        id: uid(),
+        data: new Date().toISOString().slice(0, 10),
+        titulo: titulo.trim() || "Ditado de voz",
+        categoria: "geral",
+        texto,
+        fotos: [],
+      },
       ...prev,
     ]);
     toast.success("Salvo no Diário");
