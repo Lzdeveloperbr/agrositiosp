@@ -60,33 +60,34 @@ function AgroIAPage() {
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   const context = useMemo(() => {
-    const ativo = lotes.find((l) => l.status === "ativo") ?? lotes[0];
-    const vivas = ativo ? Math.max(0, ativo.alojadas - ativo.entries.reduce((s, e) => s + (e.mortas ?? 0) + (e.eliminadas ?? 0), 0)) : 0;
-    const mortAcum = ativo ? ativo.entries.reduce((s, e) => s + (e.mortas ?? 0) + (e.eliminadas ?? 0), 0) : 0;
+    const ativo = lotes.find((l) => !l.encerrado) ?? lotes[0];
+    const mortAcum = ativo ? ativo.entries.reduce((s, e) => s + (e.mortalidade ?? 0) + (e.eliminados ?? 0), 0) : 0;
+    const vivas = ativo ? Math.max(0, ativo.quantidadeInicial - mortAcum) : 0;
     const dias = ativo ? ativo.entries.length : 0;
-    const pesoUlt = ativo?.entries.slice().reverse().find((e) => e.peso)?.peso ?? null;
+    const pesoUlt = ativo?.entries.slice().reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? null;
     const lancMes = fin.filter((l) => l.data?.startsWith(new Date().toISOString().slice(0, 7)));
     const ativosGado = animais.filter((a) => a.status === "ativo");
     return JSON.stringify({
       data: new Date().toISOString().slice(0, 10),
       granja_lote_ativo: ativo ? {
         numero: ativo.numero,
-        linhagem: ativo.linhagem ?? null,
-        alojadas: ativo.alojadas,
+        integradora: ativo.integradora ?? null,
+        alojadas: ativo.quantidadeInicial,
         vivas, mortalidade_acum: mortAcum,
-        mortalidade_pct: ativo.alojadas ? +(mortAcum / ativo.alojadas * 100).toFixed(2) : 0,
+        mortalidade_pct: ativo.quantidadeInicial ? +(mortAcum / ativo.quantidadeInicial * 100).toFixed(2) : 0,
         dias_de_vida: dias,
         peso_ultimo_g: pesoUlt,
-        data_alojamento: ativo.dataInicio,
+        previsao_abate_dias: ativo.previsaoAbateDias,
+        data_alojamento: ativo.dataEntrada,
       } : null,
       gado: { cabecas_ativas: ativosGado.length, historico: animais.length },
-      plantios_ativos: plantios.filter((p) => p.status !== "colhido").map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, previsao: p.previsaoColheita })),
+      plantios_ativos: plantios.filter((p) => p.status !== "colheita" && p.status !== "encerrado").map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, previsao: p.previsaoColheita })),
       estoque_baixo: estoque.filter((i) => i.minimo != null && i.quantidade <= (i.minimo ?? 0)).map((i) => ({ nome: i.nome, qtd: i.quantidade, un: i.unidade })),
       financeiro_mes: {
         receitas: lancMes.filter((l) => l.tipo === "receita").reduce((s, l) => s + l.valor, 0),
         despesas: lancMes.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0),
       },
-      tarefas_pendentes: tarefas.filter((t) => !t.feita).length,
+      tarefas_pendentes: tarefas.filter((t) => !t.concluida).length,
       chuva_ultimos_7d_mm: chuvas.slice(-7).reduce((s, c) => s + (c.mm ?? 0), 0),
     });
   }, [lotes, animais, estoque, fin, plantios, chuvas, tarefas]);
