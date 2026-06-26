@@ -12,6 +12,7 @@ import { useEstoque } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { LiveRacaoBanner } from "@/components/LiveRacaoBanner";
 
 export const Route = createFileRoute("/estoque")({
   head: () => ({
@@ -97,6 +98,8 @@ function EstoquePage() {
             </DialogContent>
           </Dialog>
         </header>
+
+        <LiveRacaoBanner itens={itens} />
 
         {itens.length === 0 ? (
           <Card className="p-12 text-center border-dashed">
