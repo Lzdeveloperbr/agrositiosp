@@ -99,6 +99,8 @@ function EstoquePage() {
           </Dialog>
         </header>
 
+        <LiveRacaoBanner itens={itens} />
+
         {itens.length === 0 ? (
           <Card className="p-12 text-center border-dashed">
             <Boxes className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
