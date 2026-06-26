@@ -17,6 +17,7 @@ import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
+import { Route as ModoCampoRouteImport } from './routes/modo-campo'
 import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as MedirAreaRouteImport } from './routes/medir-area'
 import { Route as MaquinasRouteImport } from './routes/maquinas'
@@ -43,6 +44,7 @@ import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
 import { Route as AmbienciaRouteImport } from './routes/ambiencia'
+import { Route as AgroIaRouteImport } from './routes/agro-ia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
@@ -87,6 +89,11 @@ const PlantiosRoute = PlantiosRouteImport.update({
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
   id: '/monitoramento',
   path: '/monitoramento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModoCampoRoute = ModoCampoRouteImport.update({
+  id: '/modo-campo',
+  path: '/modo-campo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MercadoRoute = MercadoRouteImport.update({
@@ -219,6 +226,11 @@ const AmbienciaRoute = AmbienciaRouteImport.update({
   path: '/ambiencia',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgroIaRoute = AgroIaRouteImport.update({
+  id: '/agro-ia',
+  path: '/agro-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -247,6 +259,7 @@ const GadoIdRoute = GadoIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agro-ia': typeof AgroIaRoute
   '/ambiencia': typeof AmbienciaRoute
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
@@ -273,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/maquinas': typeof MaquinasRoute
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
+  '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -288,6 +302,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agro-ia': typeof AgroIaRoute
   '/ambiencia': typeof AmbienciaRoute
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
@@ -314,6 +329,7 @@ export interface FileRoutesByTo {
   '/maquinas': typeof MaquinasRoute
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
+  '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -330,6 +346,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agro-ia': typeof AgroIaRoute
   '/ambiencia': typeof AmbienciaRoute
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
@@ -356,6 +373,7 @@ export interface FileRoutesById {
   '/maquinas': typeof MaquinasRoute
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
+  '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
@@ -373,6 +391,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/agro-ia'
     | '/ambiencia'
     | '/analise-aves'
     | '/automacoes'
@@ -399,6 +418,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/medir-area'
     | '/mercado'
+    | '/modo-campo'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -414,6 +434,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/agro-ia'
     | '/ambiencia'
     | '/analise-aves'
     | '/automacoes'
@@ -440,6 +461,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/medir-area'
     | '/mercado'
+    | '/modo-campo'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -455,6 +477,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/agro-ia'
     | '/ambiencia'
     | '/analise-aves'
     | '/automacoes'
@@ -481,6 +504,7 @@ export interface FileRouteTypes {
     | '/maquinas'
     | '/medir-area'
     | '/mercado'
+    | '/modo-campo'
     | '/monitoramento'
     | '/plantios'
     | '/quiz'
@@ -497,6 +521,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgroIaRoute: typeof AgroIaRoute
   AmbienciaRoute: typeof AmbienciaRoute
   AnaliseAvesRoute: typeof AnaliseAvesRoute
   AutomacoesRoute: typeof AutomacoesRoute
@@ -523,6 +548,7 @@ export interface RootRouteChildren {
   MaquinasRoute: typeof MaquinasRoute
   MedirAreaRoute: typeof MedirAreaRoute
   MercadoRoute: typeof MercadoRoute
+  ModoCampoRoute: typeof ModoCampoRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PlantiosRoute: typeof PlantiosRoute
   QuizRoute: typeof QuizRoute
@@ -593,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/monitoramento'
       fullPath: '/monitoramento'
       preLoaderRoute: typeof MonitoramentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modo-campo': {
+      id: '/modo-campo'
+      path: '/modo-campo'
+      fullPath: '/modo-campo'
+      preLoaderRoute: typeof ModoCampoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mercado': {
@@ -777,6 +810,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AmbienciaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agro-ia': {
+      id: '/agro-ia'
+      path: '/agro-ia'
+      fullPath: '/agro-ia'
+      preLoaderRoute: typeof AgroIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -817,6 +857,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgroIaRoute: AgroIaRoute,
   AmbienciaRoute: AmbienciaRoute,
   AnaliseAvesRoute: AnaliseAvesRoute,
   AutomacoesRoute: AutomacoesRoute,
@@ -843,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaquinasRoute: MaquinasRoute,
   MedirAreaRoute: MedirAreaRoute,
   MercadoRoute: MercadoRoute,
+  ModoCampoRoute: ModoCampoRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PlantiosRoute: PlantiosRoute,
   QuizRoute: QuizRoute,
