@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
   Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck, ClipboardCheck, Trophy,
-  BarChart3, Syringe, History, Ruler, Calculator, MapPin,
+  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList },
       { to: "/ambiencia", label: "Ambiência Aviário", icon: Wind },
       { to: "/gado", label: "Gado", icon: Beef },
+      { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp },
       { to: "/leite", label: "Leite", icon: Milk },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
       { to: "/racao", label: "Fábrica Ração", icon: Factory },
@@ -72,6 +73,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/medir-area", label: "Medir Área (satélite)", icon: Ruler },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator },
       { to: "/automacoes", label: "Automações", icon: Sparkles },
+      { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
       { to: "/backup", label: "Backup", icon: Database },
     ],

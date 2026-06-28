@@ -24,8 +24,10 @@ import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
+import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
+import { Route as GadoProRouteImport } from './routes/gado-pro'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
@@ -126,6 +128,11 @@ const LeiteRoute = LeiteRouteImport.update({
   path: '/leite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IntegracoesGovRoute = IntegracoesGovRouteImport.update({
+  id: '/integracoes-gov',
+  path: '/integracoes-gov',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
   id: '/historico-lotes',
   path: '/historico-lotes',
@@ -134,6 +141,11 @@ const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
 const GuiaCultivoRoute = GuiaCultivoRouteImport.update({
   id: '/guia-cultivo',
   path: '/guia-cultivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GadoProRoute = GadoProRouteImport.update({
+  id: '/gado-pro',
+  path: '/gado-pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -278,8 +290,10 @@ export interface FileRoutesByFullPath {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -321,8 +335,10 @@ export interface FileRoutesByTo {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -365,8 +381,10 @@ export interface FileRoutesById {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -410,8 +428,10 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -453,8 +473,10 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -496,8 +518,10 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -540,8 +564,10 @@ export interface RootRouteChildren {
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  GadoProRoute: typeof GadoProRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
+  IntegracoesGovRoute: typeof IntegracoesGovRoute
   LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
@@ -670,6 +696,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeiteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/integracoes-gov': {
+      id: '/integracoes-gov'
+      path: '/integracoes-gov'
+      fullPath: '/integracoes-gov'
+      preLoaderRoute: typeof IntegracoesGovRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/historico-lotes': {
       id: '/historico-lotes'
       path: '/historico-lotes'
@@ -682,6 +715,13 @@ declare module '@tanstack/react-router' {
       path: '/guia-cultivo'
       fullPath: '/guia-cultivo'
       preLoaderRoute: typeof GuiaCultivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gado-pro': {
+      id: '/gado-pro'
+      path: '/gado-pro'
+      fullPath: '/gado-pro'
+      preLoaderRoute: typeof GadoProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -876,8 +916,10 @@ const rootRouteChildren: RootRouteChildren = {
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
+  GadoProRoute: GadoProRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
+  IntegracoesGovRoute: IntegracoesGovRoute,
   LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
@@ -901,12 +943,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

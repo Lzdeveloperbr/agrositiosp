@@ -65,10 +65,78 @@ const INGREDIENTES_PADRAO: Ingrediente[] = [
   { id: uid(), nome: "Sal comum", unidade: "kg", precoKg: 1.0, estoqueKg: 0 },
 ];
 
+function FORMULAS_GADO_PROFISSIONAIS(ingMap: Record<string, string>): Formula[] {
+  const g = (nome: string) => ingMap[nome] ?? "";
+  return [
+    {
+      id: uid(), nome: "Confinamento — Terminação 90–120d", destino: "gado_engorda",
+      observacoes: "Alta energia, alvo GMD 1,4–1,6 kg/dia. Adaptar em 14 dias.",
+      itens: [
+        { ingredienteId: g("Milho moído"), percentual: 65 },
+        { ingredienteId: g("Farelo de soja"), percentual: 14 },
+        { ingredienteId: g("Farelo de algodão"), percentual: 8 },
+        { ingredienteId: g("Ureia pecuária"), percentual: 1 },
+        { ingredienteId: g("Núcleo mineral"), percentual: 3 },
+        { ingredienteId: g("Calcário"), percentual: 1.5 },
+        { ingredienteId: g("Sal comum"), percentual: 0.5 },
+        { ingredienteId: g("Milho moído"), percentual: 0 }, // placeholder removido pelo usuário se quiser silagem
+      ].filter((i, idx, arr) => i.ingredienteId && arr.findIndex((x) => x.ingredienteId === i.ingredienteId) === idx),
+    },
+    {
+      id: uid(), nome: "Semi-confinamento a pasto (0,8–1,2% PV)", destino: "gado_engorda",
+      observacoes: "Suplemento proteico-energético. Fornecer 6–10 kg/cab/dia.",
+      itens: [
+        { ingredienteId: g("Milho moído"), percentual: 55 },
+        { ingredienteId: g("Farelo de soja"), percentual: 22 },
+        { ingredienteId: g("Farelo de algodão"), percentual: 10 },
+        { ingredienteId: g("Ureia pecuária"), percentual: 2 },
+        { ingredienteId: g("Núcleo mineral"), percentual: 8 },
+        { ingredienteId: g("Calcário"), percentual: 2 },
+        { ingredienteId: g("Sal comum"), percentual: 1 },
+      ].filter((i) => i.ingredienteId),
+    },
+    {
+      id: uid(), nome: "Proteinado de seca (cria/recria 0,1–0,3% PV)", destino: "bezerro",
+      observacoes: "Mineraliza e fornece NNP. Consumo 0,3–1 kg/cab/dia.",
+      itens: [
+        { ingredienteId: g("Farelo de soja"), percentual: 35 },
+        { ingredienteId: g("Milho moído"), percentual: 20 },
+        { ingredienteId: g("Ureia pecuária"), percentual: 12 },
+        { ingredienteId: g("Núcleo mineral"), percentual: 18 },
+        { ingredienteId: g("Sal comum"), percentual: 15 },
+      ].filter((i) => i.ingredienteId),
+    },
+    {
+      id: uid(), nome: "Vaca leiteira em produção (18–22% PB)", destino: "gado_leite",
+      observacoes: "Concentrado para vacas >15L/dia. 1 kg para cada 2,5L produzidos.",
+      itens: [
+        { ingredienteId: g("Milho moído"), percentual: 58 },
+        { ingredienteId: g("Farelo de soja"), percentual: 28 },
+        { ingredienteId: g("Farelo de algodão"), percentual: 6 },
+        { ingredienteId: g("Núcleo mineral"), percentual: 5 },
+        { ingredienteId: g("Calcário"), percentual: 2 },
+        { ingredienteId: g("Sal comum"), percentual: 1 },
+      ].filter((i) => i.ingredienteId),
+    },
+  ];
+}
+
 function RacaoPage() {
   const [ingredientes, setIngredientes] = useLocalStorage<Ingrediente[]>("agro:racao:ingredientes", INGREDIENTES_PADRAO);
   const [formulas, setFormulas] = useLocalStorage<Formula[]>("agro:racao:formulas", []);
   const [producoes, setProducoes] = useLocalStorage<Producao[]>("agro:racao:producoes", []);
+
+  const carregarFormulasGado = () => {
+    const ingMap: Record<string, string> = {};
+    ingredientes.forEach((i) => { ingMap[i.nome] = i.id; });
+    const novas = FORMULAS_GADO_PROFISSIONAIS(ingMap);
+    setFormulas((prev) => {
+      const nomes = new Set(prev.map((p) => p.nome));
+      const adicionar = novas.filter((n) => !nomes.has(n.nome));
+      return [...adicionar, ...prev];
+    });
+    toast.success(`${novas.length} fórmulas profissionais de gado carregadas`);
+  };
 
   return (
     <AppShell>
@@ -80,6 +148,9 @@ function RacaoPage() {
             </h1>
             <p className="text-muted-foreground mt-1">Ingredientes, fórmulas e custo por batida</p>
           </div>
+          <Button size="sm" variant="outline" onClick={carregarFormulasGado}>
+            <Beaker className="h-4 w-4 mr-1.5" /> Carregar fórmulas profissionais de gado
+          </Button>
         </header>
 
         <Tabs defaultValue="formulas">
