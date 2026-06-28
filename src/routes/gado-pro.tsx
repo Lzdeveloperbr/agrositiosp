@@ -66,7 +66,7 @@ function GmdTab() {
         const dias = (new Date(ultimo.data).getTime() - new Date(primeiro.data).getTime()) / 86400000;
         if (dias > 0) gmd = (ultimo.pesoKg - primeiro.pesoKg) / dias;
       }
-      const pesoAtual = ultimo?.peso ?? a.pesoEntradaKg ?? 0;
+      const pesoAtual = ultimo?.pesoKg ?? a.pesoEntradaKg ?? 0;
       const META_ABATE = 540; // kg vivo
       const diasFalta = gmd && gmd > 0 ? Math.max(0, Math.ceil((META_ABATE - pesoAtual) / gmd)) : null;
       const arroba = (pesoAtual * 0.55) / 15; // 55% rendimento, @ = 15kg
