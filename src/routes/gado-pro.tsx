@@ -53,7 +53,7 @@ function GadoProPage() {
 
 /* ---------- GMD + projeção de abate ---------- */
 function GmdTab() {
-  const { items: animais } = useAnimais();
+  const [animais] = useAnimais();
   const ativos = animais.filter((a) => a.status === "ativo");
 
   const linhas = useMemo(() => {
@@ -120,7 +120,7 @@ function GmdTab() {
 
 /* ---------- Reprodução ---------- */
 function ReproTab() {
-  const { items: animais } = useAnimais();
+  const [animais] = useAnimais();
   const femeas = animais.filter((a) => a.sexo === "femea" && a.status === "ativo");
 
   // Próximos eventos: parto estimado 283 dias após IA/cobertura
@@ -234,8 +234,8 @@ function SanitarioTab() {
 
 /* ---------- Custo da arroba ---------- */
 function CustoArrobaTab() {
-  const { items: fin } = useFinanceiro();
-  const { items: animais } = useAnimais();
+  const [fin] = useFinanceiro();
+  const [animais] = useAnimais();
   const [cab, setCab] = useState(String(animais.filter((a) => a.status === "ativo").length || 100));
   const [pesoFinal, setPesoFinal] = useState("540");
   const [pesoInicial, setPesoInicial] = useState("350");
