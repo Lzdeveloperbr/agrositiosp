@@ -73,6 +73,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/medir-area", label: "Medir Área (satélite)", icon: Ruler },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator },
       { to: "/automacoes", label: "Automações", icon: Sparkles },
+      { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
       { to: "/backup", label: "Backup", icon: Database },
     ],
