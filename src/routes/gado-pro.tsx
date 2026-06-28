@@ -64,7 +64,7 @@ function GmdTab() {
       let gmd: number | null = null;
       if (primeiro && ultimo && primeiro !== ultimo) {
         const dias = (new Date(ultimo.data).getTime() - new Date(primeiro.data).getTime()) / 86400000;
-        if (dias > 0) gmd = (ultimo.peso - primeiro.peso) / dias;
+        if (dias > 0) gmd = (ultimo.pesoKg - primeiro.pesoKg) / dias;
       }
       const pesoAtual = ultimo?.peso ?? a.pesoEntradaKg ?? 0;
       const META_ABATE = 540; // kg vivo
