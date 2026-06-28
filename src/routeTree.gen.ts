@@ -24,6 +24,7 @@ import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
+import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
@@ -124,6 +125,11 @@ const LembretesRoute = LembretesRouteImport.update({
 const LeiteRoute = LeiteRouteImport.update({
   id: '/leite',
   path: '/leite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegracoesGovRoute = IntegracoesGovRouteImport.update({
+  id: '/integracoes-gov',
+  path: '/integracoes-gov',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/financeiro': typeof FinanceiroRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/financeiro': typeof FinanceiroRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -367,6 +375,7 @@ export interface FileRoutesById {
   '/financeiro': typeof FinanceiroRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
@@ -412,6 +421,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -455,6 +465,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -498,6 +509,7 @@ export interface FileRouteTypes {
     | '/financeiro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
     | '/manejo'
@@ -542,6 +554,7 @@ export interface RootRouteChildren {
   FinanceiroRoute: typeof FinanceiroRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
+  IntegracoesGovRoute: typeof IntegracoesGovRoute
   LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
@@ -668,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/leite'
       fullPath: '/leite'
       preLoaderRoute: typeof LeiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integracoes-gov': {
+      id: '/integracoes-gov'
+      path: '/integracoes-gov'
+      fullPath: '/integracoes-gov'
+      preLoaderRoute: typeof IntegracoesGovRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/historico-lotes': {
@@ -878,6 +898,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinanceiroRoute: FinanceiroRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
+  IntegracoesGovRoute: IntegracoesGovRoute,
   LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
