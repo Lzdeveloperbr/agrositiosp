@@ -44,6 +44,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList },
       { to: "/ambiencia", label: "Ambiência Aviário", icon: Wind },
       { to: "/gado", label: "Gado", icon: Beef },
+      { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp },
       { to: "/leite", label: "Leite", icon: Milk },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
       { to: "/racao", label: "Fábrica Ração", icon: Factory },
