@@ -148,6 +148,9 @@ function RacaoPage() {
             </h1>
             <p className="text-muted-foreground mt-1">Ingredientes, fórmulas e custo por batida</p>
           </div>
+          <Button size="sm" variant="outline" onClick={carregarFormulasGado}>
+            <Beaker className="h-4 w-4 mr-1.5" /> Carregar fórmulas profissionais de gado
+          </Button>
         </header>
 
         <Tabs defaultValue="formulas">
