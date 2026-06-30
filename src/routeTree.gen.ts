@@ -16,6 +16,7 @@ import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
+import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as ModoCampoRouteImport } from './routes/modo-campo'
 import { Route as MercadoRouteImport } from './routes/mercado'
@@ -86,6 +87,11 @@ const QuizRoute = QuizRouteImport.update({
 const PlantiosRoute = PlantiosRouteImport.update({
   id: '/plantios',
   path: '/plantios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesagemProRoute = PesagemProRouteImport.update({
+  id: '/pesagem-pro',
+  path: '/pesagem-pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/mercado'
     | '/modo-campo'
     | '/monitoramento'
+    | '/pesagem-pro'
     | '/plantios'
     | '/quiz'
     | '/racao'
@@ -485,6 +495,7 @@ export interface FileRouteTypes {
     | '/mercado'
     | '/modo-campo'
     | '/monitoramento'
+    | '/pesagem-pro'
     | '/plantios'
     | '/quiz'
     | '/racao'
@@ -530,6 +541,7 @@ export interface FileRouteTypes {
     | '/mercado'
     | '/modo-campo'
     | '/monitoramento'
+    | '/pesagem-pro'
     | '/plantios'
     | '/quiz'
     | '/racao'
@@ -576,6 +588,7 @@ export interface RootRouteChildren {
   MercadoRoute: typeof MercadoRoute
   ModoCampoRoute: typeof ModoCampoRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
+  PesagemProRoute: typeof PesagemProRoute
   PlantiosRoute: typeof PlantiosRoute
   QuizRoute: typeof QuizRoute
   RacaoRoute: typeof RacaoRoute
@@ -638,6 +651,13 @@ declare module '@tanstack/react-router' {
       path: '/plantios'
       fullPath: '/plantios'
       preLoaderRoute: typeof PlantiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesagem-pro': {
+      id: '/pesagem-pro'
+      path: '/pesagem-pro'
+      fullPath: '/pesagem-pro'
+      preLoaderRoute: typeof PesagemProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/monitoramento': {
@@ -928,6 +948,7 @@ const rootRouteChildren: RootRouteChildren = {
   MercadoRoute: MercadoRoute,
   ModoCampoRoute: ModoCampoRoute,
   MonitoramentoRoute: MonitoramentoRoute,
+  PesagemProRoute: PesagemProRoute,
   PlantiosRoute: PlantiosRoute,
   QuizRoute: QuizRoute,
   RacaoRoute: RacaoRoute,
@@ -943,12 +964,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
