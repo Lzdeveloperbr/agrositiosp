@@ -2,9 +2,17 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 import { savePdf } from "./pdfHistory";
-import type { FechamentoLote, FaseRacao } from "./fechamentoLote";
+import { fechamentoLote, type FechamentoLote, type FaseRacao } from "./fechamentoLote";
+import { CURVAS, type Linhagem } from "./linhagens";
 
 const BRAND = { r: 88, g: 165, b: 90 };
+const INK = { r: 30, g: 41, b: 59 };       // slate-800
+const MUTED = { r: 100, g: 116, b: 139 };  // slate-500
+const SOFT = { r: 241, g: 245, b: 249 };   // slate-100
+const LINE = { r: 226, g: 232, b: 240 };   // slate-200
+const OK = { r: 22, g: 163, b: 74 };
+const WARN = { r: 217, g: 119, b: 6 };
+const BAD = { r: 220, g: 38, b: 38 };
 
 export const SITIO = {
   nome: "Sítio Santo Antônio",
