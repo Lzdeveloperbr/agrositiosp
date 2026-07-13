@@ -159,6 +159,8 @@ function LoteDetalhe() {
           </Card>
         </div>
 
+        <ConfigRemuneracao loteId={lote.id} vivas={vivas} pesoVivoKg={pesoTotalKg} />
+
         <FechamentoLoteCard lote={lote} estoqueRacaoKg={estoqueRacaoKg} />
 
         <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
