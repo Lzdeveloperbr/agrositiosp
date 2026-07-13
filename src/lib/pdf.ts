@@ -306,6 +306,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const areaM2 = getLoteAreaM2(lote.id);
   const abateReal = getLoteAbateReal(lote.id);
   const f = fechamentoLote(lote, linhagem);
+  const rem = getLoteRemuneracao(lote.id);
 
   // ===== série diária derivada =====
   const entries = [...lote.entries].sort((a, b) => a.date.localeCompare(b.date));
