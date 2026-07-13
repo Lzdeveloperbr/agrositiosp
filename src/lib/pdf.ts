@@ -684,6 +684,8 @@ export function gerarRelatorioLote(lote: Lote) {
       ["Produção por ave alojada", `${producaoPorAve.toFixed(3)} kg/ave`],
       ["Índice de Eficiência Produtiva (IEP)", iep > 0 ? iep.toFixed(0) : "Não informado"],
       ["Ganho de peso diário (GPD)", `${gpd.toFixed(1)} g/dia`],
+      ["Receita bruta do integrado", `R$ ${receitaGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${rem.pctIntegrado.toFixed(1)}% de R$ ${ganhoFrigorifico.toLocaleString("pt-BR", { maximumFractionDigits: 2 })})`],
+      ["Lucro líquido do granjeiro", `R$ ${lucroLiquidoGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (R$ ${lucroPorAve.toFixed(3)}/ave)`],
       ["Classificação final do lote", `${pont.nota} (${pont.estrelas}/5 estrelas)`],
     ],
   });
