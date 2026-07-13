@@ -159,6 +159,8 @@ function LoteDetalhe() {
           </Card>
         </div>
 
+        <ConfigRemuneracao loteId={lote.id} vivas={vivas} pesoVivoKg={pesoTotalKg} />
+
         <FechamentoLoteCard lote={lote} estoqueRacaoKg={estoqueRacaoKg} />
 
         <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
@@ -212,4 +214,108 @@ function KPI({ label, value }: { label: string; value: string }) {
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1"><Label className="text-xs">{label}</Label>{children}</div>;
+}
+
+function ConfigRemuneracao({ loteId, vivas, pesoVivoKg }: { loteId: string; vivas: number; pesoVivoKg: number }) {
+  const readNum = (k: string, def: number) => {
+    if (typeof window === "undefined") return def;
+    const v = localStorage.getItem(`granja:${k}:${loteId}`);
+    return v !== null && v !== "" ? Number(v) : def;
+  };
+  const readStr = (k: string) => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(`granja:${k}:${loteId}`) || "";
+  };
+  const [precoAve, setPrecoAve] = useState(readNum("precoAve", 2.14));
+  const [pctIntegrado, setPctIntegrado] = useState(readNum("pctIntegrado", 14));
+  const [areaM2, setAreaM2] = useState(readNum("areaM2", 0));
+  const [custoEnergia, setCustoEnergia] = useState(readNum("custoEnergia", 0));
+  const [custoCama, setCustoCama] = useState(readNum("custoCama", 0));
+  const [custoMaoObra, setCustoMaoObra] = useState(readNum("custoMaoObra", 0));
+  const [custoOutros, setCustoOutros] = useState(readNum("custoOutros", 0));
+  const [abateReal, setAbateReal] = useState(readStr("abateReal"));
+
+  const save = () => {
+    const set = (k: string, v: string | number) => {
+      if (v === "" || v === 0) localStorage.removeItem(`granja:${k}:${loteId}`);
+      else localStorage.setItem(`granja:${k}:${loteId}`, String(v));
+    };
+    set("precoAve", precoAve);
+    set("pctIntegrado", pctIntegrado);
+    set("areaM2", areaM2);
+    set("custoEnergia", custoEnergia);
+    set("custoCama", custoCama);
+    set("custoMaoObra", custoMaoObra);
+    set("custoOutros", custoOutros);
+    if (abateReal) localStorage.setItem(`granja:abateReal:${loteId}`, abateReal);
+    else localStorage.removeItem(`granja:abateReal:${loteId}`);
+    toast.success("Configurações salvas");
+  };
+
+  const ganhoFrig = vivas * precoAve;
+  const receita = ganhoFrig * (pctIntegrado / 100);
+  const custos = custoEnergia + custoCama + custoMaoObra + custoOutros;
+  const lucro = receita - custos;
+  const densidade = areaM2 > 0 ? vivas / areaM2 : 0;
+
+  return (
+    <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+      <h2 className="font-display font-semibold text-lg mb-1">Configurações & remuneração</h2>
+      <p className="text-xs text-muted-foreground mb-4">Usado no PDF do lote para calcular sua parte do ganho e recomendações.</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <Field label="Preço/ave frigorífico (R$)">
+          <Input type="number" step="0.01" value={precoAve || ""} onChange={(e) => setPrecoAve(Number(e.target.value) || 0)} placeholder="2.14" />
+        </Field>
+        <Field label="% do integrado">
+          <Input type="number" step="0.1" value={pctIntegrado || ""} onChange={(e) => setPctIntegrado(Number(e.target.value) || 0)} placeholder="14" />
+        </Field>
+        <Field label="Área útil (m²)">
+          <Input type="number" value={areaM2 || ""} onChange={(e) => setAreaM2(Number(e.target.value) || 0)} placeholder="1200" />
+        </Field>
+        <Field label="Data real do abate">
+          <Input type="date" value={abateReal} onChange={(e) => setAbateReal(e.target.value)} />
+        </Field>
+      </div>
+
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Custos do granjeiro (R$)</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <Field label="Energia elétrica">
+          <Input type="number" value={custoEnergia || ""} onChange={(e) => setCustoEnergia(Number(e.target.value) || 0)} placeholder="0" />
+        </Field>
+        <Field label="Cama / maravalha">
+          <Input type="number" value={custoCama || ""} onChange={(e) => setCustoCama(Number(e.target.value) || 0)} placeholder="0" />
+        </Field>
+        <Field label="Mão de obra">
+          <Input type="number" value={custoMaoObra || ""} onChange={(e) => setCustoMaoObra(Number(e.target.value) || 0)} placeholder="0" />
+        </Field>
+        <Field label="Outros">
+          <Input type="number" value={custoOutros || ""} onChange={(e) => setCustoOutros(Number(e.target.value) || 0)} placeholder="0" />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <MiniStat label="Ganho frigorífico" value={`R$ ${ganhoFrig.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`} sub={`${vivas.toLocaleString("pt-BR")} × R$ ${precoAve.toFixed(2)}`} />
+        <MiniStat label={`Sua parte (${pctIntegrado.toFixed(1)}%)`} value={`R$ ${receita.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`} tone="primary" />
+        <MiniStat label="Lucro líquido" value={`R$ ${lucro.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`} sub={`− R$ ${custos.toLocaleString("pt-BR")} custos`} tone={lucro >= 0 ? "ok" : "bad"} />
+        <MiniStat label="Densidade" value={densidade > 0 ? `${densidade.toFixed(1)} aves/m²` : "—"} sub={areaM2 > 0 ? `${areaM2} m²` : "cadastre área"} />
+      </div>
+
+      <div className="flex gap-2">
+        <Button onClick={save}>Salvar configurações</Button>
+        <span className="text-xs text-muted-foreground self-center">Peso vivo atual: {pesoVivoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg · R$/kg estimado: R$ {pesoVivoKg > 0 ? (receita / pesoVivoKg).toFixed(3) : "—"}</span>
+      </div>
+    </Card>
+  );
+}
+
+function MiniStat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "primary" | "ok" | "bad" }) {
+  const color = tone === "primary" ? "text-primary" : tone === "ok" ? "text-emerald-500" : tone === "bad" ? "text-destructive" : "";
+  return (
+    <div className="bg-muted/40 rounded-md p-3">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className={`font-display font-bold text-lg tabular-nums ${color}`}>{value}</p>
+      {sub && <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>}
+    </div>
+  );
 }

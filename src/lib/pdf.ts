@@ -84,6 +84,21 @@ function getLoteAbateReal(loteId: string): string | undefined {
   if (typeof window === "undefined") return undefined;
   return localStorage.getItem("granja:abateReal:" + loteId) || undefined;
 }
+function getLoteRemuneracao(loteId: string) {
+  if (typeof window === "undefined") return { precoAve: 2.14, pctIntegrado: 14, custoEnergia: 0, custoCama: 0, custoMaoObra: 0, custoOutros: 0 };
+  const n = (k: string, def: number) => {
+    const v = localStorage.getItem(`granja:${k}:${loteId}`);
+    return v !== null && v !== "" ? Number(v) : def;
+  };
+  return {
+    precoAve: n("precoAve", 2.14),
+    pctIntegrado: n("pctIntegrado", 14),
+    custoEnergia: n("custoEnergia", 0),
+    custoCama: n("custoCama", 0),
+    custoMaoObra: n("custoMaoObra", 0),
+    custoOutros: n("custoOutros", 0),
+  };
+}
 
 function interpCurva(linhagem: Linhagem, dia: number, key: "peso" | "consumoAcum" | "ca") {
   const c = CURVAS[linhagem];
@@ -291,6 +306,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const areaM2 = getLoteAreaM2(lote.id);
   const abateReal = getLoteAbateReal(lote.id);
   const f = fechamentoLote(lote, linhagem);
+  const rem = getLoteRemuneracao(lote.id);
 
   // ===== série diária derivada =====
   const entries = [...lote.entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -532,6 +548,119 @@ export function gerarRelatorioLote(lote: Lote) {
     ]),
   });
 
+  // ============ Remuneração do Integrado ============
+  y = (doc as any).lastAutoTable.finalY + 8;
+  y = ensurePage(doc, y, 100);
+  y = secaoTitulo(doc, y, "Remuneração do integrado");
+
+  const avesEntregues = f.vivas;
+  const ganhoFrigorifico = avesEntregues * rem.precoAve;
+  const receitaGranjeiro = ganhoFrigorifico * (rem.pctIntegrado / 100);
+  const custosOperacionais = rem.custoEnergia + rem.custoCama + rem.custoMaoObra + rem.custoOutros;
+  const lucroLiquidoGranjeiro = receitaGranjeiro - custosOperacionais;
+  const receitaPorAve = avesEntregues > 0 ? receitaGranjeiro / avesEntregues : 0;
+  const receitaPorKg = f.pesoVivoKg > 0 ? receitaGranjeiro / f.pesoVivoKg : 0;
+  const lucroPorAve = avesEntregues > 0 ? lucroLiquidoGranjeiro / avesEntregues : 0;
+
+  // 4 cards resumo
+  const cwR = (w - 28 - 9) / 4;
+  const remCards: Array<[string, string, string?, [number, number, number]?]> = [
+    ["Preço por ave (frigorífico)", `R$ ${rem.precoAve.toFixed(2)}`, "Valor pago por cabeça"],
+    ["Ganho total do frigorífico", `R$ ${ganhoFrigorifico.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`, `${avesEntregues.toLocaleString("pt-BR")} aves × R$ ${rem.precoAve.toFixed(2)}`],
+    ["Sua parte", `R$ ${receitaGranjeiro.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`, `${rem.pctIntegrado.toFixed(1)}% do ganho`, [BRAND.r, BRAND.g, BRAND.b]],
+    ["Lucro líquido", `R$ ${lucroLiquidoGranjeiro.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`, `Após R$ ${custosOperacionais.toLocaleString("pt-BR")} de custos`, lucroLiquidoGranjeiro >= 0 ? [OK.r, OK.g, OK.b] : [BAD.r, BAD.g, BAD.b]],
+  ];
+  remCards.forEach((k, i) => card(doc, 14 + i * (cwR + 3), y, cwR, ch, k[0], k[1], k[2], k[3]));
+  y += ch + 6;
+
+  autoTable(doc, {
+    startY: y, theme: "grid",
+    styles: { fontSize: 9, cellPadding: 2.5 },
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b], textColor: 255 },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 90 }, 1: { halign: "right" } },
+    head: [["Detalhamento financeiro", "Valor"]],
+    body: [
+      ["Aves entregues ao frigorífico", `${avesEntregues.toLocaleString("pt-BR")} aves`],
+      ["Preço pago por ave", `R$ ${rem.precoAve.toFixed(2)}`],
+      ["(=) Ganho total do frigorífico", `R$ ${ganhoFrigorifico.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      [`(×) Percentual do integrado (${rem.pctIntegrado.toFixed(1)}%)`, `R$ ${receitaGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["(−) Energia elétrica", `R$ ${rem.custoEnergia.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["(−) Cama / maravalha", `R$ ${rem.custoCama.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["(−) Mão de obra", `R$ ${rem.custoMaoObra.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["(−) Outros custos", `R$ ${rem.custoOutros.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["(=) Lucro líquido do granjeiro", `R$ ${lucroLiquidoGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ["Receita por ave entregue", `R$ ${receitaPorAve.toFixed(3)}`],
+      ["Receita por kg vivo produzido", `R$ ${receitaPorKg.toFixed(3)}/kg`],
+      ["Lucro por ave", `R$ ${lucroPorAve.toFixed(3)}`],
+    ],
+  });
+
+  // ============ Recomendações para a próxima granjada ============
+  y = (doc as any).lastAutoTable.finalY + 8;
+  y = ensurePage(doc, y, 120);
+  y = secaoTitulo(doc, y, "Recomendações para a próxima granjada");
+
+  const recs: Array<{ area: string; prio: "Alta" | "Média" | "Baixa"; acao: string }> = [];
+  if (f.mortPct > 5) recs.push({ area: "Mortalidade", prio: "Alta", acao: `Mortalidade de ${f.mortPct.toFixed(2)}% acima da meta (≤5%). Revisar biosseguridade, qualidade do pintinho, primeira semana (aquecimento/água) e ventilação.` });
+  else if (f.mortPct > 3) recs.push({ area: "Mortalidade", prio: "Média", acao: `Mortalidade ${f.mortPct.toFixed(2)}% pode melhorar. Foco na 1ª semana e no manejo de eliminados.` });
+  else recs.push({ area: "Mortalidade", prio: "Baixa", acao: `Excelente controle (${f.mortPct.toFixed(2)}%). Manter protocolo atual de biosseguridade.` });
+
+  if (temConsumo) {
+    if (caReal > 1.85) recs.push({ area: "Conversão alimentar", prio: "Alta", acao: `CA ${caReal.toFixed(3)} muito acima do ideal (≤1,70). Revisar desperdício, altura de comedouros, granulometria e temperatura do galpão.` });
+    else if (caReal > 1.70) recs.push({ area: "Conversão alimentar", prio: "Média", acao: `CA ${caReal.toFixed(3)} pode melhorar. Ajustar densidade de comedouros e minimizar desperdício de ração.` });
+    else recs.push({ area: "Conversão alimentar", prio: "Baixa", acao: `CA ${caReal.toFixed(3)} dentro da meta. Manter manejo de ração.` });
+  } else {
+    recs.push({ area: "Conversão alimentar", prio: "Média", acao: "Registre o consumo de ração diário para calcular CA real e comparar com a meta." });
+  }
+
+  if (f.pesoMedioG) {
+    if (f.pesoVsMetaPct < -6) recs.push({ area: "Peso vs meta", prio: "Alta", acao: `Peso ${f.pesoVsMetaPct.toFixed(1)}% abaixo da curva ${linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}. Revisar programa de ração, temperatura e fase inicial (7 primeiros dias).` });
+    else if (f.pesoVsMetaPct < -2) recs.push({ area: "Peso vs meta", prio: "Média", acao: `Peso ${f.pesoVsMetaPct.toFixed(1)}% abaixo. Verificar qualidade da pré-inicial e uniformidade de água/luz.` });
+    else recs.push({ area: "Peso vs meta", prio: "Baixa", acao: `Peso ${f.pesoVsMetaPct >= 0 ? "+" : ""}${f.pesoVsMetaPct.toFixed(1)}% vs meta. Ótimo desempenho.` });
+  }
+
+  if (cvEstimado > 10) recs.push({ area: "Uniformidade", prio: "Alta", acao: `CV ${cvEstimado.toFixed(1)}% indica lote desuniforme. Revisar densidade, distribuição de comedouros/bebedouros e nivelamento da cama.` });
+  else if (cvEstimado > 8) recs.push({ area: "Uniformidade", prio: "Média", acao: `CV ${cvEstimado.toFixed(1)}%. Reforçar amostragens semanais de pesagem em 3 pontos do galpão.` });
+  else recs.push({ area: "Uniformidade", prio: "Baixa", acao: `CV ${cvEstimado.toFixed(1)}% — lote uniforme. Manter distribuição atual de equipamentos.` });
+
+  if (densidade !== null) {
+    if (densidade > 14) recs.push({ area: "Densidade", prio: "Alta", acao: `Densidade final de ${densidade.toFixed(1)} aves/m² acima do ideal (12–14). Reavaliar alojamento inicial para próxima granjada.` });
+    else if (densidade < 10) recs.push({ area: "Densidade", prio: "Baixa", acao: `Densidade ${densidade.toFixed(1)} aves/m² — há espaço para aumentar o alojamento e diluir custos fixos.` });
+  } else {
+    recs.push({ area: "Densidade", prio: "Média", acao: "Cadastre a área útil do galpão (m²) para calcular densidade e produção por m²." });
+  }
+
+  if (iep > 0) {
+    if (iep < 280) recs.push({ area: "IEP", prio: "Alta", acao: `IEP ${iep.toFixed(0)} abaixo do padrão comercial (≥320). Priorizar melhorias em CA, peso e viabilidade simultaneamente.` });
+    else if (iep < 320) recs.push({ area: "IEP", prio: "Média", acao: `IEP ${iep.toFixed(0)} pode chegar a 320+. Pequenas melhorias em CA e uniformidade dão o salto.` });
+    else recs.push({ area: "IEP", prio: "Baixa", acao: `IEP ${iep.toFixed(0)} excelente — lote de padrão elite.` });
+  }
+
+  recs.push({ area: "Vazio sanitário", prio: "Média", acao: "Respeitar vazio sanitário mínimo de 10–15 dias com desinfecção completa (lavagem, cal, flambagem de bebedouros)." });
+  recs.push({ area: "Pré-alojamento", prio: "Média", acao: "Pré-aquecer galpão 24h antes: piso a 30–32 °C e água a 24–28 °C na chegada dos pintinhos." });
+
+  autoTable(doc, {
+    startY: y, theme: "striped",
+    styles: { fontSize: 8.5, cellPadding: 2.5, valign: "top" },
+    headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b], textColor: 255 },
+    columnStyles: {
+      0: { fontStyle: "bold", cellWidth: 38 },
+      1: { cellWidth: 20, halign: "center" },
+      2: { cellWidth: "auto" },
+    },
+    head: [["Área", "Prioridade", "Ação recomendada"]],
+    body: recs.map(r => [r.area, r.prio, r.acao]),
+    didParseCell: (data) => {
+      if (data.column.index === 1 && data.section === "body") {
+        const v = String(data.cell.raw);
+        if (v === "Alta") data.cell.styles.textColor = [BAD.r, BAD.g, BAD.b];
+        else if (v === "Média") data.cell.styles.textColor = [WARN.r, WARN.g, WARN.b];
+        else data.cell.styles.textColor = [OK.r, OK.g, OK.b];
+        data.cell.styles.fontStyle = "bold";
+      }
+    },
+  });
+
   // ============ Estatísticas finais ============
   y = (doc as any).lastAutoTable.finalY + 8;
   y = ensurePage(doc, y, 90);
@@ -555,6 +684,8 @@ export function gerarRelatorioLote(lote: Lote) {
       ["Produção por ave alojada", `${producaoPorAve.toFixed(3)} kg/ave`],
       ["Índice de Eficiência Produtiva (IEP)", iep > 0 ? iep.toFixed(0) : "Não informado"],
       ["Ganho de peso diário (GPD)", `${gpd.toFixed(1)} g/dia`],
+      ["Receita bruta do integrado", `R$ ${receitaGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${rem.pctIntegrado.toFixed(1)}% de R$ ${ganhoFrigorifico.toLocaleString("pt-BR", { maximumFractionDigits: 2 })})`],
+      ["Lucro líquido do granjeiro", `R$ ${lucroLiquidoGranjeiro.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (R$ ${lucroPorAve.toFixed(3)}/ave)`],
       ["Classificação final do lote", `${pont.nota} (${pont.estrelas}/5 estrelas)`],
     ],
   });
