@@ -84,6 +84,21 @@ function getLoteAbateReal(loteId: string): string | undefined {
   if (typeof window === "undefined") return undefined;
   return localStorage.getItem("granja:abateReal:" + loteId) || undefined;
 }
+function getLoteRemuneracao(loteId: string) {
+  if (typeof window === "undefined") return { precoAve: 2.14, pctIntegrado: 14, custoEnergia: 0, custoCama: 0, custoMaoObra: 0, custoOutros: 0 };
+  const n = (k: string, def: number) => {
+    const v = localStorage.getItem(`granja:${k}:${loteId}`);
+    return v !== null && v !== "" ? Number(v) : def;
+  };
+  return {
+    precoAve: n("precoAve", 2.14),
+    pctIntegrado: n("pctIntegrado", 14),
+    custoEnergia: n("custoEnergia", 0),
+    custoCama: n("custoCama", 0),
+    custoMaoObra: n("custoMaoObra", 0),
+    custoOutros: n("custoOutros", 0),
+  };
+}
 
 function interpCurva(linhagem: Linhagem, dia: number, key: "peso" | "consumoAcum" | "ca") {
   const c = CURVAS[linhagem];
