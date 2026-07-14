@@ -98,21 +98,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      <aside className="hidden md:flex md:w-60 flex-col bg-sidebar border-r border-sidebar-border">
+      <aside className="hidden md:flex md:w-64 flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border sticky top-0 h-screen">
         <div className="p-5 border-b border-sidebar-border">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={logoUrl} alt="AgroSítio" width={40} height={40} className="h-10 w-10 object-contain" />
-            <div>
-              <div className="font-display text-lg font-bold leading-tight">AgroSítio</div>
-              <div className="text-xs text-muted-foreground">{fazendaNome ?? "Granja & Gado"}</div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition" style={{ background: "var(--gradient-primary)" }} />
+              <img src={logoUrl} alt="AgroSítio" width={40} height={40} className="h-10 w-10 object-contain relative" />
+            </div>
+            <div className="min-w-0">
+              <div className="font-display text-lg font-bold leading-tight tracking-tight">
+                Agro<span className="text-gradient">Sítio</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground truncate">{fazendaNome ?? "Granja & Gado"}</div>
             </div>
           </Link>
         </div>
-        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
           {groups.map((g) => (
             <div key={g.label}>
-              <div className="px-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">{g.label}</div>
-              <div className="space-y-1">
+              <div className="px-3 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 font-semibold">{g.label}</div>
+              <div className="space-y-0.5">
                 {g.items.map((it) => {
                   const active = isActive(it.to);
                   const Icon = it.icon;
@@ -121,15 +126,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       key={it.to}
                       to={it.to}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                        "relative flex items-center gap-3 pl-3 pr-3 py-2 rounded-lg text-sm font-medium transition-all",
                         active
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50",
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                          : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40",
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                      {it.label}
-                      {active && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+                      {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-primary" />}
+                      <Icon className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-primary" : "")} />
+                      <span className="truncate">{it.label}</span>
                     </Link>
                   );
                 })}
@@ -137,20 +142,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
-          <div className="text-[10px] text-muted-foreground truncate">
-            <div className="truncate">{operador || "—"}</div>
-            <div className="truncate">{codigo} · v1.2</div>
+        <div className="p-3 border-t border-sidebar-border flex items-center justify-between gap-2">
+          <div className="min-w-0 flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full grid place-items-center text-[11px] font-bold shrink-0" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+              {(operador || "?").slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-medium truncate">{operador || "—"}</div>
+              <div className="text-[10px] text-muted-foreground truncate">{codigo} · v1.2</div>
+            </div>
           </div>
           <Button variant="ghost" size="icon" onClick={sair} aria-label="Sair da fazenda" className="h-8 w-8 shrink-0"><LogOut className="h-4 w-4" /></Button>
         </div>
       </aside>
 
-      <header className="md:hidden flex items-center justify-between p-3 border-b border-border bg-sidebar sticky top-0 z-30">
-        <Link to="/" className="flex items-center gap-2 min-w-0">
+      <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-border bg-sidebar/85 backdrop-blur-xl sticky top-0 z-30">
+        <Link to="/" className="flex items-center gap-2.5 min-w-0">
           <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
-            <div className="font-display font-bold text-sm truncate">{fazendaNome ?? "AgroSítio"}</div>
+            <div className="font-display font-bold text-sm truncate tracking-tight">{fazendaNome ?? "AgroSítio"}</div>
             <div className="text-[10px] text-muted-foreground truncate">{operador || codigo}</div>
           </div>
         </Link>
@@ -161,14 +171,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent side="right" className="w-[85vw] sm:w-[360px] overflow-y-auto p-0 bg-sidebar">
               <SheetHeader className="p-5 border-b border-sidebar-border text-left">
-                <SheetTitle className="font-display">{fazendaNome ?? "AgroSítio"}</SheetTitle>
+                <SheetTitle className="font-display tracking-tight">{fazendaNome ?? "AgroSítio"}</SheetTitle>
                 <p className="text-xs text-muted-foreground">{operador ? `${operador} · ` : ""}{codigo}</p>
               </SheetHeader>
-              <nav className="p-3 space-y-4">
+              <nav className="p-3 space-y-5">
                 {groups.map((g) => (
                   <div key={g.label}>
-                    <div className="px-3 pb-1.5 text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">{g.label}</div>
-                    <div className="space-y-1">
+                    <div className="px-3 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 font-semibold">{g.label}</div>
+                    <div className="space-y-0.5">
                       {g.items.map((it) => {
                         const active = isActive(it.to);
                         const Icon = it.icon;
@@ -178,12 +188,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                             to={it.to}
                             onClick={() => setOpen(false)}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium",
-                              active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50",
+                              "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
+                              active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50",
                             )}
                           >
-                            <Icon className="h-4 w-4" />
-                            {it.label}
+                            {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-primary" />}
+                            <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "")} />
+                            <span className="truncate">{it.label}</span>
                           </Link>
                         );
                       })}
@@ -199,10 +210,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 pb-20 md:pb-0">
+      <main className="flex-1 min-w-0 pb-24 md:pb-0">
         <div className="p-4 md:p-8 max-w-7xl mx-auto">{children}</div>
 
-        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 bg-sidebar border-t border-sidebar-border">
+        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-2xl bg-sidebar/85 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
           {mobileBottom.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;
@@ -211,10 +222,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={it.to}
                 to={it.to}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[10px]",
-                  active ? "text-primary" : "text-muted-foreground",
+                  "relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
+                {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-primary" />}
                 <Icon className="h-5 w-5" />
                 {it.label}
               </Link>
@@ -222,7 +234,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
           <button
             onClick={() => setOpen(true)}
-            className="flex flex-col items-center gap-1 py-2.5 text-[10px] text-muted-foreground"
+            className="flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium text-muted-foreground hover:text-foreground"
           >
             <Menu className="h-5 w-5" />
             Mais
