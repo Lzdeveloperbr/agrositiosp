@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes } from "@/lib/state";
-import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles } from "lucide-react";
+import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
