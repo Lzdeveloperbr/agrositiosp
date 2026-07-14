@@ -285,11 +285,13 @@ function ManejoPage() {
 
         {/* Tabs com guias completos */}
         <Tabs defaultValue="semanal">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full">
+          <TabsList className="flex flex-wrap w-full h-auto">
             <TabsTrigger value="semanal">Semanal</TabsTrigger>
             <TabsTrigger value="equipamentos">Equip.</TabsTrigger>
             <TabsTrigger value="agua">Água & Cama</TabsTrigger>
             <TabsTrigger value="luz">Luz</TabsTrigger>
+            <TabsTrigger value="calo">Anti-calo</TabsTrigger>
+            <TabsTrigger value="vazio">Vazio Sanit.</TabsTrigger>
             <TabsTrigger value="excelencia">Excelência</TabsTrigger>
             <TabsTrigger value="ca">CA</TabsTrigger>
           </TabsList>
