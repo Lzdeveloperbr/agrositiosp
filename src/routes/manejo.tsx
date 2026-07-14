@@ -480,6 +480,91 @@ function ManejoPage() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="calo" className="mt-4 space-y-3">
+            <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+              <h3 className="font-display font-semibold text-lg flex items-center gap-2"><Footprints className="h-5 w-5" /> Prevenção de calo (pododermatite)</h3>
+              <p className="text-sm opacity-90 mt-1">Calo de pata é o principal defeito que desclassifica frango no frigorífico e derruba sua nota. 90% dos casos são causados por CAMA ÚMIDA. Zerar calo = mais R$ no bolso.</p>
+            </Card>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Droplets className="h-5 w-5 text-sky-500" /> Água & nipples (causa nº 1)</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Zero vazamento — nipple pingando molha a cama e queima a pata em 6h",
+                    "Pressão correta por idade (ver tabela Água) — pressão alta = respinga na cama",
+                    "Altura sempre no ponto certo: bico levemente erguido, nunca abaixado",
+                    "Passar na linha 2x/dia checando cada nipple, trocar defeituosos na hora",
+                    "Bandeja de recolhimento embaixo da linha se houver vazamento crônico",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Sparkles className="h-5 w-5 text-emerald-500" /> Cama (causa nº 2)</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Umidade ideal 20–25% — mais que isso já queima a pata",
+                    "Bater cama a cada 3 dias (D6, D9, D12…) — obrigatório",
+                    "Revolver linha do bebedouro TODO dia — é onde forma torrão",
+                    "Cal virgem 200g/m² na linha úmida antes de secar",
+                    "Espessura mínima 8–10 cm de maravalha nova ou 12–15 cm reutilizada",
+                    "Nunca compactar — bater profundo, soltar até o piso",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Waves className="h-5 w-5 text-purple-500" /> Ventilação</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Ventilação mínima 24h/dia mesmo no frio — retira umidade",
+                    "Umidade relativa do ar ≤ 65% após D14",
+                    "Sem sofrer com condensação no teto (pinga em cima da cama)",
+                    "Exaustores limpos — sujo perde 30% da vazão",
+                    "Placa evaporativa só quando T° > 28°C — usar excessivamente encharca cama",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-amber-500" /> Nutrição & manejo</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Sódio da ração no ponto — sódio alto = ave bebe mais = mais umidade na cama",
+                    "Biotina e zinco orgânico na inicial reforçam a pele da pata",
+                    "Densidade final ≤ 30 kg/m² (frango pesado)",
+                    "Coccidiose sob controle — fezes líquidas = pata queimada",
+                    "Verminose e disbiose no radar — fazer fecais no D14 e D28",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+            </div>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h4 className="font-display font-semibold mb-3">Escala de calo (frigorífico)</h4>
+              <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/30">
+                  <p className="font-bold text-emerald-600">Escore 0 — Sem calo</p>
+                  <p className="text-muted-foreground mt-1">Pata limpa, sem ferida. Meta: ≥ 90% do lote.</p>
+                </div>
+                <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/30">
+                  <p className="font-bold text-amber-600">Escore 1 — Leve</p>
+                  <p className="text-muted-foreground mt-1">Mancha escura ≤ 25% da almofada. Ainda paga cheio.</p>
+                </div>
+                <div className="p-3 rounded-md bg-destructive/10 border border-destructive/30">
+                  <p className="font-bold text-destructive">Escore 2 — Severo</p>
+                  <p className="text-muted-foreground mt-1">Lesão &gt; 25%, crosta. DESCLASSIFICA a pata.</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Fazer inspeção semanal: pegar 20 aves aleatórias, virar a pata, contar escores. Se &gt; 5% chegar em escore 2, revisar TUDO acima urgente.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="vazio" className="mt-4">
+            <VazioSanitario />
+          </TabsContent>
+
           <TabsContent value="excelencia" className="mt-4 space-y-3">
             <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
               <h3 className="font-display font-semibold mb-1 flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Os 10 fatores para um lote excelente</h3>
