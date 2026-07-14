@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes } from "@/lib/state";
-import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles } from "lucide-react";
+import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
@@ -283,11 +285,13 @@ function ManejoPage() {
 
         {/* Tabs com guias completos */}
         <Tabs defaultValue="semanal">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full">
+          <TabsList className="flex flex-wrap w-full h-auto">
             <TabsTrigger value="semanal">Semanal</TabsTrigger>
             <TabsTrigger value="equipamentos">Equip.</TabsTrigger>
             <TabsTrigger value="agua">Água & Cama</TabsTrigger>
             <TabsTrigger value="luz">Luz</TabsTrigger>
+            <TabsTrigger value="calo">Anti-calo</TabsTrigger>
+            <TabsTrigger value="vazio">Vazio Sanit.</TabsTrigger>
             <TabsTrigger value="excelencia">Excelência</TabsTrigger>
             <TabsTrigger value="ca">CA</TabsTrigger>
           </TabsList>
@@ -476,6 +480,91 @@ function ManejoPage() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="calo" className="mt-4 space-y-3">
+            <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+              <h3 className="font-display font-semibold text-lg flex items-center gap-2"><Footprints className="h-5 w-5" /> Prevenção de calo (pododermatite)</h3>
+              <p className="text-sm opacity-90 mt-1">Calo de pata é o principal defeito que desclassifica frango no frigorífico e derruba sua nota. 90% dos casos são causados por CAMA ÚMIDA. Zerar calo = mais R$ no bolso.</p>
+            </Card>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Droplets className="h-5 w-5 text-sky-500" /> Água & nipples (causa nº 1)</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Zero vazamento — nipple pingando molha a cama e queima a pata em 6h",
+                    "Pressão correta por idade (ver tabela Água) — pressão alta = respinga na cama",
+                    "Altura sempre no ponto certo: bico levemente erguido, nunca abaixado",
+                    "Passar na linha 2x/dia checando cada nipple, trocar defeituosos na hora",
+                    "Bandeja de recolhimento embaixo da linha se houver vazamento crônico",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Sparkles className="h-5 w-5 text-emerald-500" /> Cama (causa nº 2)</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Umidade ideal 20–25% — mais que isso já queima a pata",
+                    "Bater cama a cada 3 dias (D6, D9, D12…) — obrigatório",
+                    "Revolver linha do bebedouro TODO dia — é onde forma torrão",
+                    "Cal virgem 200g/m² na linha úmida antes de secar",
+                    "Espessura mínima 8–10 cm de maravalha nova ou 12–15 cm reutilizada",
+                    "Nunca compactar — bater profundo, soltar até o piso",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><Waves className="h-5 w-5 text-purple-500" /> Ventilação</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Ventilação mínima 24h/dia mesmo no frio — retira umidade",
+                    "Umidade relativa do ar ≤ 65% após D14",
+                    "Sem sofrer com condensação no teto (pinga em cima da cama)",
+                    "Exaustores limpos — sujo perde 30% da vazão",
+                    "Placa evaporativa só quando T° > 28°C — usar excessivamente encharca cama",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+
+              <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+                <h4 className="font-display font-semibold mb-3 flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-amber-500" /> Nutrição & manejo</h4>
+                <ul className="space-y-2 text-sm">
+                  {[
+                    "Sódio da ração no ponto — sódio alto = ave bebe mais = mais umidade na cama",
+                    "Biotina e zinco orgânico na inicial reforçam a pele da pata",
+                    "Densidade final ≤ 30 kg/m² (frango pesado)",
+                    "Coccidiose sob controle — fezes líquidas = pata queimada",
+                    "Verminose e disbiose no radar — fazer fecais no D14 e D28",
+                  ].map((t, i) => <li key={i} className="flex gap-2"><ArrowRight className="h-4 w-4 shrink-0 mt-0.5 text-primary" /><span>{t}</span></li>)}
+                </ul>
+              </Card>
+            </div>
+
+            <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+              <h4 className="font-display font-semibold mb-3">Escala de calo (frigorífico)</h4>
+              <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/30">
+                  <p className="font-bold text-emerald-600">Escore 0 — Sem calo</p>
+                  <p className="text-muted-foreground mt-1">Pata limpa, sem ferida. Meta: ≥ 90% do lote.</p>
+                </div>
+                <div className="p-3 rounded-md bg-amber-500/10 border border-amber-500/30">
+                  <p className="font-bold text-amber-600">Escore 1 — Leve</p>
+                  <p className="text-muted-foreground mt-1">Mancha escura ≤ 25% da almofada. Ainda paga cheio.</p>
+                </div>
+                <div className="p-3 rounded-md bg-destructive/10 border border-destructive/30">
+                  <p className="font-bold text-destructive">Escore 2 — Severo</p>
+                  <p className="text-muted-foreground mt-1">Lesão &gt; 25%, crosta. DESCLASSIFICA a pata.</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Fazer inspeção semanal: pegar 20 aves aleatórias, virar a pata, contar escores. Se &gt; 5% chegar em escore 2, revisar TUDO acima urgente.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="vazio" className="mt-4">
+            <VazioSanitario />
+          </TabsContent>
+
           <TabsContent value="excelencia" className="mt-4 space-y-3">
             <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
               <h3 className="font-display font-semibold mb-1 flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Os 10 fatores para um lote excelente</h3>
@@ -628,5 +717,192 @@ function EquipCard({ titulo, itens }: { titulo: string; itens: string[] }) {
         ))}
       </ul>
     </Card>
+  );
+}
+
+// ============ VAZIO SANITÁRIO (sem troca de cama) — protocolo profissional ============
+type VazioEtapa = { id: string; titulo: string; timing: string; itens: string[] };
+const VAZIO_ETAPAS: VazioEtapa[] = [
+  {
+    id: "pos-carregamento",
+    titulo: "1. Imediatamente após o carregamento",
+    timing: "Nas primeiras horas após saída do último caminhão",
+    itens: [
+      "Eliminar refugos restantes e recolher aves mortas — destinar à composteira / rotoacelerador / desidratador",
+      "Recolher sobra de ração nos pratinhos (não deixar contaminar a cama)",
+      "Pulverizar Colosso (ou similar) — 1 L do produto para 400 L de água — em paredes internas, externas, dog house e onde houver cascudinho",
+      "Deixar TODOS os exaustores ligados: facilita subida das penas para a queimada e ajuda a secar a cama",
+    ],
+  },
+  {
+    id: "cascoes",
+    titulo: "2. Retirar cascões da cama",
+    timing: "Antes de qualquer manejo com trator",
+    itens: [
+      "Retirar cascões das beiradas e partes molhadas da cama",
+      "Descartar TUDO na composteira (não jogar de volta na cama)",
+    ],
+  },
+  {
+    id: "trator",
+    titulo: "3. Manejos com trator",
+    timing: "Após retirar os cascões — deixar exaustores ligados e túnel door aberto",
+    itens: [
+      "Realizar a 1ª queima de penas",
+      "1ª batida de cama",
+      "2ª batida de cama com no mínimo 1 dia de diferença da primeira",
+      "Continuar as batidas até a cama ficar completamente solta e sem cascões",
+      "Cascão que não desmanchar na batida → retirar e descartar na composteira",
+      "Espalhar o cal sobre a cama até incorporar completamente",
+    ],
+  },
+  {
+    id: "durante-trator",
+    titulo: "4. Enquanto o trator trabalha",
+    timing: "Em paralelo — aproveitar o tempo",
+    itens: [
+      "Lavar comedouros infantis e divisórias",
+      "Limpeza completa dos fornos, portaria, sala de painel e caixas de ração",
+      "Recolher e descartar todo o lixo do galpão e arredores",
+    ],
+  },
+  {
+    id: "pos-batidas",
+    titulo: "5. Após término das batidas de cama",
+    timing: "Cama pronta, solta e nivelada",
+    itens: [
+      "Vassourar e assoprar TODOS os equipamentos: linhas e barras de nipples, comedouros, reguladores, fiação, inlets, muretas e cortinas",
+      "Lavar placas evaporativas, dog house e túnel door / cortina",
+      "Lavar exaustores por dentro e por fora",
+      "A CADA 2 LOTES: incluir lavagem do silo de ração",
+      "Realizar a 2ª queima de penas",
+    ],
+  },
+  {
+    id: "nebulizacao",
+    titulo: "6. Após a 2ª queima — nebulizações",
+    timing: "Aviário pronto para desinfecção química",
+    itens: [
+      "Colocar divisórias e comedouros infantis dentro do aviário para serem desinfetados junto",
+      "Nebulização com FORMOL: 2 galões do produto para 300 L de água — deixar 1 ou 2 exaustores ligados para o produto cair sobre equipamento e cama",
+      "Após nebulizar: desligar todos os exaustores, fechar portas e entradas de ar",
+      "Manter aviário LACRADO por no mínimo 12h e no máximo 24h",
+      "Nebulização com AVT 450: 1 L para 300 L de água — mesmo procedimento (1-2 exaustores ligados)",
+      "Após AVT: lacrar novamente por 12–24h",
+    ],
+  },
+  {
+    id: "pre-alojamento",
+    titulo: "7. Três a quatro dias antes do alojamento",
+    timing: "Reta final antes de receber o pintinho",
+    itens: [
+      "Pulverizar VETANCID sobre a cama com atomizador, na dosagem recomendada pelo extensionista/sanitarista",
+      "Lacrar o aviário por pelo menos 36h",
+      "Trocar o cal dos pedilúvios (entradas do galpão)",
+    ],
+  },
+];
+
+function VazioSanitario() {
+  const storageKey = "manejo:vazioSanitario:checks";
+  const [checks, setChecks] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { const raw = localStorage.getItem(storageKey); if (raw) setChecks(JSON.parse(raw)); } catch {}
+  }, []);
+
+  const toggle = (key: string) => {
+    setChecks((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (typeof window !== "undefined") localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  };
+  const reset = () => {
+    setChecks({});
+    if (typeof window !== "undefined") localStorage.removeItem(storageKey);
+  };
+
+  const total = VAZIO_ETAPAS.reduce((s, e) => s + e.itens.length, 0);
+  const feitos = Object.values(checks).filter(Boolean).length;
+  const pct = total > 0 ? Math.round((feitos / total) * 100) : 0;
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-display font-semibold text-lg flex items-center gap-2"><ShieldCheck className="h-5 w-5" /> Vazio Sanitário (sem troca de cama)</h3>
+            <p className="text-sm opacity-90 mt-1">Protocolo completo do diário de bordo. Marcar cada item — persistido no aparelho. Um vazio bem feito reduz mortalidade da 1ª semana em até 60% e melhora a CA em 5–8 pontos.</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-display font-bold tabular-nums">{pct}%</p>
+            <p className="text-xs opacity-80">{feitos} / {total} itens</p>
+          </div>
+        </div>
+      </Card>
+
+      {VAZIO_ETAPAS.map((etapa) => {
+        const doneItens = etapa.itens.filter((_, i) => checks[`${etapa.id}:${i}`]).length;
+        return (
+          <Card key={etapa.id} className="p-5" style={{ background: "var(--gradient-surface)" }}>
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <h4 className="font-display font-semibold">{etapa.titulo}</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">{etapa.timing}</p>
+              </div>
+              <Badge variant={doneItens === etapa.itens.length ? "default" : "outline"} className="tabular-nums shrink-0">
+                {doneItens}/{etapa.itens.length}
+              </Badge>
+            </div>
+            <ul className="space-y-2">
+              {etapa.itens.map((item, i) => {
+                const key = `${etapa.id}:${i}`;
+                const done = !!checks[key];
+                return (
+                  <li key={i} className="flex gap-3 items-start">
+                    <Checkbox id={key} checked={done} onCheckedChange={() => toggle(key)} className="mt-0.5" />
+                    <label htmlFor={key} className={`text-sm cursor-pointer flex-1 ${done ? "line-through text-muted-foreground" : ""}`}>
+                      {item}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        );
+      })}
+
+      <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
+        <h4 className="font-display font-semibold mb-3">Diluições e dosagens (referência rápida)</h4>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-xs text-muted-foreground uppercase">
+              <tr className="border-b border-border">
+                <th className="text-left py-2">Produto</th>
+                <th className="text-left py-2 pl-3">Uso</th>
+                <th className="text-left py-2 pl-3">Diluição</th>
+                <th className="text-left py-2 pl-3">Aplicação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-border/50"><td className="py-2 font-medium">Colosso</td><td className="py-2 pl-3">Cascudinho (paredes, dog house)</td><td className="py-2 pl-3 font-mono">1 L / 400 L água</td><td className="py-2 pl-3">Pulverização</td></tr>
+              <tr className="border-b border-border/50"><td className="py-2 font-medium">Formol</td><td className="py-2 pl-3">Desinfecção geral</td><td className="py-2 pl-3 font-mono">2 galões / 300 L água</td><td className="py-2 pl-3">Nebulização · lacrar 12–24h</td></tr>
+              <tr className="border-b border-border/50"><td className="py-2 font-medium">AVT 450</td><td className="py-2 pl-3">Desinfecção sequencial</td><td className="py-2 pl-3 font-mono">1 L / 300 L água</td><td className="py-2 pl-3">Nebulização · lacrar 12–24h</td></tr>
+              <tr className="border-b border-border/50"><td className="py-2 font-medium">Vetancid</td><td className="py-2 pl-3">Tratamento da cama</td><td className="py-2 pl-3 font-mono">Conforme sanitarista</td><td className="py-2 pl-3">Atomizador · lacrar 36h</td></tr>
+              <tr className="border-b border-border/50"><td className="py-2 font-medium">Cal virgem</td><td className="py-2 pl-3">Cama + pedilúvios</td><td className="py-2 pl-3 font-mono">Espalhar até incorporar</td><td className="py-2 pl-3">Trocar cal do pedilúvio</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 p-3 rounded-md bg-amber-500/10 border border-amber-500/30 text-sm">
+          <strong>Segurança:</strong> formol e AVT são irritantes respiratórios. Usar máscara com filtro, luva e óculos. Nunca entrar no galpão lacrado — abrir e ventilar pelo menos 2h antes de retornar.
+        </div>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={reset} disabled={feitos === 0}>Zerar checklist para o próximo vazio</Button>
+      </div>
+    </div>
   );
 }
