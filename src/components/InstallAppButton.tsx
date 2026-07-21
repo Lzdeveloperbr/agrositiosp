@@ -31,7 +31,7 @@ export function InstallAppButton({ size = "sm" as const }) {
 
   return (
     <>
-      <Button onClick={handleClick} variant="outline" size={size} className="gap-1.5">
+      <Button onClick={handleClick} variant="outline" size={size} className="gap-1.5 w-full sm:w-auto">
         <Smartphone className="h-4 w-4" />
         Instalar como app
       </Button>
