@@ -4,8 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sprout, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { toast } from "sonner";
+import logoUrl from "@/assets/logo-agrositio.png";
 
 export function EntrarFazenda() {
   const { entrar, criar, setOperador } = useFazenda();
@@ -30,17 +31,22 @@ export function EntrarFazenda() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 surface grain relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full blur-3xl" style={{ background: "radial-gradient(closest-side, oklch(0.86 0.20 125 / 0.22), transparent 70%)" }} />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 h-[520px] w-[520px] rounded-full blur-3xl" style={{ background: "radial-gradient(closest-side, oklch(0.78 0.13 82 / 0.22), transparent 70%)" }} />
       <Card className="w-full max-w-md p-7 space-y-6 card-elevated relative">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
-            <Sprout className="h-6 w-6 text-primary-foreground" />
+        <div className="flex flex-col items-center text-center gap-3">
+          <div className="relative">
+            <div aria-hidden className="absolute inset-0 rounded-full blur-2xl opacity-60" style={{ background: "var(--gradient-primary)" }} />
+            <img src={logoUrl} alt="AgroSítio" width={120} height={120} className="h-28 w-28 object-contain relative" />
           </div>
-          <div className="min-w-0">
-            <h1 className="font-display text-2xl font-bold leading-tight tracking-tight">
+          <div>
+            <h1 className="font-display text-3xl font-bold leading-tight tracking-tight">
               Agro<span className="text-gradient">Sítio</span>
             </h1>
-            <p className="text-xs text-muted-foreground">Gestão profissional · sincronizada com sua família</p>
+            <div className="mt-1 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.28em] text-primary/90 font-semibold">
+              <span className="h-px w-6 bg-primary/50" />
+              Avicultura de Corte
+              <span className="h-px w-6 bg-primary/50" />
+            </div>
           </div>
         </div>
 
@@ -89,8 +95,8 @@ export function EntrarFazenda() {
           {loading ? "..." : modo === "entrar" ? "Entrar na fazenda →" : "Criar fazenda →"}
         </Button>
 
-        <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground/60">
-          Agropecuária · Granja · Gado · Lavoura
+        <p className="text-center text-[10px] uppercase tracking-[0.28em] text-muted-foreground/60">
+          Manejo · Nutrição · Sanidade · Resultados
         </p>
       </Card>
     </div>
