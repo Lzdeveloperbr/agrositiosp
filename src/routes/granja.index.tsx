@@ -220,3 +220,17 @@ function Mini({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function KpiTile({ icon: Icon, label, value, sub, tone }: { icon: any; label: string; value: string; sub?: string; tone?: "ok" | "warn" | "bad" }) {
+  const toneColor = tone === "ok" ? "text-success" : tone === "warn" ? "text-warning" : tone === "bad" ? "text-destructive" : "text-primary";
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-card/70 border border-border p-3.5">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{label}</span>
+        <Icon className={`h-3.5 w-3.5 ${toneColor}`} />
+      </div>
+      <div className="font-display font-bold text-2xl tabular-nums leading-none">{value}</div>
+      {sub && <div className={`text-[10px] mt-1 ${toneColor}`}>{sub}</div>}
+    </div>
+  );
+}
