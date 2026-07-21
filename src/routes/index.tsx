@@ -88,7 +88,7 @@ function Dashboard() {
           style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-soft)" }}
         >
           <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-          <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="text-xs md:text-sm text-muted-foreground capitalize min-h-[18px]">
                 {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
@@ -100,11 +100,11 @@ function Dashboard() {
                 {fazendaNome ? `${fazendaNome} · Resumo de hoje no sítio` : "Resumo de hoje no sítio"}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 shrink-0">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:shrink-0">
               <InstallAppButton />
-              <Button asChild variant="outline" size="sm"><Link to="/lembretes">Lembretes</Link></Button>
-              <Button asChild variant="outline" size="sm"><Link to="/diario">+ Diário</Link></Button>
-              <Button asChild size="sm"><Link to="/relatorios">Relatórios</Link></Button>
+              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/lembretes">Lembretes</Link></Button>
+              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/diario">+ Diário</Link></Button>
+              <Button asChild size="sm" className="w-full sm:w-auto"><Link to="/relatorios">Relatórios</Link></Button>
             </div>
           </div>
         </header>
