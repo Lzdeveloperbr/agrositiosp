@@ -116,6 +116,47 @@ function GranjaPage() {
           </Dialog>
         </header>
 
+        {ativos.length > 0 && (
+          <Card className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg grid place-items-center" style={{ background: "var(--gradient-primary)" }}>
+                  <Activity className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="font-display font-semibold text-base leading-tight">Painel Operacional</h2>
+                  <p className="text-[11px] text-muted-foreground">{kpis.ativos} lote{kpis.ativos > 1 ? "s" : ""} em produção · idade média {kpis.idadeMedia.toFixed(0)}d</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="border-primary/40 text-primary">Ao vivo</Badge>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <KpiTile icon={Bird} label="Aves vivas" value={kpis.vivas.toLocaleString("pt-BR")} sub={`de ${kpis.totalAves.toLocaleString("pt-BR")}`} />
+              <KpiTile icon={Target} label="Mortalidade" value={`${kpis.mortalidade.toFixed(2)}%`} sub={kpis.mortalidade < 3 ? "Excelente" : kpis.mortalidade < 5 ? "Bom" : "Atenção"} tone={kpis.mortalidade < 3 ? "ok" : kpis.mortalidade < 5 ? "warn" : "bad"} />
+              <KpiTile icon={Scale} label="Peso médio" value={kpis.pesoMedio ? `${kpis.pesoMedio.toFixed(0)} g` : "—"} sub="última pesagem" />
+              <KpiTile icon={Droplets} label="Idade média" value={`${kpis.idadeMedia.toFixed(0)} d`} sub="dias de vida" />
+            </div>
+          </Card>
+        )}
+
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 font-semibold mb-2 px-1">Módulos técnicos</div>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            {atalhos.map((a) => {
+              const Icon = a.icon;
+              return (
+                <Link key={a.to} to={a.to} className="group flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-card/60 border border-border hover:border-primary/50 hover:bg-card transition-all">
+                  <div className="h-9 w-9 rounded-lg grid place-items-center bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <span className="text-[11px] font-medium text-center leading-tight">{a.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+
         {lotes.length === 0 ? (
           <Card className="p-12 text-center border-dashed">
             <Bird className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
