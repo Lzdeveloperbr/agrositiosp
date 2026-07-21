@@ -210,8 +210,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 pb-24 md:pb-0">
-        <div className="p-4 md:p-8 max-w-7xl mx-auto">{children}</div>
+      <main className="flex-1 min-w-0 pb-28 md:pb-0">
+        <div className="px-3 py-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
 
         <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-2xl bg-sidebar/85 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
           {mobileBottom.map((it) => {
