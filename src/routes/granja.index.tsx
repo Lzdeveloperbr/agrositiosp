@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Bird, Plus, FileText, Trash2, ArrowRight } from "lucide-react";
+import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 
@@ -53,13 +53,50 @@ function GranjaPage() {
     setLotes((prev) => prev.filter((l) => l.id !== id));
   };
 
+  const ativos = lotes.filter((l) => !l.encerrado);
+  const kpis = useMemo(() => {
+    let totalAves = 0, vivas = 0, mortas = 0, somaPeso = 0, comPeso = 0, somaRacao = 0, somaAgua = 0;
+    for (const l of ativos) {
+      const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
+      totalAves += l.quantidadeInicial;
+      mortas += mort;
+      vivas += l.quantidadeInicial - mort;
+      const ult = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
+      if (ult) { somaPeso += ult; comPeso++; }
+      somaRacao += l.entries.reduce((s, e) => s + (e.racaoKg || 0), 0);
+      somaAgua += l.entries.reduce((s, e) => s + (e.aguaL || 0), 0);
+    }
+    return {
+      ativos: ativos.length,
+      vivas,
+      mortalidade: totalAves ? (mortas / totalAves) * 100 : 0,
+      pesoMedio: comPeso ? somaPeso / comPeso : 0,
+      racaoKg: somaRacao,
+      aguaL: somaAgua,
+    };
+  }, [ativos]);
+
+  const atalhos = [
+    { to: "/pesagem-pro", label: "Pesagem Pro", icon: Scale },
+    { to: "/excelencia-lote", label: "Excelência", icon: Trophy },
+    { to: "/checklist-granja", label: "Checklist", icon: ClipboardCheck },
+    { to: "/calendario-sanitario", label: "Sanitário", icon: Syringe },
+    { to: "/manejo", label: "Manejo", icon: BookOpen },
+    { to: "/ambiencia", label: "Ambiência", icon: Wind },
+    { to: "/analise-aves", label: "IA Aves", icon: Stethoscope },
+    { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3 },
+    { to: "/historico-lotes", label: "Histórico", icon: History },
+    { to: "/entregas-racao", label: "Ração", icon: Wheat },
+  ];
+
   return (
     <AppShell>
       <div className="space-y-6">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
+            <div className="text-[10px] uppercase tracking-[0.28em] text-primary/80 font-semibold mb-1">Avicultura de Corte</div>
             <h1 className="text-3xl md:text-4xl font-display font-bold">Granja</h1>
-            <p className="text-muted-foreground mt-1">Lotes de frango de corte · Bello Alimentos</p>
+            <p className="text-muted-foreground mt-1">Manejo · Nutrição · Sanidade · Resultados</p>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
