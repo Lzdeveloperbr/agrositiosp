@@ -55,7 +55,7 @@ function GranjaPage() {
 
   const ativos = lotes.filter((l) => !l.encerrado);
   const kpis = useMemo(() => {
-    let totalAves = 0, vivas = 0, mortas = 0, somaPeso = 0, comPeso = 0, somaRacao = 0, somaAgua = 0;
+    let totalAves = 0, vivas = 0, mortas = 0, somaPeso = 0, comPeso = 0, diasSoma = 0;
     for (const l of ativos) {
       const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
       totalAves += l.quantidadeInicial;
@@ -63,16 +63,15 @@ function GranjaPage() {
       vivas += l.quantidadeInicial - mort;
       const ult = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
       if (ult) { somaPeso += ult; comPeso++; }
-      somaRacao += l.entries.reduce((s, e) => s + (e.racaoKg || 0), 0);
-      somaAgua += l.entries.reduce((s, e) => s + (e.aguaL || 0), 0);
+      diasSoma += Math.max(0, Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000));
     }
     return {
       ativos: ativos.length,
       vivas,
+      totalAves,
       mortalidade: totalAves ? (mortas / totalAves) * 100 : 0,
       pesoMedio: comPeso ? somaPeso / comPeso : 0,
-      racaoKg: somaRacao,
-      aguaL: somaAgua,
+      idadeMedia: ativos.length ? diasSoma / ativos.length : 0,
     };
   }, [ativos]);
 
