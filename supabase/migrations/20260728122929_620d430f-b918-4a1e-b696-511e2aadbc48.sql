@@ -1,0 +1,1 @@
+ALTER TABLE public.estoque ADD COLUMN IF NOT EXISTS lote_id text;

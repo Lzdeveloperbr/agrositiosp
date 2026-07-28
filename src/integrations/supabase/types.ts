@@ -424,6 +424,7 @@ export type Database = {
           created_at: string
           fazenda_id: string
           id: string
+          lote_id: string | null
           minimo: number | null
           movimentacoes: Json
           nome: string
@@ -437,6 +438,7 @@ export type Database = {
           created_at?: string
           fazenda_id: string
           id?: string
+          lote_id?: string | null
           minimo?: number | null
           movimentacoes?: Json
           nome: string
@@ -450,6 +452,7 @@ export type Database = {
           created_at?: string
           fazenda_id?: string
           id?: string
+          lote_id?: string | null
           minimo?: number | null
           movimentacoes?: Json
           nome?: string
