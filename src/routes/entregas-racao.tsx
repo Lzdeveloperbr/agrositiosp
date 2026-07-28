@@ -115,6 +115,7 @@ type Entrega = {
   documento_url?: string;     // foto da nota
   foto_caminhao_url?: string; // foto do caminhão
   observacoes?: string;
+  lote_id?: string | null;    // lote da granja ao qual a entrega pertence
 };
 
 function fmtKg(n: number) {
@@ -125,9 +126,29 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 function EntregasRacaoPage() {
   const { client, fazendaId } = useFazenda();
-  const [entregas, setEntregas] = useState<Entrega[]>([]);
+  const [todas, setTodas] = useState<Entrega[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [lotes] = useLotes();
+
+  // Lote ativo (mais recente não encerrado) — todo o controle de ração é por lote
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter(l => !l.encerrado);
+    return [...ativos].sort((a, b) => b.dataEntrada.localeCompare(a.dataEntrada))[0] || null;
+  }, [lotes]);
+
+  // Entregas do lote ativo (inclui registros antigos sem lote feitos após o alojamento)
+  const entregas = useMemo(() => {
+    if (!loteAtivo) return todas.filter(e => !e.lote_id);
+    return todas.filter(e => e.lote_id === loteAtivo.id || (!e.lote_id && e.data >= loteAtivo.dataEntrada));
+  }, [todas, loteAtivo]);
+
+  const entregasOutrosLotes = useMemo(
+    () => todas.filter(e => !entregas.includes(e)),
+    [todas, entregas]
+  );
+
+  const setEntregas = setTodas;
 
   useEffect(() => {
     if (!fazendaId) { setLoading(false); return; }
@@ -135,11 +156,12 @@ function EntregasRacaoPage() {
     client.from("entregas_racao").select("*").order("data", { ascending: false })
       .then(({ data }) => {
         if (cancel) return;
-        setEntregas((data as any[]) || []);
+        setTodas((data as any[]) || []);
         setLoading(false);
       });
     return () => { cancel = true; };
   }, [client, fazendaId]);
+
 
   const stats = useMemo(() => {
     const hoje = todayISO();
@@ -174,7 +196,9 @@ function EntregasRacaoPage() {
 
   async function addEntrega(e: Omit<Entrega, "id">) {
     if (!fazendaId) return;
-    const { data, error } = await client.from("entregas_racao").insert({ ...e, fazenda_id: fazendaId }).select().single();
+    if (!loteAtivo) { toast.error("Cadastre um lote ativo na Granja antes de lançar entregas"); return; }
+    const { data, error } = await client.from("entregas_racao")
+      .insert({ ...e, fazenda_id: fazendaId, lote_id: loteAtivo.id }).select().single();
     if (error) { toast.error("Erro: " + error.message); return; }
     setEntregas(prev => [data as any, ...prev]);
     toast.success("Entrega registrada");
@@ -216,6 +240,28 @@ function EntregasRacaoPage() {
             <EntregaForm onSave={addEntrega} />
           </div>
         </div>
+
+        <Card className="p-3 flex flex-wrap items-center gap-2 text-sm">
+          <Drumstick className="h-4 w-4 text-primary" />
+          {loteAtivo ? (
+            <>
+              <span className="font-semibold">Lote {loteAtivo.numero}</span>
+              <Badge variant="outline" className="text-[10px]">
+                alojado em {new Date(loteAtivo.dataEntrada + "T00:00").toLocaleDateString("pt-BR")}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                Todas as entregas e o estoque abaixo são só deste lote — ao iniciar um novo lote tudo começa zerado.
+              </span>
+              {entregasOutrosLotes.length > 0 && (
+                <Badge variant="secondary" className="text-[10px]">{entregasOutrosLotes.length} entrega(s) de lotes anteriores ocultas</Badge>
+              )}
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground">Nenhum lote ativo — cadastre um lote na Granja para registrar entregas.</span>
+          )}
+        </Card>
+
+
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard label="Hoje" value={fmtKg(stats.hoje)} hint={`${stats.hojeQt} caminhões`} icon={CalIcon} tone="primary" />
