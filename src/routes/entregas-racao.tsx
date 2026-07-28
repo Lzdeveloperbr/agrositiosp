@@ -196,7 +196,9 @@ function EntregasRacaoPage() {
 
   async function addEntrega(e: Omit<Entrega, "id">) {
     if (!fazendaId) return;
-    const { data, error } = await client.from("entregas_racao").insert({ ...e, fazenda_id: fazendaId }).select().single();
+    if (!loteAtivo) { toast.error("Cadastre um lote ativo na Granja antes de lançar entregas"); return; }
+    const { data, error } = await client.from("entregas_racao")
+      .insert({ ...e, fazenda_id: fazendaId, lote_id: loteAtivo.id }).select().single();
     if (error) { toast.error("Erro: " + error.message); return; }
     setEntregas(prev => [data as any, ...prev]);
     toast.success("Entrega registrada");
