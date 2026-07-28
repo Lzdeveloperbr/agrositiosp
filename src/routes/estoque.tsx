@@ -37,17 +37,36 @@ const CATS = [
 
 function EstoquePage() {
   const [itens, setItens] = useEstoque();
+  const [lotes] = useLotes();
   const [open, setOpen] = useState(false);
   const [movItem, setMovItem] = useState<string | null>(null);
   const [movTipo, setMovTipo] = useState<"entrada" | "saida">("entrada");
   const [movQtd, setMovQtd] = useState(0);
   const [movNota, setMovNota] = useState("");
 
+  // Lote ativo (mais recente não encerrado) — a ração é sempre por lote
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter((l) => !l.encerrado);
+    return [...ativos].sort((a, b) => b.dataEntrada.localeCompare(a.dataEntrada))[0] || null;
+  }, [lotes]);
+
+  // Itens visíveis: ração apenas do lote ativo; demais categorias sempre
+  const visiveis = useMemo(
+    () => itens.filter((i) => i.categoria !== "racao" || (loteAtivo ? i.loteId === loteAtivo.id : !i.loteId)),
+    [itens, loteAtivo]
+  );
+  const racaoOutrosLotes = useMemo(
+    () => itens.filter((i) => i.categoria === "racao" && !visiveis.includes(i)),
+    [itens, visiveis]
+  );
+
   const [form, setForm] = useState({ nome: "", categoria: "racao" as any, unidade: "kg", quantidade: 0, minimo: undefined as number | undefined });
 
   const criar = () => {
     if (!form.nome) { toast.error("Nome obrigatório"); return; }
-    setItens((p) => [{ id: uid(), ...form, movimentacoes: [] }, ...p]);
+    if (form.categoria === "racao" && !loteAtivo) { toast.error("Cadastre um lote ativo na Granja antes de lançar ração"); return; }
+    const loteId = form.categoria === "racao" ? loteAtivo?.id : undefined;
+    setItens((p) => [{ id: uid(), ...form, loteId, movimentacoes: [] }, ...p]);
     setOpen(false);
     setForm({ nome: "", categoria: "racao", unidade: "kg", quantidade: 0, minimo: undefined });
     toast.success("Item adicionado");
