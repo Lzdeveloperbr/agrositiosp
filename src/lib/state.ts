@@ -75,8 +75,8 @@ const tarefaMap: Mapper<Tarefa> = {
 };
 
 const estoqueMap: Mapper<ItemEstoque> = {
-  toRow: (i) => ({ id: i.id, nome: i.nome, categoria: i.categoria, unidade: i.unidade, quantidade: i.quantidade, minimo: i.minimo ?? null, observacoes: i.observacoes ?? null, movimentacoes: i.movimentacoes }),
-  fromRow: (r) => ({ id: r.id, nome: r.nome, categoria: r.categoria, unidade: r.unidade, quantidade: Number(r.quantidade), minimo: r.minimo ?? undefined, observacoes: r.observacoes ?? undefined, movimentacoes: r.movimentacoes ?? [] }),
+  toRow: (i) => ({ id: i.id, nome: i.nome, categoria: i.categoria, unidade: i.unidade, quantidade: i.quantidade, minimo: i.minimo ?? null, observacoes: i.observacoes ?? null, lote_id: i.loteId ?? null, movimentacoes: i.movimentacoes }),
+  fromRow: (r) => ({ id: r.id, nome: r.nome, categoria: r.categoria, unidade: r.unidade, quantidade: Number(r.quantidade), minimo: r.minimo ?? undefined, observacoes: r.observacoes ?? undefined, loteId: r.lote_id ?? undefined, movimentacoes: r.movimentacoes ?? [] }),
 };
 
 const finMap: Mapper<Lancamento> = {

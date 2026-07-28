@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { useEstoque } from "@/lib/state";
+import { useEstoque, useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle } from "lucide-react";
+import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Bird, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { LiveRacaoBanner } from "@/components/LiveRacaoBanner";
 
@@ -37,17 +37,36 @@ const CATS = [
 
 function EstoquePage() {
   const [itens, setItens] = useEstoque();
+  const [lotes] = useLotes();
   const [open, setOpen] = useState(false);
   const [movItem, setMovItem] = useState<string | null>(null);
   const [movTipo, setMovTipo] = useState<"entrada" | "saida">("entrada");
   const [movQtd, setMovQtd] = useState(0);
   const [movNota, setMovNota] = useState("");
 
+  // Lote ativo (mais recente não encerrado) — a ração é sempre por lote
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter((l) => !l.encerrado);
+    return [...ativos].sort((a, b) => b.dataEntrada.localeCompare(a.dataEntrada))[0] || null;
+  }, [lotes]);
+
+  // Itens visíveis: ração apenas do lote ativo; demais categorias sempre
+  const visiveis = useMemo(
+    () => itens.filter((i) => i.categoria !== "racao" || (loteAtivo ? i.loteId === loteAtivo.id : !i.loteId)),
+    [itens, loteAtivo]
+  );
+  const racaoOutrosLotes = useMemo(
+    () => itens.filter((i) => i.categoria === "racao" && !visiveis.includes(i)),
+    [itens, visiveis]
+  );
+
   const [form, setForm] = useState({ nome: "", categoria: "racao" as any, unidade: "kg", quantidade: 0, minimo: undefined as number | undefined });
 
   const criar = () => {
     if (!form.nome) { toast.error("Nome obrigatório"); return; }
-    setItens((p) => [{ id: uid(), ...form, movimentacoes: [] }, ...p]);
+    if (form.categoria === "racao" && !loteAtivo) { toast.error("Cadastre um lote ativo na Granja antes de lançar ração"); return; }
+    const loteId = form.categoria === "racao" ? loteAtivo?.id : undefined;
+    setItens((p) => [{ id: uid(), ...form, loteId, movimentacoes: [] }, ...p]);
     setOpen(false);
     setForm({ nome: "", categoria: "racao", unidade: "kg", quantidade: 0, minimo: undefined });
     toast.success("Item adicionado");
@@ -99,9 +118,22 @@ function EstoquePage() {
           </Dialog>
         </header>
 
-        <LiveRacaoBanner itens={itens} />
+        <Card className="p-3 flex flex-wrap items-center gap-2 text-sm">
+          <Bird className="h-4 w-4 text-primary" />
+          {loteAtivo ? (
+            <>
+              <span className="font-semibold">Ração do Lote {loteAtivo.numero}</span>
+              <Badge variant="outline" className="text-[10px]">entrada {new Date(loteAtivo.dataEntrada + "T00:00:00").toLocaleDateString("pt-BR")}</Badge>
+              <span className="text-xs text-muted-foreground">O estoque de ração é exclusivo deste lote — ao iniciar um novo lote ele começa zerado.</span>
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground">Nenhum lote ativo — cadastre um lote na Granja para controlar a ração.</span>
+          )}
+        </Card>
 
-        {itens.length === 0 ? (
+        <LiveRacaoBanner itens={visiveis} />
+
+        {visiveis.length === 0 ? (
           <Card className="p-12 text-center border-dashed">
             <Boxes className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-lg font-medium">Sem itens</p>
@@ -110,7 +142,7 @@ function EstoquePage() {
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {itens.map((i) => {
+            {visiveis.map((i) => {
               const baixo = i.minimo !== undefined && i.quantidade <= i.minimo;
               return (
                 <Card key={i.id} className={`p-4 ${baixo ? "border-destructive/40" : ""}`} style={{ background: "var(--gradient-surface)" }}>
@@ -133,6 +165,37 @@ function EstoquePage() {
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {racaoOutrosLotes.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+              <Archive className="h-3.5 w-3.5" /> Ração de lotes anteriores (histórico)
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {racaoOutrosLotes.map((i) => {
+                const lote = lotes.find((l) => l.id === i.loteId);
+                return (
+                  <Card key={i.id} className="p-4 opacity-70">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-sm">{i.nome}</h3>
+                        <p className="text-[11px] text-muted-foreground">{lote ? `Lote ${lote.numero}` : "sem lote"}</p>
+                      </div>
+                      <Button size="icon" variant="ghost" onClick={() => remover(i.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                    <p className="font-display font-bold text-xl tabular-nums mt-2">{i.quantidade.toLocaleString("pt-BR")} <span className="text-xs text-muted-foreground font-normal">{i.unidade}</span></p>
+                    {loteAtivo && (
+                      <Button size="sm" variant="outline" className="w-full mt-2"
+                        onClick={() => setItens((p) => p.map((x) => x.id === i.id ? { ...x, loteId: loteAtivo.id } : x))}>
+                        Transferir para o Lote {loteAtivo.numero}
+                      </Button>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         )}
 
