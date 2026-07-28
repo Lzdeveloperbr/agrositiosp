@@ -126,9 +126,29 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 function EntregasRacaoPage() {
   const { client, fazendaId } = useFazenda();
-  const [entregas, setEntregas] = useState<Entrega[]>([]);
+  const [todas, setTodas] = useState<Entrega[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [lotes] = useLotes();
+
+  // Lote ativo (mais recente não encerrado) — todo o controle de ração é por lote
+  const loteAtivo = useMemo(() => {
+    const ativos = lotes.filter(l => !l.encerrado);
+    return [...ativos].sort((a, b) => b.dataEntrada.localeCompare(a.dataEntrada))[0] || null;
+  }, [lotes]);
+
+  // Entregas do lote ativo (inclui registros antigos sem lote feitos após o alojamento)
+  const entregas = useMemo(() => {
+    if (!loteAtivo) return todas.filter(e => !e.lote_id);
+    return todas.filter(e => e.lote_id === loteAtivo.id || (!e.lote_id && e.data >= loteAtivo.dataEntrada));
+  }, [todas, loteAtivo]);
+
+  const entregasOutrosLotes = useMemo(
+    () => todas.filter(e => !entregas.includes(e)),
+    [todas, entregas]
+  );
+
+  const setEntregas = setTodas;
 
   useEffect(() => {
     if (!fazendaId) { setLoading(false); return; }
@@ -136,11 +156,12 @@ function EntregasRacaoPage() {
     client.from("entregas_racao").select("*").order("data", { ascending: false })
       .then(({ data }) => {
         if (cancel) return;
-        setEntregas((data as any[]) || []);
+        setTodas((data as any[]) || []);
         setLoading(false);
       });
     return () => { cancel = true; };
   }, [client, fazendaId]);
+
 
   const stats = useMemo(() => {
     const hoje = todayISO();
