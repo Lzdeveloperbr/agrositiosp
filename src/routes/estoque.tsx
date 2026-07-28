@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { useEstoque } from "@/lib/state";
+import { useEstoque, useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle } from "lucide-react";
+import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Bird, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { LiveRacaoBanner } from "@/components/LiveRacaoBanner";
 
