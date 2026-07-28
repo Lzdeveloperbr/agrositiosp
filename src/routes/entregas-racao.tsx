@@ -115,6 +115,7 @@ type Entrega = {
   documento_url?: string;     // foto da nota
   foto_caminhao_url?: string; // foto do caminhão
   observacoes?: string;
+  lote_id?: string | null;    // lote da granja ao qual a entrega pertence
 };
 
 function fmtKg(n: number) {
