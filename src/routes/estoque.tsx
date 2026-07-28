@@ -118,9 +118,22 @@ function EstoquePage() {
           </Dialog>
         </header>
 
-        <LiveRacaoBanner itens={itens} />
+        <Card className="p-3 flex flex-wrap items-center gap-2 text-sm">
+          <Bird className="h-4 w-4 text-primary" />
+          {loteAtivo ? (
+            <>
+              <span className="font-semibold">Ração do Lote {loteAtivo.numero}</span>
+              <Badge variant="outline" className="text-[10px]">entrada {new Date(loteAtivo.dataEntrada + "T00:00:00").toLocaleDateString("pt-BR")}</Badge>
+              <span className="text-xs text-muted-foreground">O estoque de ração é exclusivo deste lote — ao iniciar um novo lote ele começa zerado.</span>
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground">Nenhum lote ativo — cadastre um lote na Granja para controlar a ração.</span>
+          )}
+        </Card>
 
-        {itens.length === 0 ? (
+        <LiveRacaoBanner itens={visiveis} />
+
+        {visiveis.length === 0 ? (
           <Card className="p-12 text-center border-dashed">
             <Boxes className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-lg font-medium">Sem itens</p>
@@ -129,7 +142,7 @@ function EstoquePage() {
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {itens.map((i) => {
+            {visiveis.map((i) => {
               const baixo = i.minimo !== undefined && i.quantidade <= i.minimo;
               return (
                 <Card key={i.id} className={`p-4 ${baixo ? "border-destructive/40" : ""}`} style={{ background: "var(--gradient-surface)" }}>
@@ -152,6 +165,37 @@ function EstoquePage() {
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {racaoOutrosLotes.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+              <Archive className="h-3.5 w-3.5" /> Ração de lotes anteriores (histórico)
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {racaoOutrosLotes.map((i) => {
+                const lote = lotes.find((l) => l.id === i.loteId);
+                return (
+                  <Card key={i.id} className="p-4 opacity-70">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-sm">{i.nome}</h3>
+                        <p className="text-[11px] text-muted-foreground">{lote ? `Lote ${lote.numero}` : "sem lote"}</p>
+                      </div>
+                      <Button size="icon" variant="ghost" onClick={() => remover(i.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                    <p className="font-display font-bold text-xl tabular-nums mt-2">{i.quantidade.toLocaleString("pt-BR")} <span className="text-xs text-muted-foreground font-normal">{i.unidade}</span></p>
+                    {loteAtivo && (
+                      <Button size="sm" variant="outline" className="w-full mt-2"
+                        onClick={() => setItens((p) => p.map((x) => x.id === i.id ? { ...x, loteId: loteAtivo.id } : x))}>
+                        Transferir para o Lote {loteAtivo.numero}
+                      </Button>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         )}
 
