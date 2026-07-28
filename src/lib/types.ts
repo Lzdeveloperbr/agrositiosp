@@ -118,6 +118,8 @@ export type ItemEstoque = {
   quantidade: number;
   minimo?: number;
   observacoes?: string;
+  /** Lote da granja ao qual o item pertence (usado na ração) */
+  loteId?: string;
   movimentacoes: { id: string; data: string; tipo: "entrada" | "saida"; quantidade: number; nota?: string }[];
 };
 
