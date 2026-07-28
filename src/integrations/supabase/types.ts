@@ -372,6 +372,7 @@ export type Database = {
           galpao: string | null
           granja_id: string | null
           id: string
+          lote_id: string | null
           motorista: string | null
           observacoes: string | null
           placa: string | null
@@ -390,6 +391,7 @@ export type Database = {
           galpao?: string | null
           granja_id?: string | null
           id?: string
+          lote_id?: string | null
           motorista?: string | null
           observacoes?: string | null
           placa?: string | null
@@ -408,6 +410,7 @@ export type Database = {
           galpao?: string | null
           granja_id?: string | null
           id?: string
+          lote_id?: string | null
           motorista?: string | null
           observacoes?: string | null
           placa?: string | null
