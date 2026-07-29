@@ -41,6 +41,7 @@ import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
 import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
 import { Route as CalculadoraAgroRouteImport } from './routes/calculadora-agro'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -214,6 +215,11 @@ const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
   path: '/checklist-granja',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
   id: '/calendario-sanitario',
   path: '/calendario-sanitario',
@@ -284,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
+  '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
+  '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -377,6 +385,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
+  '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
@@ -425,6 +434,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/calculadora-agro'
     | '/calendario-sanitario'
+    | '/chat'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -471,6 +481,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/calculadora-agro'
     | '/calendario-sanitario'
+    | '/chat'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/calculadora-agro'
     | '/calendario-sanitario'
+    | '/chat'
     | '/checklist-granja'
     | '/chuvas'
     | '/comparativo-lotes'
@@ -564,6 +576,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   CalculadoraAgroRoute: typeof CalculadoraAgroRoute
   CalendarioSanitarioRoute: typeof CalendarioSanitarioRoute
+  ChatRoute: typeof ChatRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ChuvasRoute: typeof ChuvasRoute
   ComparativoLotesRoute: typeof ComparativoLotesRoute
@@ -828,6 +841,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChecklistGranjaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendario-sanitario': {
       id: '/calendario-sanitario'
       path: '/calendario-sanitario'
@@ -924,6 +944,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   CalculadoraAgroRoute: CalculadoraAgroRoute,
   CalendarioSanitarioRoute: CalendarioSanitarioRoute,
+  ChatRoute: ChatRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
   ChuvasRoute: ChuvasRoute,
   ComparativoLotesRoute: ComparativoLotesRoute,

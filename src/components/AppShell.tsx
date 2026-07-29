@@ -20,6 +20,7 @@ const groups: { label: string; items: Item[] }[] = [
     items: [
       { to: "/", label: "Início", icon: LayoutDashboard },
       { to: "/agro-ia", label: "Agro IA", icon: Sparkles },
+      { to: "/chat", label: "Chat da Equipe", icon: MessagesSquare },
       { to: "/modo-campo", label: "Modo Campo", icon: MapPin },
       { to: "/diario", label: "Diário", icon: BookOpen },
       { to: "/tarefas", label: "Tarefas", icon: ListChecks },
