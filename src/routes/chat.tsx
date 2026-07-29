@@ -62,31 +62,52 @@ function ChatPage() {
     if (!fazendaId) { setCarregando(false); return; }
     let cancel = false;
     setCarregando(true);
-    client
-      .from("mensagens")
-      .select("id, autor, texto, created_at")
-      .order("created_at", { ascending: true })
-      .limit(500)
-      .then(({ data, error }) => {
-        if (cancel) return;
-        setCarregando(false);
-        if (error) { console.error("[mensagens]", error); return; }
-        setMsgs((data as Mensagem[]) ?? []);
+
+    const merge = (rows: Mensagem[]) =>
+      setMsgs((prev) => {
+        const map = new Map(prev.map((m) => [m.id, m]));
+        for (const r of rows) map.set(r.id, r);
+        return Array.from(map.values()).sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        );
       });
+
+    const carregar = async (inicial = false) => {
+      const { data, error } = await client
+        .from("mensagens")
+        .select("id, autor, texto, created_at")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (cancel) return;
+      if (inicial) setCarregando(false);
+      if (error) { console.error("[mensagens]", error); return; }
+      merge(((data as Mensagem[]) ?? []).slice().reverse());
+    };
+
+    void carregar(true);
+
+    // Atualização automática (fallback confiável ao realtime)
+    const timer = setInterval(() => { void carregar(); }, 2000);
+    const onFocus = () => void carregar();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
 
     const ch = client
       .channel(`rt:mensagens:${fazendaId}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "mensagens", filter: `fazenda_id=eq.${fazendaId}` },
-        (payload) => {
-          const m = payload.new as Mensagem;
-          setMsgs((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]));
-        },
+        (payload) => merge([payload.new as Mensagem]),
       )
       .subscribe();
 
-    return () => { cancel = true; client.removeChannel(ch); };
+    return () => {
+      cancel = true;
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+      client.removeChannel(ch);
+    };
   }, [client, fazendaId]);
 
   useEffect(() => {
