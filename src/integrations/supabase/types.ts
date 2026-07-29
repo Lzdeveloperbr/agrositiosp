@@ -767,6 +767,38 @@ export type Database = {
           },
         ]
       }
+      mensagens: {
+        Row: {
+          autor: string
+          created_at: string
+          fazenda_id: string
+          id: string
+          texto: string
+        }
+        Insert: {
+          autor: string
+          created_at?: string
+          fazenda_id: string
+          id?: string
+          texto: string
+        }
+        Update: {
+          autor?: string
+          created_at?: string
+          fazenda_id?: string
+          id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitoramentos: {
         Row: {
           acao: string | null
