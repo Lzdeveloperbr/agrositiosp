@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
   Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck, ClipboardCheck, Trophy,
-  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark, Scale,
+  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark, Scale, MessagesSquare,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
