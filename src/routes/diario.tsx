@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useDiario } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import type { DiarioEntry, DiarioFoto } from "@/lib/types";
-import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Camera, Trash2, MapPin, FileText, X, CloudSun, Loader2, Images } from "lucide-react";
 import { toast } from "sonner";
 import { gerarRelatorioDiario } from "@/lib/pdf";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
@@ -43,6 +43,7 @@ function DiarioPage() {
   const [filtro, setFiltro] = useState<string>("todas");
   const [busca, setBusca] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const galeriaRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<{ data: string; titulo: string; categoria: any; texto: string; condicao: string; temperatura?: number; chuvaMm?: number; gps?: { lat: number; lon: number }; fotos: DiarioFoto[] }>({
     data: new Date().toISOString().slice(0, 10),

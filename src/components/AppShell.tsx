@@ -3,13 +3,14 @@ import {
   LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
   Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck, ClipboardCheck, Trophy,
-  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark, Scale, MessagesSquare,
+  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark, Scale, MessagesSquare, Store,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ChatNotifier } from "@/components/ChatNotifier";
 import logoUrl from "@/assets/logo-agrositio.png";
 
 type Item = { to: string; label: string; icon: any };
@@ -75,6 +76,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/medir-area", label: "Medir Área (satélite)", icon: Ruler },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator },
       { to: "/automacoes", label: "Automações", icon: Sparkles },
+      { to: "/fornecedores", label: "Fornecedores", icon: Store },
       { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark },
       { to: "/relatorios", label: "Relatórios", icon: FileText },
       { to: "/backup", label: "Backup", icon: Database },
