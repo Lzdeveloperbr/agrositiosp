@@ -101,6 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
+      <ChatNotifier />
       <aside className="hidden md:flex md:w-64 flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border sticky top-0 h-screen">
         <div className="p-5 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3 group">
