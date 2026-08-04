@@ -560,6 +560,83 @@ export type Database = {
           },
         ]
       }
+      fornecedores: {
+        Row: {
+          autor: string | null
+          categoria: string
+          cep: string | null
+          cidade: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          favorito: boolean
+          fazenda_id: string
+          foto_url: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          nome: string
+          observacoes: string | null
+          responsavel: string | null
+          telefone: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          autor?: string | null
+          categoria?: string
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          favorito?: boolean
+          fazenda_id: string
+          foto_url?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nome: string
+          observacoes?: string | null
+          responsavel?: string | null
+          telefone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          autor?: string | null
+          categoria?: string
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          favorito?: boolean
+          fazenda_id?: string
+          foto_url?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nome?: string
+          observacoes?: string | null
+          responsavel?: string | null
+          telefone?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       granjas_racao: {
         Row: {
           autor: string | null
