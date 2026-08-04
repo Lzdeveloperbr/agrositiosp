@@ -29,6 +29,7 @@ import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
 import { Route as GadoProRouteImport } from './routes/gado-pro'
+import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
@@ -153,6 +154,11 @@ const GuiaCultivoRoute = GuiaCultivoRouteImport.update({
 const GadoProRoute = GadoProRouteImport.update({
   id: '/gado-pro',
   path: '/gado-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FornecedoresRoute = FornecedoresRouteImport.update({
+  id: '/fornecedores',
+  path: '/fornecedores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
@@ -398,6 +406,7 @@ export interface FileRoutesById {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
@@ -494,6 +504,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
@@ -589,6 +601,7 @@ export interface RootRouteChildren {
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  FornecedoresRoute: typeof FornecedoresRoute
   GadoProRoute: typeof GadoProRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
@@ -755,6 +768,13 @@ declare module '@tanstack/react-router' {
       path: '/gado-pro'
       fullPath: '/gado-pro'
       preLoaderRoute: typeof GadoProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fornecedores': {
+      id: '/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/fornecedores'
+      preLoaderRoute: typeof FornecedoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -957,6 +977,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
+  FornecedoresRoute: FornecedoresRoute,
   GadoProRoute: GadoProRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
