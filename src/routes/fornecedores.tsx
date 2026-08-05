@@ -19,7 +19,6 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import { geocodificarEndereco, reverterCoordenadas } from "@/lib/fornecedores.functions";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
-import { DARK_MAP_STYLE } from "@/lib/mapStyle";
 
 export const Route = createFileRoute("/fornecedores")({
   head: () => ({
@@ -145,7 +144,6 @@ function FornecedoresPage() {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: true,
-      styles: DARK_MAP_STYLE,
     });
     mapRef.current = map;
     map.addListener("click", (e: any) => {
