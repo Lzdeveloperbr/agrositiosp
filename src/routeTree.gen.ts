@@ -18,6 +18,7 @@ import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
+import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ModoCampoRouteImport } from './routes/modo-campo'
 import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as MedirAreaRouteImport } from './routes/medir-area'
@@ -99,6 +100,11 @@ const PesagemProRoute = PesagemProRouteImport.update({
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
   id: '/monitoramento',
   path: '/monitoramento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosRoute = ModulosRouteImport.update({
+  id: '/modulos',
+  path: '/modulos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModoCampoRoute = ModoCampoRouteImport.update({
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
+  '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
@@ -369,6 +376,7 @@ export interface FileRoutesByTo {
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
+  '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
@@ -418,6 +426,7 @@ export interface FileRoutesById {
   '/medir-area': typeof MedirAreaRoute
   '/mercado': typeof MercadoRoute
   '/modo-campo': typeof ModoCampoRoute
+  '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/medir-area'
     | '/mercado'
     | '/modo-campo'
+    | '/modulos'
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/medir-area'
     | '/mercado'
     | '/modo-campo'
+    | '/modulos'
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
@@ -564,6 +575,7 @@ export interface FileRouteTypes {
     | '/medir-area'
     | '/mercado'
     | '/modo-campo'
+    | '/modulos'
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
@@ -613,6 +625,7 @@ export interface RootRouteChildren {
   MedirAreaRoute: typeof MedirAreaRoute
   MercadoRoute: typeof MercadoRoute
   ModoCampoRoute: typeof ModoCampoRoute
+  ModulosRoute: typeof ModulosRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   PesagemProRoute: typeof PesagemProRoute
   PlantiosRoute: typeof PlantiosRoute
@@ -691,6 +704,13 @@ declare module '@tanstack/react-router' {
       path: '/monitoramento'
       fullPath: '/monitoramento'
       preLoaderRoute: typeof MonitoramentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modulos': {
+      id: '/modulos'
+      path: '/modulos'
+      fullPath: '/modulos'
+      preLoaderRoute: typeof ModulosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modo-campo': {
@@ -989,6 +1009,7 @@ const rootRouteChildren: RootRouteChildren = {
   MedirAreaRoute: MedirAreaRoute,
   MercadoRoute: MercadoRoute,
   ModoCampoRoute: ModoCampoRoute,
+  ModulosRoute: ModulosRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   PesagemProRoute: PesagemProRoute,
   PlantiosRoute: PlantiosRoute,
@@ -1006,12 +1027,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
