@@ -109,6 +109,27 @@ function Dashboard() {
           </div>
         </header>
 
+        <section aria-label="Acesso rápido">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Acesso rápido</h2>
+            <Link to="/modulos" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+              Todos os módulos <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
+            {ATALHOS.map((a) => (
+              <Link
+                key={a.to}
+                to={a.to}
+                className="card-elevated flex flex-col items-center justify-center gap-1.5 py-3 px-1 text-center transition-all hover:border-primary/40 hover:-translate-y-0.5"
+              >
+                <a.icon className="h-5 w-5 text-primary" />
+                <span className="text-[10px] leading-tight text-muted-foreground line-clamp-2">{a.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
 
         {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0 || lembretesHoje.length > 0) && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
