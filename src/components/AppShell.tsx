@@ -1,109 +1,176 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
-  Boxes, Wallet, Database, LogOut, Tractor, CloudRain, Bug, ShoppingCart, Menu, Sprout, BellRing,
-  Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck, ClipboardCheck, Trophy,
-  BarChart3, Syringe, History, Ruler, Calculator, MapPin, Landmark, Scale, MessagesSquare, Store,
-} from "lucide-react";
-import { useState } from "react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { LogOut, Menu, Search, Grid3X3, ChevronDown, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChatNotifier } from "@/components/ChatNotifier";
+import { NAV_GROUPS, MOBILE_BOTTOM, ALL_NAV_ITEMS, buscarModulos, type NavItem } from "@/lib/nav";
 import logoUrl from "@/assets/logo-agrositio.png";
 
-type Item = { to: string; label: string; icon: any };
+function NavLinkRow({ item, active, onClick, compact }: { item: NavItem; active: boolean; onClick?: () => void; compact?: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      to={item.to}
+      onClick={onClick}
+      className={cn(
+        "relative flex items-center gap-3 pl-3 pr-3 rounded-lg text-sm font-medium transition-all",
+        compact ? "py-2" : "py-2.5",
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+          : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40",
+      )}
+    >
+      {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-primary" />}
+      <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} />
+      <span className="truncate">{item.label}</span>
+    </Link>
+  );
+}
 
-const groups: { label: string; items: Item[] }[] = [
-  {
-    label: "Operação",
-    items: [
-      { to: "/", label: "Início", icon: LayoutDashboard },
-      { to: "/agro-ia", label: "Agro IA", icon: Sparkles },
-      { to: "/chat", label: "Chat da Equipe", icon: MessagesSquare },
-      { to: "/modo-campo", label: "Modo Campo", icon: MapPin },
-      { to: "/diario", label: "Diário", icon: BookOpen },
-      { to: "/tarefas", label: "Tarefas", icon: ListChecks },
-      { to: "/lembretes", label: "Lembretes", icon: BellRing },
-      { to: "/quiz", label: "Quiz Diário", icon: ClipboardList },
-    ],
-  },
-  {
-    label: "Produção",
-    items: [
-      { to: "/granja", label: "Granja", icon: Bird },
-      { to: "/pesagem-pro", label: "Pesagem Pro", icon: Scale },
-      { to: "/checklist-granja", label: "Checklist Diário", icon: ClipboardCheck },
-      { to: "/excelencia-lote", label: "Excelência do Lote", icon: Trophy },
-      { to: "/comparativo-lotes", label: "Comparativo Lotes", icon: BarChart3 },
-      { to: "/historico-lotes", label: "Histórico & Benchmark", icon: History },
-      { to: "/calendario-sanitario", label: "Calendário Sanitário", icon: Syringe },
+function NavTree({ pathname, onNavigate, initialOpenAll }: { pathname: string; onNavigate?: () => void; initialOpenAll?: boolean }) {
+  const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/"));
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const base: Record<string, boolean> = {};
+    NAV_GROUPS.forEach((g) => {
+      base[g.label] = initialOpenAll ? true : g.items.some((i) => isActive(i.to)) || g.label === "Dia a dia";
+    });
+    return base;
+  });
+  const [q, setQ] = useState("");
+  const results = buscarModulos(q);
 
+  return (
+    <div className="space-y-3">
+      <div className="relative px-1">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar módulo…"
+          className="pl-9 h-9 bg-sidebar-accent/40 border-sidebar-border"
+        />
+      </div>
 
+      {q ? (
+        <div className="space-y-0.5">
+          {results.length === 0 && <p className="px-3 py-6 text-sm text-muted-foreground text-center">Nada encontrado.</p>}
+          {results.map((it) => (
+            <NavLinkRow key={it.to} item={it} active={isActive(it.to)} onClick={onNavigate} compact />
+          ))}
+        </div>
+      ) : (
+        NAV_GROUPS.map((g) => {
+          const open = openGroups[g.label];
+          const GIcon = g.icon;
+          return (
+            <div key={g.label}>
+              <button
+                type="button"
+                onClick={() => setOpenGroups((p) => ({ ...p, [g.label]: !p[g.label] }))}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 font-semibold hover:text-foreground transition-colors"
+              >
+                <GIcon className="h-3.5 w-3.5" />
+                <span className="flex-1 text-left">{g.label}</span>
+                <span className="text-[10px] tabular-nums opacity-60">{g.items.length}</span>
+                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !open && "-rotate-90")} />
+              </button>
+              {open && (
+                <div className="space-y-0.5 mt-0.5">
+                  {g.items.map((it) => (
+                    <NavLinkRow key={it.to} item={it} active={isActive(it.to)} onClick={onNavigate} compact />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
 
-      { to: "/analise-aves", label: "Análise IA Aves", icon: Stethoscope },
-      { to: "/manejo", label: "Manejo Frango", icon: BookOpen },
-      { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList },
-      { to: "/ambiencia", label: "Ambiência Aviário", icon: Wind },
-      { to: "/gado", label: "Gado", icon: Beef },
-      { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp },
-      { to: "/leite", label: "Leite", icon: Milk },
-      { to: "/veterinario", label: "Veterinário", icon: Stethoscope },
-      { to: "/racao", label: "Fábrica Ração", icon: Factory },
-      { to: "/entregas-racao", label: "Entregas Ração", icon: Truck },
-      { to: "/guia-cultivo", label: "Guia de Cultivo", icon: Sprout },
-      { to: "/plantios", label: "Plantios", icon: Sprout },
-      { to: "/chuvas", label: "Chuvas", icon: CloudRain },
-      { to: "/monitoramento", label: "Monitoramento", icon: Bug },
-    ],
-  },
-  {
-    label: "Recursos",
-    items: [
-      { to: "/estoque", label: "Estoque", icon: Boxes },
-      { to: "/compras", label: "Compras", icon: ShoppingCart },
-      { to: "/maquinas", label: "Máquinas", icon: Tractor },
-      { to: "/energia", label: "Energia", icon: Zap },
-    ],
-  },
-  {
-    label: "Gestão",
-    items: [
-      { to: "/financeiro", label: "Finanças", icon: Wallet },
-      { to: "/mercado", label: "Mercado Agro", icon: BarChart3 },
-      { to: "/custos", label: "Custos por Lote", icon: TrendingUp },
-      { to: "/medir-area", label: "Medir Área (satélite)", icon: Ruler },
-      { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator },
-      { to: "/automacoes", label: "Automações", icon: Sparkles },
-      { to: "/fornecedores", label: "Fornecedores", icon: Store },
-      { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark },
-      { to: "/relatorios", label: "Relatórios", icon: FileText },
-      { to: "/backup", label: "Backup", icon: Database },
-    ],
-  },
-];
+function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+  const list = useMemo(() => (q ? buscarModulos(q) : ALL_NAV_ITEMS.slice(0, 8)), [q]);
 
-const allItems: Item[] = groups.flatMap((g) => g.items);
-const mobileBottom: Item[] = [
-  { to: "/", label: "Início", icon: LayoutDashboard },
-  { to: "/granja", label: "Granja", icon: Bird },
-  { to: "/gado", label: "Gado", icon: Beef },
-  { to: "/diario", label: "Diário", icon: BookOpen },
-];
+  useEffect(() => { if (!open) setQ(""); }, [open]);
+
+  const go = (to: string) => {
+    onOpenChange(false);
+    navigate({ to });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="p-0 gap-0 max-w-lg overflow-hidden">
+        <div className="flex items-center gap-2 border-b border-border px-4">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && list[0]) go(list[0].to); }}
+            placeholder="Buscar módulo, função ou atalho…"
+            className="flex-1 bg-transparent py-3.5 text-sm outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+        <div className="max-h-[55vh] overflow-y-auto p-2">
+          {list.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Nada encontrado.</p>}
+          {list.map((it) => {
+            const Icon = it.icon;
+            return (
+              <button
+                key={it.to}
+                onClick={() => go(it.to)}
+                className="w-full flex items-start gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-accent/10 transition-colors"
+              >
+                <Icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium truncate">{it.label}</span>
+                  <span className="block text-xs text-muted-foreground truncate">{it.desc}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { fazendaNome, codigo, operador, sair } = useFazenda();
   const [open, setOpen] = useState(false);
+  const [palette, setPalette] = useState(false);
 
-  const isActive = (to: string) => pathname === to || (to !== "/" && pathname.startsWith(to));
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPalette((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/"));
+  const atual = ALL_NAV_ITEMS.find((i) => i.to !== "/" && isActive(i.to));
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <ChatNotifier />
+      <CommandPalette open={palette} onOpenChange={setPalette} />
+
       <aside className="hidden md:flex md:w-64 flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border sticky top-0 h-screen">
-        <div className="p-5 border-b border-sidebar-border">
+        <div className="p-4 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative shrink-0">
               <div className="absolute inset-0 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition" style={{ background: "var(--gradient-primary)" }} />
@@ -117,46 +184,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
         </div>
-        <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
-          {groups.map((g) => (
-            <div key={g.label}>
-              <div className="px-3 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 font-semibold">{g.label}</div>
-              <div className="space-y-0.5">
-                {g.items.map((it) => {
-                  const active = isActive(it.to);
-                  const Icon = it.icon;
-                  return (
-                    <Link
-                      key={it.to}
-                      to={it.to}
-                      className={cn(
-                        "relative flex items-center gap-3 pl-3 pr-3 py-2 rounded-lg text-sm font-medium transition-all",
-                        active
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                          : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40",
-                      )}
-                    >
-                      {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-primary" />}
-                      <Icon className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-primary" : "")} />
-                      <span className="truncate">{it.label}</span>
-                    </Link>
-                  );
-                })}
+
+        <nav className="flex-1 p-3 overflow-y-auto">
+          <NavTree pathname={pathname} />
+        </nav>
+
+        <div className="p-3 border-t border-sidebar-border space-y-2">
+          <button
+            onClick={() => setPalette(true)}
+            className="w-full flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Search className="h-3.5 w-3.5" /> Busca rápida
+            <kbd className="ml-auto rounded border border-border px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
+          </button>
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full grid place-items-center text-[11px] font-bold shrink-0" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+                {(operador || "?").slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-medium truncate">{operador || "—"}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{codigo}</div>
               </div>
             </div>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-sidebar-border flex items-center justify-between gap-2">
-          <div className="min-w-0 flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full grid place-items-center text-[11px] font-bold shrink-0" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
-              {(operador || "?").slice(0, 1).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-medium truncate">{operador || "—"}</div>
-              <div className="text-[10px] text-muted-foreground truncate">{codigo} · v1.2</div>
-            </div>
+            <Button variant="ghost" size="icon" onClick={sair} aria-label="Sair da fazenda" className="h-8 w-8 shrink-0"><LogOut className="h-4 w-4" /></Button>
           </div>
-          <Button variant="ghost" size="icon" onClick={sair} aria-label="Sair da fazenda" className="h-8 w-8 shrink-0"><LogOut className="h-4 w-4" /></Button>
         </div>
       </aside>
 
@@ -164,48 +216,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
           <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
-            <div className="font-display font-bold text-sm truncate tracking-tight">{fazendaNome ?? "AgroSítio"}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{operador || codigo}</div>
+            <div className="font-display font-bold text-sm truncate tracking-tight">{atual?.label ?? fazendaNome ?? "AgroSítio"}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{fazendaNome ?? operador ?? codigo}</div>
           </div>
         </Link>
         <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="icon" aria-label="Buscar" className="h-9 w-9" onClick={() => setPalette(true)}><Search className="h-5 w-5" /></Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Abrir menu" className="h-9 w-9"><Menu className="h-5 w-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[85vw] sm:w-[360px] overflow-y-auto p-0 bg-sidebar">
+            <SheetContent side="right" className="w-[88vw] sm:w-[380px] overflow-y-auto p-0 bg-sidebar">
               <SheetHeader className="p-5 border-b border-sidebar-border text-left">
                 <SheetTitle className="font-display tracking-tight">{fazendaNome ?? "AgroSítio"}</SheetTitle>
                 <p className="text-xs text-muted-foreground">{operador ? `${operador} · ` : ""}{codigo}</p>
               </SheetHeader>
-              <nav className="p-3 space-y-5">
-                {groups.map((g) => (
-                  <div key={g.label}>
-                    <div className="px-3 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 font-semibold">{g.label}</div>
-                    <div className="space-y-0.5">
-                      {g.items.map((it) => {
-                        const active = isActive(it.to);
-                        const Icon = it.icon;
-                        return (
-                          <Link
-                            key={it.to}
-                            to={it.to}
-                            onClick={() => setOpen(false)}
-                            className={cn(
-                              "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-                              active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/75 hover:bg-sidebar-accent/50",
-                            )}
-                          >
-                            {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-primary" />}
-                            <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "")} />
-                            <span className="truncate">{it.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full mt-2" onClick={() => { setOpen(false); sair(); }}>
+              <nav className="p-3">
+                <NavTree pathname={pathname} onNavigate={() => setOpen(false)} />
+                <Button variant="outline" className="w-full mt-4" onClick={() => { setOpen(false); sair(); }}>
                   <LogOut className="h-4 w-4 mr-2" /> Sair da fazenda
                 </Button>
               </nav>
@@ -217,8 +245,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 min-w-0 pb-28 md:pb-0">
         <div className="px-3 py-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
 
-        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-2xl bg-sidebar/85 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
-          {mobileBottom.map((it) => {
+        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-2xl bg-sidebar/90 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
+          {MOBILE_BOTTOM.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;
             return (
@@ -236,17 +264,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
-          <button
-            onClick={() => setOpen(true)}
-            className="flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium text-muted-foreground hover:text-foreground"
+          <Link
+            to="/modulos"
+            className={cn(
+              "relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
+              isActive("/modulos") ? "text-primary" : "text-muted-foreground hover:text-foreground",
+            )}
           >
-            <Menu className="h-5 w-5" />
-            Mais
-          </button>
+            {isActive("/modulos") && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-primary" />}
+            <Grid3X3 className="h-5 w-5" />
+            Módulos
+          </Link>
         </nav>
       </main>
     </div>
   );
 }
 
-export const __ALL_NAV_ITEMS = allItems;
+export const __ALL_NAV_ITEMS = ALL_NAV_ITEMS;
+void X;
