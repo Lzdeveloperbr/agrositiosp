@@ -10,7 +10,8 @@ export function getCloudClient(codigo: string | null): SupabaseClient {
   const k = codigo ?? "_anon_";
   if (cache.has(k)) return cache.get(k)!;
   const client = createClient(URL, KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
+    // storageKey único evita o aviso "Multiple GoTrueClient instances"
+    auth: { persistSession: false, autoRefreshToken: false, storageKey: `agro-nosess-${k}` },
     global: codigo ? { headers: { "x-fazenda-codigo": codigo } } : undefined,
     realtime: { params: { eventsPerSecond: 10 } },
   });

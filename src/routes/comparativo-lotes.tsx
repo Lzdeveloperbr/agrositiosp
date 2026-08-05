@@ -162,7 +162,7 @@ function Comparativo() {
                         <td className={`py-3 text-right tabular-nums pr-2 font-semibold ${d.lucroLiquido >= 0 ? "text-primary" : "text-destructive"}`}>{fmtBRL(d.lucroLiquido)}</td>
                         <td className="py-3 text-right tabular-nums pr-4">{d.lucroPorAve.toFixed(2)}</td>
                         <td className="py-3 pr-3 text-right">
-                          <Button asChild size="icon" variant="ghost" className="h-7 w-7"><Link to={`/granja/${d.loteId}`}><ArrowRight className="h-3.5 w-3.5" /></Link></Button>
+                          <Button asChild size="icon" variant="ghost" className="h-7 w-7"><Link to="/granja/$id" params={{ id: d.loteId }}><ArrowRight className="h-3.5 w-3.5" /></Link></Button>
                         </td>
                       </tr>
                     ))}

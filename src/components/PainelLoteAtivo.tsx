@@ -149,7 +149,7 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
           </div>
           <div className="flex gap-2">
             <Button asChild size="sm" variant="outline"><Link to="/granja">+ Lançar dia</Link></Button>
-            <Button asChild size="sm"><Link to={`/granja/${ativo.id}`}>Detalhes <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link></Button>
+            <Button asChild size="sm"><Link to="/granja/$id" params={{ id: ativo.id }}>Detalhes <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link></Button>
           </div>
         </div>
 

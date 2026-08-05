@@ -168,7 +168,7 @@ function HistoricoLotes() {
                       <div className="mt-0.5">{badgeBenchmark(d.f.lucroLiquido, dados.reduce((s, x) => s + x.f.lucroLiquido, 0) / n)}</div>
                     </td>
                     <td className="py-3 pr-3">
-                      <Button asChild size="icon" variant="ghost" className="h-7 w-7"><Link to={`/granja/${d.lote.id}`}><ArrowRight className="h-3.5 w-3.5" /></Link></Button>
+                      <Button asChild size="icon" variant="ghost" className="h-7 w-7"><Link to="/granja/$id" params={{ id: d.lote.id }}><ArrowRight className="h-3.5 w-3.5" /></Link></Button>
                     </td>
                   </tr>
                 ))}
@@ -189,7 +189,7 @@ function Recorde({ icon: Icon, label, lote, valor, id }: { icon: any; label: str
         <span className="text-xs font-semibold uppercase tracking-wide text-primary">{label}</span>
       </div>
       <p className="font-display font-bold text-2xl">{valor}</p>
-      <Link to={`/granja/${id}`} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mt-1">
+      <Link to="/granja/$id" params={{ id }} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mt-1">
         Lote {lote} <ArrowRight className="h-3 w-3" />
       </Link>
     </Card>
