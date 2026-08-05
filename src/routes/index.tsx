@@ -15,6 +15,11 @@ import { PainelLoteAtivo } from "@/components/PainelLoteAtivo";
 import { NotificationsManager } from "@/components/NotificationsManager";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
+import { ALL_NAV_ITEMS, type NavItem } from "@/lib/nav";
+
+const ATALHOS: NavItem[] = ["/granja", "/pesagem-pro", "/entregas-racao", "/estoque", "/gado", "/financeiro", "/chat", "/agro-ia"]
+  .map((to) => ALL_NAV_ITEMS.find((i) => i.to === to)!)
+  .filter(Boolean);
 
 export const Route = createFileRoute("/")({
   head: () => ({
