@@ -56,7 +56,7 @@ export function WeatherWidget({ compact }: { compact?: boolean }) {
           <Input placeholder="Cidade, ex: Patos de Minas" value={busca} onChange={(e) => setBusca(e.target.value)} onKeyDown={(e) => e.key === "Enter" && buscar()} />
           <Button onClick={buscar} variant="secondary">Buscar</Button>
         </div>
-        <Button onClick={usarGPS} variant="outline" size="sm" className="w-full mb-2">📍 Usar GPS atual</Button>
+        <Button onClick={usarGPS} variant="outline" size="sm" className="w-full mb-2"><MapPin className="h-4 w-4 mr-1.5" /> Usar GPS atual</Button>
         {results.length > 0 && (
           <div className="space-y-1 mt-2">
             {results.map((r, i) => (
