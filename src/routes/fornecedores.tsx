@@ -144,6 +144,7 @@ function FornecedoresPage() {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: true,
+      styles: DARK_MAP_STYLE,
     });
     mapRef.current = map;
     map.addListener("click", (e: any) => {
