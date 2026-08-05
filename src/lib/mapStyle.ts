@@ -1,5 +1,5 @@
 // Estilo escuro (preto & dourado) para os mapas do AgroSítio.
-export const DARK_MAP_STYLE: google.maps.MapTypeStyle[] = [
+export const DARK_MAP_STYLE: any[] = [
   { elementType: "geometry", stylers: [{ color: "#17150f" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#c9b184" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#0d0c09" }] },
