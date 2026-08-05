@@ -163,6 +163,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/"));
   const atual = ALL_NAV_ITEMS.find((i) => i.to !== "/" && isActive(i.to));
+  const titulo = atual?.label ?? (pathname.startsWith("/modulos") ? "Módulos" : (fazendaNome ?? "AgroSítio"));
+  const subtitulo = titulo === fazendaNome ? (operador || codigo || "") : (fazendaNome ?? operador ?? codigo ?? "");
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -216,8 +218,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
           <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
-            <div className="font-display font-bold text-sm truncate tracking-tight">{atual?.label ?? fazendaNome ?? "AgroSítio"}</div>
-            <div className="text-[10px] text-muted-foreground truncate">{fazendaNome ?? operador ?? codigo}</div>
+            <div className="font-display font-bold text-sm truncate tracking-tight">{titulo}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{subtitulo}</div>
           </div>
         </Link>
         <div className="flex items-center gap-1 shrink-0">
@@ -260,7 +262,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-primary" />}
                 <Icon className="h-5 w-5" />
-                {it.label}
+                {it.short ?? it.label}
               </Link>
             );
           })}

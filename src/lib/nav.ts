@@ -12,6 +12,7 @@ export type NavItem = {
   label: string;
   icon: any;
   desc: string;
+  short?: string;
   tags?: string[];
 };
 
@@ -102,10 +103,10 @@ export const NAV_GROUPS: NavGroup[] = [
 export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 export const MOBILE_BOTTOM: NavItem[] = [
-  ALL_NAV_ITEMS[0]!,
-  NAV_GROUPS[1]!.items[0]!,
-  NAV_GROUPS[2]!.items[0]!,
-  ALL_NAV_ITEMS.find((i) => i.to === "/chat")!,
+  { ...ALL_NAV_ITEMS[0]!, short: "Início" },
+  { ...NAV_GROUPS[1]!.items[0]!, short: "Granja" },
+  { ...NAV_GROUPS[2]!.items[0]!, short: "Gado" },
+  { ...ALL_NAV_ITEMS.find((i) => i.to === "/chat")!, short: "Chat" },
 ];
 
 const norm = (s: string) =>
