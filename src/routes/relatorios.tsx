@@ -42,6 +42,9 @@ function RelatoriosPage() {
           <Big icon={BookOpen} title="Diário de campo" desc="Todos os registros com fotos." action={() => gerarRelatorioDiario(diario)} />
         </div>
 
+        <ExportacaoCSV />
+
+
         <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
           <div className="flex items-center gap-2 mb-4">
             <Bird className="h-5 w-5 text-primary" />
