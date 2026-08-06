@@ -250,7 +250,7 @@ function ExportacaoCSV() {
         ))}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" variant="secondary" onClick={() => gerarLivroCaixa(fin)}>
+        <Button size="sm" variant="secondary" onClick={() => gerarLivroCaixa(fin, `Todos os lançamentos · ${new Date().getFullYear()}`)}>
           <Wallet className="h-4 w-4 mr-1" /> Livro caixa em PDF
         </Button>
       </div>
