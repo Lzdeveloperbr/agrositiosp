@@ -4,10 +4,11 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useLotes, useMedidores, useAnimais, useDiario, useFinanceiro } from "@/lib/state";
+import { useLotes, useMedidores, useAnimais, useDiario, useFinanceiro, useEstoque, useChuvas } from "@/lib/state";
 import { gerarRelatorioLote, gerarRelatorioEnergia, gerarRelatorioGeral, gerarRelatorioRebanho, gerarRelatorioDiario, gerarRelatorioAnimal, gerarLivroCaixa } from "@/lib/pdf";
 import { listPdfHistory, deletePdfHistory, downloadFromHistory, printFromHistory, clearPdfHistory, type PdfHistoryItem } from "@/lib/pdfHistory";
-import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet, History, Download, Printer, Trash2 } from "lucide-react";
+import { baixarCSV } from "@/lib/exportar";
+import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet, History, Download, Printer, Trash2, Table } from "lucide-react";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
