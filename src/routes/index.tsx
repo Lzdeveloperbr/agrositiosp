@@ -13,6 +13,7 @@ import { InstallAppButton } from "@/components/InstallAppButton";
 import { NoticiasAgro } from "@/components/NoticiasAgro";
 import { PainelLoteAtivo } from "@/components/PainelLoteAtivo";
 import { NotificationsManager } from "@/components/NotificationsManager";
+import { AlertasInteligentes } from "@/components/AlertasInteligentes";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 import { ALL_NAV_ITEMS, type NavItem } from "@/lib/nav";
@@ -197,7 +198,10 @@ function Dashboard() {
 
         <NotificationsManager />
 
+        <AlertasInteligentes />
+
         <PainelLoteAtivo />
+
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />

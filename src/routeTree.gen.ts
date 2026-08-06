@@ -31,6 +31,7 @@ import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
 import { Route as GadoProRouteImport } from './routes/gado-pro'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
+import { Route as FinanceiroLoteRouteImport } from './routes/financeiro-lote'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
@@ -165,6 +166,11 @@ const GadoProRoute = GadoProRouteImport.update({
 const FornecedoresRoute = FornecedoresRouteImport.update({
   id: '/fornecedores',
   path: '/fornecedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroLoteRoute = FinanceiroLoteRouteImport.update({
+  id: '/financeiro-lote',
+  path: '/financeiro-lote',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroRoute = FinanceiroRouteImport.update({
@@ -315,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
@@ -414,6 +422,7 @@ export interface FileRoutesById {
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
+  '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
@@ -465,6 +474,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
@@ -514,6 +524,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
+    | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
     | '/guia-cultivo'
@@ -613,6 +625,7 @@ export interface RootRouteChildren {
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
+  FinanceiroLoteRoute: typeof FinanceiroLoteRoute
   FornecedoresRoute: typeof FornecedoresRoute
   GadoProRoute: typeof GadoProRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
@@ -795,6 +808,13 @@ declare module '@tanstack/react-router' {
       path: '/fornecedores'
       fullPath: '/fornecedores'
       preLoaderRoute: typeof FornecedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro-lote': {
+      id: '/financeiro-lote'
+      path: '/financeiro-lote'
+      fullPath: '/financeiro-lote'
+      preLoaderRoute: typeof FinanceiroLoteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro': {
@@ -997,6 +1017,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
+  FinanceiroLoteRoute: FinanceiroLoteRoute,
   FornecedoresRoute: FornecedoresRoute,
   GadoProRoute: GadoProRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
@@ -1027,12 +1048,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

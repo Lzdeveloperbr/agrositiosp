@@ -90,6 +90,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/financeiro", label: "Finanças", icon: Wallet, desc: "Receitas, despesas e contas a pagar", tags: ["dinheiro", "caixa"] },
       { to: "/custos", label: "Custos por Lote", icon: TrendingUp, desc: "Rateio de custo e margem por lote", tags: ["margem", "lucro"] },
+      { to: "/financeiro-lote", label: "Painel Financeiro do Lote", icon: Wallet, desc: "Custo por ave, custo/kg, participação e lucro projetado", tags: ["custo", "ave", "lucro", "participacao"] },
       { to: "/mercado", label: "Mercado Agro", icon: BarChart3, desc: "Cotações e notícias do agronegócio", tags: ["cotacao", "boi", "soja"] },
       { to: "/relatorios", label: "Relatórios", icon: FileText, desc: "PDFs técnicos e fechamento de lote", tags: ["pdf", "impressao"] },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
