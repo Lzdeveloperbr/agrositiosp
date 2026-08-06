@@ -197,7 +197,10 @@ function Dashboard() {
 
         <NotificationsManager />
 
+        <AlertasInteligentes />
+
         <PainelLoteAtivo />
+
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />
