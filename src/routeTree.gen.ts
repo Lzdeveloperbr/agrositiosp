@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as PrioridadesRouteImport } from './routes/prioridades'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
@@ -86,6 +87,11 @@ const RacaoRoute = RacaoRouteImport.update({
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrioridadesRoute = PrioridadesRouteImport.update({
+  id: '/prioridades',
+  path: '/prioridades',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlantiosRoute = PlantiosRouteImport.update({
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/monitoramento': typeof MonitoramentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -591,6 +602,7 @@ export interface FileRouteTypes {
     | '/monitoramento'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -642,6 +654,7 @@ export interface RootRouteChildren {
   MonitoramentoRoute: typeof MonitoramentoRoute
   PesagemProRoute: typeof PesagemProRoute
   PlantiosRoute: typeof PlantiosRoute
+  PrioridadesRoute: typeof PrioridadesRoute
   QuizRoute: typeof QuizRoute
   RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
@@ -696,6 +709,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz'
       fullPath: '/quiz'
       preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prioridades': {
+      id: '/prioridades'
+      path: '/prioridades'
+      fullPath: '/prioridades'
+      preLoaderRoute: typeof PrioridadesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plantios': {
@@ -1034,6 +1054,7 @@ const rootRouteChildren: RootRouteChildren = {
   MonitoramentoRoute: MonitoramentoRoute,
   PesagemProRoute: PesagemProRoute,
   PlantiosRoute: PlantiosRoute,
+  PrioridadesRoute: PrioridadesRoute,
   QuizRoute: QuizRoute,
   RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
@@ -1048,12 +1069,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
