@@ -682,6 +682,63 @@ export type Database = {
         }
         Relationships: []
       }
+      importacoes_ia: {
+        Row: {
+          acao: string
+          arquivo_id: string | null
+          arquivo_nome: string | null
+          chave: string | null
+          confianca: number | null
+          created_at: string
+          dados: Json
+          fazenda_id: string
+          id: string
+          registro_id: string | null
+          tabela: string
+        }
+        Insert: {
+          acao?: string
+          arquivo_id?: string | null
+          arquivo_nome?: string | null
+          chave?: string | null
+          confianca?: number | null
+          created_at?: string
+          dados?: Json
+          fazenda_id: string
+          id?: string
+          registro_id?: string | null
+          tabela: string
+        }
+        Update: {
+          acao?: string
+          arquivo_id?: string | null
+          arquivo_nome?: string | null
+          chave?: string | null
+          confianca?: number | null
+          created_at?: string
+          dados?: Json
+          fazenda_id?: string
+          id?: string
+          registro_id?: string | null
+          tabela?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "importacoes_ia_arquivo_id_fkey"
+            columns: ["arquivo_id"]
+            isOneToOne: false
+            referencedRelation: "onedrive_arquivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "importacoes_ia_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lotes: {
         Row: {
           aplicacoes: Json
@@ -938,6 +995,124 @@ export type Database = {
           },
         ]
       }
+      onedrive_arquivos: {
+        Row: {
+          caminho: string | null
+          confianca: number | null
+          created_at: string
+          destino: string | null
+          erro: string | null
+          fazenda_id: string
+          id: string
+          item_id: string
+          mime: string | null
+          modificado_em: string | null
+          nome: string
+          processado_em: string | null
+          registros: number
+          resumo: string | null
+          status: string
+          tamanho: number | null
+          updated_at: string
+          versao: string | null
+        }
+        Insert: {
+          caminho?: string | null
+          confianca?: number | null
+          created_at?: string
+          destino?: string | null
+          erro?: string | null
+          fazenda_id: string
+          id?: string
+          item_id: string
+          mime?: string | null
+          modificado_em?: string | null
+          nome: string
+          processado_em?: string | null
+          registros?: number
+          resumo?: string | null
+          status?: string
+          tamanho?: number | null
+          updated_at?: string
+          versao?: string | null
+        }
+        Update: {
+          caminho?: string | null
+          confianca?: number | null
+          created_at?: string
+          destino?: string | null
+          erro?: string | null
+          fazenda_id?: string
+          id?: string
+          item_id?: string
+          mime?: string | null
+          modificado_em?: string | null
+          nome?: string
+          processado_em?: string | null
+          registros?: number
+          resumo?: string | null
+          status?: string
+          tamanho?: number | null
+          updated_at?: string
+          versao?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onedrive_arquivos_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onedrive_config: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          delta_link: string | null
+          fazenda_id: string
+          id: string
+          pasta_caminho: string | null
+          pasta_id: string | null
+          pasta_nome: string | null
+          ultima_verificacao: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          delta_link?: string | null
+          fazenda_id: string
+          id?: string
+          pasta_caminho?: string | null
+          pasta_id?: string | null
+          pasta_nome?: string | null
+          ultima_verificacao?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          delta_link?: string | null
+          fazenda_id?: string
+          id?: string
+          pasta_caminho?: string | null
+          pasta_id?: string | null
+          pasta_nome?: string | null
+          ultima_verificacao?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onedrive_config_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: true
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pastos: {
         Row: {
           area_ha: number | null
@@ -1044,6 +1219,77 @@ export type Database = {
           variedade?: string | null
         }
         Relationships: []
+      }
+      prioridades: {
+        Row: {
+          autor: string | null
+          categoria: string
+          created_at: string
+          custo_estimado: number | null
+          custo_real: number | null
+          descricao: string | null
+          fazenda_id: string
+          fonte_arquivo: string | null
+          id: string
+          mes: string
+          ordem: number
+          prazo: string | null
+          prioridade: string
+          progresso: number
+          responsavel: string | null
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          autor?: string | null
+          categoria?: string
+          created_at?: string
+          custo_estimado?: number | null
+          custo_real?: number | null
+          descricao?: string | null
+          fazenda_id: string
+          fonte_arquivo?: string | null
+          id?: string
+          mes: string
+          ordem?: number
+          prazo?: string | null
+          prioridade?: string
+          progresso?: number
+          responsavel?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          autor?: string | null
+          categoria?: string
+          created_at?: string
+          custo_estimado?: number | null
+          custo_real?: number | null
+          descricao?: string | null
+          fazenda_id?: string
+          fonte_arquivo?: string | null
+          id?: string
+          mes?: string
+          ordem?: number
+          prazo?: string | null
+          prioridade?: string
+          progresso?: number
+          responsavel?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prioridades_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tarefas: {
         Row: {
