@@ -4,7 +4,7 @@ import {
   Boxes, Wallet, Database, Tractor, CloudRain, Bug, ShoppingCart, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
   ClipboardCheck, Trophy, BarChart3, Syringe, History, Ruler, Calculator, MapPin,
-  Landmark, Scale, MessagesSquare, Store,
+  Landmark, Scale, MessagesSquare, Store, Target, Cloud,
 } from "lucide-react";
 
 export type NavItem = {
@@ -97,6 +97,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
       { to: "/automacoes", label: "Automações", icon: Sparkles, desc: "Regras automáticas e gatilhos", tags: ["regra", "gatilho"] },
       { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark, desc: "CNPJ, CEP, CAR, INCRA e SISBOV", tags: ["governo", "cnpj", "car"] },
+      { to: "/onedrive", label: "OneDrive + IA", icon: Cloud, desc: "IA lê planilhas e PDFs do OneDrive e atualiza os módulos sozinha", tags: ["onedrive", "importar", "excel", "pdf", "ia"] },
       { to: "/backup", label: "Backup & Dados", icon: Database, desc: "Exportar, importar e limpar dados", tags: ["exportar", "importar"] },
     ],
   },
