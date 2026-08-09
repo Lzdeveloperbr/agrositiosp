@@ -19,7 +19,7 @@ export const Route = createFileRoute("/onedrive")({
   head: () => ({
     meta: [
       { title: "OneDrive + IA — AgroSítio" },
-      { name: "description", content: "A IA lê planilhas, PDFs e fotos da sua pasta do OneDrive e atualiza sozinha prioridades, финanças, estoque e chuvas do sítio." },
+      { name: "description", content: "A IA lê planilhas, PDFs e fotos da sua pasta do OneDrive e atualiza sozinha prioridades, finanças, estoque e chuvas do sítio." },
       { property: "og:title", content: "OneDrive + IA — AgroSítio" },
       { property: "og:description", content: "Importação automática de planilhas, PDFs e fotos do OneDrive para os módulos do sítio." },
       { property: "og:type", content: "website" },
