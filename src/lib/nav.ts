@@ -28,6 +28,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/chat", label: "Chat da Equipe", icon: MessagesSquare, desc: "Conversa em tempo real com todo o time", tags: ["mensagem", "equipe"] },
       { to: "/modo-campo", label: "Modo Campo", icon: MapPin, desc: "Foto + GPS, leitor de brinco e ditado por voz", tags: ["mobile", "gps", "campo"] },
       { to: "/diario", label: "Diário de Campo", icon: BookOpen, desc: "Registros diários com fotos, clima e localização", tags: ["registro", "foto"] },
+      { to: "/prioridades", label: "Prioridades do Mês", icon: Target, desc: "Plano mensal do sítio com metas, prazos, responsáveis e custo", tags: ["plano", "mes", "meta", "prioridade"] },
       { to: "/tarefas", label: "Tarefas", icon: ListChecks, desc: "Lista de atividades por prioridade e categoria", tags: ["todo", "atividade"] },
       { to: "/lembretes", label: "Lembretes", icon: BellRing, desc: "Avisos recorrentes com notificação", tags: ["alerta", "notificacao"] },
       { to: "/quiz", label: "Quiz Diário", icon: ClipboardList, desc: "Treinamento rápido da equipe", tags: ["treino", "curso"] },
