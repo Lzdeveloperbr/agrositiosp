@@ -15,8 +15,10 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as PrioridadesRouteImport } from './routes/prioridades'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
+import { Route as OnedriveRouteImport } from './routes/onedrive'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as ModoCampoRouteImport } from './routes/modo-campo'
@@ -88,6 +90,11 @@ const QuizRoute = QuizRouteImport.update({
   path: '/quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrioridadesRoute = PrioridadesRouteImport.update({
+  id: '/prioridades',
+  path: '/prioridades',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlantiosRoute = PlantiosRouteImport.update({
   id: '/plantios',
   path: '/plantios',
@@ -96,6 +103,11 @@ const PlantiosRoute = PlantiosRouteImport.update({
 const PesagemProRoute = PesagemProRouteImport.update({
   id: '/pesagem-pro',
   path: '/pesagem-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnedriveRoute = OnedriveRouteImport.update({
+  id: '/onedrive',
+  path: '/onedrive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MonitoramentoRoute = MonitoramentoRouteImport.update({
@@ -336,8 +348,10 @@ export interface FileRoutesByFullPath {
   '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/onedrive': typeof OnedriveRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -386,8 +400,10 @@ export interface FileRoutesByTo {
   '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/onedrive': typeof OnedriveRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -437,8 +453,10 @@ export interface FileRoutesById {
   '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
+  '/onedrive': typeof OnedriveRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/plantios': typeof PlantiosRoute
+  '/prioridades': typeof PrioridadesRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -489,8 +507,10 @@ export interface FileRouteTypes {
     | '/modo-campo'
     | '/modulos'
     | '/monitoramento'
+    | '/onedrive'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -539,8 +559,10 @@ export interface FileRouteTypes {
     | '/modo-campo'
     | '/modulos'
     | '/monitoramento'
+    | '/onedrive'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -589,8 +611,10 @@ export interface FileRouteTypes {
     | '/modo-campo'
     | '/modulos'
     | '/monitoramento'
+    | '/onedrive'
     | '/pesagem-pro'
     | '/plantios'
+    | '/prioridades'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -640,8 +664,10 @@ export interface RootRouteChildren {
   ModoCampoRoute: typeof ModoCampoRoute
   ModulosRoute: typeof ModulosRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
+  OnedriveRoute: typeof OnedriveRoute
   PesagemProRoute: typeof PesagemProRoute
   PlantiosRoute: typeof PlantiosRoute
+  PrioridadesRoute: typeof PrioridadesRoute
   QuizRoute: typeof QuizRoute
   RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
@@ -698,6 +724,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuizRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prioridades': {
+      id: '/prioridades'
+      path: '/prioridades'
+      fullPath: '/prioridades'
+      preLoaderRoute: typeof PrioridadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plantios': {
       id: '/plantios'
       path: '/plantios'
@@ -710,6 +743,13 @@ declare module '@tanstack/react-router' {
       path: '/pesagem-pro'
       fullPath: '/pesagem-pro'
       preLoaderRoute: typeof PesagemProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onedrive': {
+      id: '/onedrive'
+      path: '/onedrive'
+      fullPath: '/onedrive'
+      preLoaderRoute: typeof OnedriveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/monitoramento': {
@@ -1032,8 +1072,10 @@ const rootRouteChildren: RootRouteChildren = {
   ModoCampoRoute: ModoCampoRoute,
   ModulosRoute: ModulosRoute,
   MonitoramentoRoute: MonitoramentoRoute,
+  OnedriveRoute: OnedriveRoute,
   PesagemProRoute: PesagemProRoute,
   PlantiosRoute: PlantiosRoute,
+  PrioridadesRoute: PrioridadesRoute,
   QuizRoute: QuizRoute,
   RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
