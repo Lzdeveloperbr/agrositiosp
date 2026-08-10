@@ -2,7 +2,7 @@
 // Lê arquivos da pasta monitorada, classifica com IA e grava nos módulos existentes.
 import { createServerFn } from "@tanstack/react-start";
 
-const GATEWAY = "https://connector-gateway.lovable.dev/microsoft_onedrive/v1.0";
+const GATEWAY = "https://connector-gateway.lovable.dev/microsoft_onedrive";
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-3.6-flash";
 
@@ -54,6 +54,18 @@ function mapItem(it: any): ArquivoOneDrive {
   };
 }
 
+let driveIdCache: string | null = null;
+async function driveId() {
+  if (driveIdCache) return driveIdCache;
+  const d = await graphJson("/me/drive");
+  driveIdCache = d.id as string;
+  return driveIdCache;
+}
+/** OneDrive pessoal exige /drives/{id}/... — /me/drive/root retorna 404. */
+async function drivePath(sufixo: string) {
+  return `/drives/${await driveId()}${sufixo}`;
+}
+
 async function fazendaPorCodigo(codigo: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
@@ -68,7 +80,8 @@ export const onedriveStatus = createServerFn({ method: "GET" }).handler(async ()
   if (!ok) return { conectado: false, conta: null as string | null, erro: "Conector do OneDrive não está ligado." };
   try {
     const me = await graphJson("/me/drive");
-    return { conectado: true, conta: me?.owner?.user?.displayName ?? me?.name ?? "OneDrive", erro: null as string | null };
+    driveIdCache = me?.id ?? null;
+    return { conectado: true, conta: me?.owner?.user?.email ?? me?.owner?.user?.displayName ?? "OneDrive", erro: null as string | null };
   } catch (e: any) {
     return { conectado: false, conta: null, erro: String(e?.message ?? e) };
   }
@@ -79,7 +92,7 @@ export const onedriveListar = createServerFn({ method: "POST" })
   .inputValidator((d: { pastaId?: string | null }) => ({ pastaId: d?.pastaId ?? null }))
   .handler(async ({ data }) => {
     if (!creds().ok) throw new Error("Conector do OneDrive não está ligado.");
-    const path = data.pastaId ? `/me/drive/items/${data.pastaId}/children?$top=200` : `/me/drive/root/children?$top=200`;
+    const path = await drivePath(data.pastaId ? `/items/${data.pastaId}/children?$top=200` : `/root/children?$top=200`);
     const json = await graphJson(path);
     return { itens: (json.value ?? []).map(mapItem) as ArquivoOneDrive[] };
   });
@@ -111,7 +124,13 @@ async function classificar(nome: string, mime: string, conteudo: { texto?: strin
   const hoje = new Date().toISOString().slice(0, 10);
   const content: any[] = [{ type: "text", text: `Arquivo: ${nome}\nData de hoje: ${hoje}` }];
   if (conteudo.texto) content.push({ type: "text", text: `Conteúdo:\n${conteudo.texto.slice(0, 60000)}` });
-  if (conteudo.base64) content.push({ type: "image_url", image_url: { url: `data:${mime};base64,${conteudo.base64}` } });
+  if (conteudo.base64) {
+    content.push(
+      mime === "application/pdf"
+        ? { type: "file", file: { filename: nome, file_data: `data:application/pdf;base64,${conteudo.base64}` } }
+        : { type: "image_url", image_url: { url: `data:${mime};base64,${conteudo.base64}` } },
+    );
+  }
 
   const res = await fetch(AI_URL, {
     method: "POST",
@@ -132,7 +151,8 @@ async function classificar(nome: string, mime: string, conteudo: { texto?: strin
 
 const TEXTO_EXT = /\.(csv|txt|md|json|tsv|log)$/i;
 const IMG_EXT = /\.(png|jpe?g|webp|gif|heic)$/i;
-const DOC_EXT = /\.(pdf|xlsx|xls|docx|doc|pptx)$/i;
+const PDF_EXT = /\.pdf$/i;
+const DOC_EXT = /\.(xlsx|xls|docx|doc|pptx|ppt|odt|ods)$/i;
 
 function b64(buf: ArrayBuffer) {
   const bytes = new Uint8Array(buf);
@@ -143,18 +163,23 @@ function b64(buf: ArrayBuffer) {
 
 async function baixarConteudo(item: ArquivoOneDrive) {
   if (TEXTO_EXT.test(item.nome)) {
-    const res = await graph(`/me/drive/items/${item.id}/content`);
+    const res = await graph(await drivePath(`/items/${item.id}/content`));
     if (!res.ok) throw new Error(`Download [${res.status}]`);
     return { texto: await res.text(), mime: "text/plain" };
   }
   if (IMG_EXT.test(item.nome)) {
-    const res = await graph(`/me/drive/items/${item.id}/content`);
+    const res = await graph(await drivePath(`/items/${item.id}/content`));
     if (!res.ok) throw new Error(`Download [${res.status}]`);
     return { base64: b64(await res.arrayBuffer()), mime: item.mime ?? "image/jpeg" };
   }
+  if (PDF_EXT.test(item.nome)) {
+    const res = await graph(await drivePath(`/items/${item.id}/content`));
+    if (!res.ok) throw new Error(`Download [${res.status}]`);
+    return { base64: b64(await res.arrayBuffer()), mime: "application/pdf" };
+  }
   if (DOC_EXT.test(item.nome)) {
     // Graph converte planilhas/documentos em PDF, que a IA lê nativamente.
-    const res = await graph(`/me/drive/items/${item.id}/content?format=pdf`);
+    const res = await graph(await drivePath(`/items/${item.id}/content?format=pdf`));
     if (!res.ok) throw new Error(`Conversão para PDF falhou [${res.status}]`);
     return { base64: b64(await res.arrayBuffer()), mime: "application/pdf" };
   }
@@ -225,9 +250,9 @@ export const onedriveSincronizar = createServerFn({ method: "POST" })
     const fazenda = await fazendaPorCodigo(data.codigo);
     const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
 
-    const path = data.pastaId ? `/me/drive/items/${data.pastaId}/children?$top=200` : `/me/drive/root/children?$top=200`;
+    const path = await drivePath(data.pastaId ? `/items/${data.pastaId}/children?$top=200` : `/root/children?$top=200`);
     const json = await graphJson(path);
-    const itens = (json.value ?? []).map(mapItem).filter((i: ArquivoOneDrive) => !i.pasta);
+    const itens = (json.value ?? []).map(mapItem).filter((i: ArquivoOneDrive) => !i.pasta && !!i.mime);
 
     const { data: jaVistos } = await admin
       .from("onedrive_arquivos").select("id, item_id, versao, status").eq("fazenda_id", fazenda.id);
@@ -238,7 +263,7 @@ export const onedriveSincronizar = createServerFn({ method: "POST" })
     for (const it of itens) {
       const anterior = mapa.get(it.id) as any;
       const versao = `${it.modificado ?? ""}|${it.tamanho}`;
-      if (anterior && anterior.versao === versao && anterior.status !== "pendente") continue;
+      if (anterior && anterior.versao === versao && (anterior.status === "processado" || anterior.status === "ignorado")) continue;
 
       let linhaId = anterior?.id as string | undefined;
       const base = {
@@ -283,7 +308,13 @@ export const onedriveSincronizar = createServerFn({ method: "POST" })
       }
     }
 
+    // Limpa registros de arquivos que não estão mais na pasta monitorada.
+    const idsAtuais = itens.map((i: ArquivoOneDrive) => i.id);
+    const obsoletos = (jaVistos ?? []).filter((r: any) => !idsAtuais.includes(r.item_id)).map((r: any) => r.id);
+    if (obsoletos.length) await admin.from("onedrive_arquivos").delete().in("id", obsoletos);
+
     await admin.from("onedrive_config").upsert({
+
       fazenda_id: fazenda.id,
       pasta_id: data.pastaId,
       ultima_verificacao: new Date().toISOString(),
