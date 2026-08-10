@@ -308,7 +308,13 @@ export const onedriveSincronizar = createServerFn({ method: "POST" })
       }
     }
 
+    // Limpa registros de arquivos que não estão mais na pasta monitorada.
+    const idsAtuais = itens.map((i: ArquivoOneDrive) => i.id);
+    const obsoletos = (jaVistos ?? []).filter((r: any) => !idsAtuais.includes(r.item_id)).map((r: any) => r.id);
+    if (obsoletos.length) await admin.from("onedrive_arquivos").delete().in("id", obsoletos);
+
     await admin.from("onedrive_config").upsert({
+
       fazenda_id: fazenda.id,
       pasta_id: data.pastaId,
       ultima_verificacao: new Date().toISOString(),
