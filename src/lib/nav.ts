@@ -58,7 +58,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/gado", label: "Rebanho", icon: Beef, desc: "Cadastro, categorias e movimentação do rebanho", tags: ["boi", "vaca", "gedave"] },
       { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp, desc: "GMD, reprodução e lotação de pasto", tags: ["gmd", "reproducao", "pasto"] },
-      { to: "/leite", label: "Leite", icon: Milk, desc: "Produção diária e qualidade do leite", tags: ["ordenha", "litros"] },
+      { to: "/leite", label: "Gado de Leite", icon: Milk, desc: "Rebanho leiteiro, controle leiteiro, lactações e reprodução", tags: ["ordenha", "litros", "vaca", "leite"] },
+      { to: "/engorda", label: "Gado de Engorda", icon: Scale, desc: "Lotes de engorda com GMD, arrobas e lucro por cabeça", tags: ["boi", "gmd", "arroba", "confinamento"] },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope, desc: "Atendimentos, tratamentos e carências", tags: ["saude", "medicamento"] },
       { to: "/racao", label: "Fábrica de Ração", icon: Factory, desc: "Fórmulas e custo por tonelada", tags: ["formula", "nutricao"] },
     ],

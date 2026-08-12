@@ -361,6 +361,222 @@ export type Database = {
         }
         Relationships: []
       }
+      engorda_animais: {
+        Row: {
+          brinco: string
+          categoria: string | null
+          created_at: string
+          data_entrada: string
+          fazenda_id: string
+          id: string
+          lote_id: string | null
+          nascimento: string | null
+          observacoes: string | null
+          peso_entrada_kg: number | null
+          raca: string | null
+          sexo: string
+          status: string
+          updated_at: string
+          valor_compra: number | null
+        }
+        Insert: {
+          brinco: string
+          categoria?: string | null
+          created_at?: string
+          data_entrada?: string
+          fazenda_id: string
+          id?: string
+          lote_id?: string | null
+          nascimento?: string | null
+          observacoes?: string | null
+          peso_entrada_kg?: number | null
+          raca?: string | null
+          sexo?: string
+          status?: string
+          updated_at?: string
+          valor_compra?: number | null
+        }
+        Update: {
+          brinco?: string
+          categoria?: string | null
+          created_at?: string
+          data_entrada?: string
+          fazenda_id?: string
+          id?: string
+          lote_id?: string | null
+          nascimento?: string | null
+          observacoes?: string | null
+          peso_entrada_kg?: number | null
+          raca?: string | null
+          sexo?: string
+          status?: string
+          updated_at?: string
+          valor_compra?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engorda_animais_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engorda_animais_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "engorda_lotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engorda_lotes: {
+        Row: {
+          autor: string | null
+          categoria: string | null
+          created_at: string
+          data_entrada: string
+          encerrado: boolean
+          fazenda_id: string
+          id: string
+          local: string | null
+          meta_gmd: number | null
+          numero: string
+          observacoes: string | null
+          origem: string | null
+          peso_inicial_total_kg: number | null
+          peso_medio_inicial_kg: number | null
+          preco_arroba_venda: number | null
+          previsao_saida: string | null
+          quantidade: number
+          raca: string | null
+          sistema: string | null
+          updated_at: string
+          valor_compra: number | null
+        }
+        Insert: {
+          autor?: string | null
+          categoria?: string | null
+          created_at?: string
+          data_entrada?: string
+          encerrado?: boolean
+          fazenda_id: string
+          id?: string
+          local?: string | null
+          meta_gmd?: number | null
+          numero: string
+          observacoes?: string | null
+          origem?: string | null
+          peso_inicial_total_kg?: number | null
+          peso_medio_inicial_kg?: number | null
+          preco_arroba_venda?: number | null
+          previsao_saida?: string | null
+          quantidade?: number
+          raca?: string | null
+          sistema?: string | null
+          updated_at?: string
+          valor_compra?: number | null
+        }
+        Update: {
+          autor?: string | null
+          categoria?: string | null
+          created_at?: string
+          data_entrada?: string
+          encerrado?: boolean
+          fazenda_id?: string
+          id?: string
+          local?: string | null
+          meta_gmd?: number | null
+          numero?: string
+          observacoes?: string | null
+          origem?: string | null
+          peso_inicial_total_kg?: number | null
+          peso_medio_inicial_kg?: number | null
+          preco_arroba_venda?: number | null
+          previsao_saida?: string | null
+          quantidade?: number
+          raca?: string | null
+          sistema?: string | null
+          updated_at?: string
+          valor_compra?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engorda_lotes_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engorda_pesagens: {
+        Row: {
+          animal_id: string | null
+          autor: string | null
+          created_at: string
+          data: string
+          fazenda_id: string
+          id: string
+          lote_id: string | null
+          observacoes: string | null
+          peso_medio_kg: number | null
+          peso_total_kg: number | null
+          quantidade: number | null
+          updated_at: string
+        }
+        Insert: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          data?: string
+          fazenda_id: string
+          id?: string
+          lote_id?: string | null
+          observacoes?: string | null
+          peso_medio_kg?: number | null
+          peso_total_kg?: number | null
+          quantidade?: number | null
+          updated_at?: string
+        }
+        Update: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          data?: string
+          fazenda_id?: string
+          id?: string
+          lote_id?: string | null
+          observacoes?: string | null
+          peso_medio_kg?: number | null
+          peso_total_kg?: number | null
+          quantidade?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engorda_pesagens_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "engorda_animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engorda_pesagens_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engorda_pesagens_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "engorda_lotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entregas_racao: {
         Row: {
           autor: string | null
@@ -732,6 +948,284 @@ export type Database = {
           },
           {
             foreignKeyName: "importacoes_ia_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leite_animais: {
+        Row: {
+          autor: string | null
+          brinco: string
+          categoria: string
+          created_at: string
+          data_entrada: string
+          fazenda_id: string
+          id: string
+          local: string | null
+          mae: string | null
+          nascimento: string | null
+          nome: string | null
+          observacoes: string | null
+          origem: string | null
+          pai: string | null
+          peso_kg: number | null
+          raca: string | null
+          sexo: string
+          status: string
+          updated_at: string
+          valor_aquisicao: number | null
+        }
+        Insert: {
+          autor?: string | null
+          brinco: string
+          categoria?: string
+          created_at?: string
+          data_entrada?: string
+          fazenda_id: string
+          id?: string
+          local?: string | null
+          mae?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          pai?: string | null
+          peso_kg?: number | null
+          raca?: string | null
+          sexo?: string
+          status?: string
+          updated_at?: string
+          valor_aquisicao?: number | null
+        }
+        Update: {
+          autor?: string | null
+          brinco?: string
+          categoria?: string
+          created_at?: string
+          data_entrada?: string
+          fazenda_id?: string
+          id?: string
+          local?: string | null
+          mae?: string | null
+          nascimento?: string | null
+          nome?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          pai?: string | null
+          peso_kg?: number | null
+          raca?: string | null
+          sexo?: string
+          status?: string
+          updated_at?: string
+          valor_aquisicao?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leite_animais_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leite_eventos: {
+        Row: {
+          animal_id: string | null
+          autor: string | null
+          created_at: string
+          custo: number | null
+          data: string
+          data_fim: string | null
+          data_prevista: string | null
+          dosagem: string | null
+          fazenda_id: string
+          id: string
+          medicamento: string | null
+          observacoes: string | null
+          problema: string | null
+          responsavel: string | null
+          resultado: string | null
+          tipo: string
+          touro_semen: string | null
+          updated_at: string
+        }
+        Insert: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          custo?: number | null
+          data?: string
+          data_fim?: string | null
+          data_prevista?: string | null
+          dosagem?: string | null
+          fazenda_id: string
+          id?: string
+          medicamento?: string | null
+          observacoes?: string | null
+          problema?: string | null
+          responsavel?: string | null
+          resultado?: string | null
+          tipo: string
+          touro_semen?: string | null
+          updated_at?: string
+        }
+        Update: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          custo?: number | null
+          data?: string
+          data_fim?: string | null
+          data_prevista?: string | null
+          dosagem?: string | null
+          fazenda_id?: string
+          id?: string
+          medicamento?: string | null
+          observacoes?: string | null
+          problema?: string | null
+          responsavel?: string | null
+          resultado?: string | null
+          tipo?: string
+          touro_semen?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leite_eventos_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "leite_animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leite_eventos_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leite_lactacoes: {
+        Row: {
+          animal_id: string
+          created_at: string
+          data_parto: string
+          data_secagem: string | null
+          data_secagem_prevista: string | null
+          fazenda_id: string
+          id: string
+          numero: number
+          observacoes: string | null
+          pico_litros: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          animal_id: string
+          created_at?: string
+          data_parto: string
+          data_secagem?: string | null
+          data_secagem_prevista?: string | null
+          fazenda_id: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          pico_litros?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          animal_id?: string
+          created_at?: string
+          data_parto?: string
+          data_secagem?: string | null
+          data_secagem_prevista?: string | null
+          fazenda_id?: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          pico_litros?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leite_lactacoes_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "leite_animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leite_lactacoes_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leite_producao: {
+        Row: {
+          animal_id: string | null
+          autor: string | null
+          created_at: string
+          data: string
+          fazenda_id: string
+          id: string
+          manha: number
+          noite: number
+          observacoes: string | null
+          ordenhas: number
+          tarde: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          data?: string
+          fazenda_id: string
+          id?: string
+          manha?: number
+          noite?: number
+          observacoes?: string | null
+          ordenhas?: number
+          tarde?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          animal_id?: string | null
+          autor?: string | null
+          created_at?: string
+          data?: string
+          fazenda_id?: string
+          id?: string
+          manha?: number
+          noite?: number
+          observacoes?: string | null
+          ordenhas?: number
+          tarde?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leite_producao_animal_id_fkey"
+            columns: ["animal_id"]
+            isOneToOne: false
+            referencedRelation: "leite_animais"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leite_producao_fazenda_id_fkey"
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"
@@ -1144,6 +1638,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pastos_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planilhas: {
+        Row: {
+          atividade: string | null
+          autor: string | null
+          celulas: Json
+          colunas: Json
+          config: Json
+          created_at: string
+          fazenda_id: string
+          id: string
+          linhas: number
+          modelo: string
+          nome: string
+          updated_at: string
+          vinculo: Json
+        }
+        Insert: {
+          atividade?: string | null
+          autor?: string | null
+          celulas?: Json
+          colunas?: Json
+          config?: Json
+          created_at?: string
+          fazenda_id: string
+          id?: string
+          linhas?: number
+          modelo?: string
+          nome: string
+          updated_at?: string
+          vinculo?: Json
+        }
+        Update: {
+          atividade?: string | null
+          autor?: string | null
+          celulas?: Json
+          colunas?: Json
+          config?: Json
+          created_at?: string
+          fazenda_id?: string
+          id?: string
+          linhas?: number
+          modelo?: string
+          nome?: string
+          updated_at?: string
+          vinculo?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planilhas_fazenda_id_fkey"
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"
