@@ -33,6 +33,7 @@ import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
+import { Route as GoogleDriveRouteImport } from './routes/google-drive'
 import { Route as GadoProRouteImport } from './routes/gado-pro'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as FinanceiroLoteRouteImport } from './routes/financeiro-lote'
@@ -181,6 +182,11 @@ const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
 const GuiaCultivoRoute = GuiaCultivoRouteImport.update({
   id: '/guia-cultivo',
   path: '/guia-cultivo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoogleDriveRoute = GoogleDriveRouteImport.update({
+  id: '/google-drive',
+  path: '/google-drive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GadoProRoute = GadoProRouteImport.update({
@@ -355,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
@@ -466,6 +474,7 @@ export interface FileRoutesById {
   '/financeiro-lote': typeof FinanceiroLoteRoute
   '/fornecedores': typeof FornecedoresRoute
   '/gado-pro': typeof GadoProRoute
+  '/google-drive': typeof GoogleDriveRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
@@ -523,6 +532,7 @@ export interface FileRouteTypes {
     | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
+    | '/google-drive'
     | '/guia-cultivo'
     | '/historico-lotes'
     | '/integracoes-gov'
@@ -578,6 +588,7 @@ export interface FileRouteTypes {
     | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
+    | '/google-drive'
     | '/guia-cultivo'
     | '/historico-lotes'
     | '/integracoes-gov'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/financeiro-lote'
     | '/fornecedores'
     | '/gado-pro'
+    | '/google-drive'
     | '/guia-cultivo'
     | '/historico-lotes'
     | '/integracoes-gov'
@@ -689,6 +701,7 @@ export interface RootRouteChildren {
   FinanceiroLoteRoute: typeof FinanceiroLoteRoute
   FornecedoresRoute: typeof FornecedoresRoute
   GadoProRoute: typeof GadoProRoute
+  GoogleDriveRoute: typeof GoogleDriveRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
   IntegracoesGovRoute: typeof IntegracoesGovRoute
@@ -887,6 +900,13 @@ declare module '@tanstack/react-router' {
       path: '/guia-cultivo'
       fullPath: '/guia-cultivo'
       preLoaderRoute: typeof GuiaCultivoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/google-drive': {
+      id: '/google-drive'
+      path: '/google-drive'
+      fullPath: '/google-drive'
+      preLoaderRoute: typeof GoogleDriveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gado-pro': {
@@ -1121,6 +1141,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinanceiroLoteRoute: FinanceiroLoteRoute,
   FornecedoresRoute: FornecedoresRoute,
   GadoProRoute: GadoProRoute,
+  GoogleDriveRoute: GoogleDriveRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
   IntegracoesGovRoute: IntegracoesGovRoute,
