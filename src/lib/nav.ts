@@ -4,7 +4,7 @@ import {
   Boxes, Wallet, Database, Tractor, CloudRain, Bug, ShoppingCart, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
   ClipboardCheck, Trophy, BarChart3, Syringe, History, Ruler, Calculator, MapPin,
-  Landmark, Scale, MessagesSquare, Store, Target, Cloud,
+  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2,
 } from "lucide-react";
 
 export type NavItem = {
@@ -24,6 +24,8 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: LayoutDashboard,
     items: [
       { to: "/", label: "Início", icon: LayoutDashboard, desc: "Painel geral com clima, alertas e indicadores", tags: ["painel", "dashboard", "home"] },
+      { to: "/propriedade", label: "Visão da Propriedade", icon: Landmark, desc: "Frango, leite e engorda em um só painel com o resultado do mês", tags: ["visao", "geral", "atividades", "resumo"] },
+      { to: "/planilhas", label: "Planilhas Inteligentes", icon: Table2, desc: "Planilhas com fórmulas e variáveis vivas dos módulos", tags: ["planilha", "excel", "formula", "calculo"] },
       { to: "/agro-ia", label: "Agro IA", icon: Sparkles, desc: "Assistente técnico com os dados da sua fazenda", tags: ["ia", "chat", "inteligencia"] },
       { to: "/chat", label: "Chat da Equipe", icon: MessagesSquare, desc: "Conversa em tempo real com todo o time", tags: ["mensagem", "equipe"] },
       { to: "/modo-campo", label: "Modo Campo", icon: MapPin, desc: "Foto + GPS, leitor de brinco e ditado por voz", tags: ["mobile", "gps", "campo"] },
