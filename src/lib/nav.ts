@@ -4,7 +4,7 @@ import {
   Boxes, Wallet, Database, Tractor, CloudRain, Bug, ShoppingCart, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
   ClipboardCheck, Trophy, BarChart3, Syringe, History, Ruler, Calculator, MapPin,
-  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2,
+  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2, HardDrive,
 } from "lucide-react";
 
 export type NavItem = {
