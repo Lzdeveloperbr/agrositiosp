@@ -100,6 +100,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
       { to: "/automacoes", label: "Automações", icon: Sparkles, desc: "Regras automáticas e gatilhos", tags: ["regra", "gatilho"] },
       { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark, desc: "CNPJ, CEP, CAR, INCRA e SISBOV", tags: ["governo", "cnpj", "car"] },
+      { to: "/google-drive", label: "Google Drive + IA", icon: HardDrive, desc: "IA lê planilhas, PDFs e fotos do Google Drive e preenche os módulos sozinha", tags: ["google", "drive", "importar", "planilha", "pdf", "ia"] },
       { to: "/onedrive", label: "OneDrive + IA", icon: Cloud, desc: "IA lê planilhas e PDFs do OneDrive e atualiza os módulos sozinha", tags: ["onedrive", "importar", "excel", "pdf", "ia"] },
       { to: "/backup", label: "Backup & Dados", icon: Database, desc: "Exportar, importar e limpar dados", tags: ["exportar", "importar"] },
     ],
