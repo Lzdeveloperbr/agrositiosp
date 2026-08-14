@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as PropriedadeRouteImport } from './routes/propriedade'
 import { Route as PrioridadesRouteImport } from './routes/prioridades'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as PlanilhasRouteImport } from './routes/planilhas'
@@ -90,6 +91,11 @@ const RacaoRoute = RacaoRouteImport.update({
 const QuizRoute = QuizRouteImport.update({
   id: '/quiz',
   path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropriedadeRoute = PropriedadeRouteImport.update({
+  id: '/propriedade',
+  path: '/propriedade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrioridadesRoute = PrioridadesRouteImport.update({
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
   '/prioridades': typeof PrioridadesRoute
+  '/propriedade': typeof PropriedadeRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -420,6 +427,7 @@ export interface FileRoutesByTo {
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
   '/prioridades': typeof PrioridadesRoute
+  '/propriedade': typeof PropriedadeRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -475,6 +483,7 @@ export interface FileRoutesById {
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
   '/prioridades': typeof PrioridadesRoute
+  '/propriedade': typeof PropriedadeRoute
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
@@ -531,6 +540,7 @@ export interface FileRouteTypes {
     | '/planilhas'
     | '/plantios'
     | '/prioridades'
+    | '/propriedade'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -585,6 +595,7 @@ export interface FileRouteTypes {
     | '/planilhas'
     | '/plantios'
     | '/prioridades'
+    | '/propriedade'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -639,6 +650,7 @@ export interface FileRouteTypes {
     | '/planilhas'
     | '/plantios'
     | '/prioridades'
+    | '/propriedade'
     | '/quiz'
     | '/racao'
     | '/relatorios'
@@ -694,6 +706,7 @@ export interface RootRouteChildren {
   PlanilhasRoute: typeof PlanilhasRoute
   PlantiosRoute: typeof PlantiosRoute
   PrioridadesRoute: typeof PrioridadesRoute
+  PropriedadeRoute: typeof PropriedadeRoute
   QuizRoute: typeof QuizRoute
   RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
@@ -748,6 +761,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz'
       fullPath: '/quiz'
       preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/propriedade': {
+      id: '/propriedade'
+      path: '/propriedade'
+      fullPath: '/propriedade'
+      preLoaderRoute: typeof PropriedadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/prioridades': {
@@ -1118,6 +1138,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlanilhasRoute: PlanilhasRoute,
   PlantiosRoute: PlantiosRoute,
   PrioridadesRoute: PrioridadesRoute,
+  PropriedadeRoute: PropriedadeRoute,
   QuizRoute: QuizRoute,
   RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
