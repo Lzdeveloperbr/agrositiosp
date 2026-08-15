@@ -178,3 +178,7 @@
     background-size: 3px 3px;
   }
 }
+
+#lovable-badge {
+  display: none !important;
+}
