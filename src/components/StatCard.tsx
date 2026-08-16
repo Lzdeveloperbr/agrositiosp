@@ -19,18 +19,19 @@ export function StatCard({ label, value, hint, icon: Icon, tone = "primary" }: P
   }[tone];
 
   return (
-    <Card className="p-5 relative overflow-hidden border-border/60" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
-      <div className={cn("absolute -top-8 -right-8 h-32 w-32 rounded-full bg-gradient-to-br opacity-50 blur-2xl", toneClass)} />
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="text-3xl font-display font-bold tabular-nums">{value}</p>
-          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    <Card className="reveal lift sheen group p-5 md:p-6 relative overflow-hidden border-border/60" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
+      <div className={cn("absolute -top-8 -right-8 h-32 w-32 rounded-full bg-linear-to-br opacity-50 blur-2xl transition-opacity duration-500 group-hover:opacity-80", toneClass)} />
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="space-y-1.5 min-w-0">
+          <p className="eyebrow truncate">{label}</p>
+          <p className="text-3xl md:text-[2rem] font-display font-bold tabular-nums leading-none tracking-[-0.03em]">{value}</p>
+          {hint && <p className="text-xs leading-relaxed text-muted-foreground truncate">{hint}</p>}
         </div>
-        <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center bg-gradient-to-br", toneClass)}>
+        <div className={cn("h-10 w-10 shrink-0 rounded-xl flex items-center justify-center bg-linear-to-br transition-transform duration-500 group-hover:scale-110", toneClass)}>
           <Icon className="h-5 w-5" />
         </div>
       </div>
     </Card>
   );
 }
+
