@@ -88,21 +88,22 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-8 md:space-y-12">
         <header
-          className="relative overflow-hidden rounded-2xl border border-border/60 p-5 md:p-7"
-          style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-soft)" }}
+          className="reveal grain relative overflow-hidden rounded-3xl border border-border/60 px-6 py-8 md:px-10 md:py-12"
+          style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
         >
-          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+          <div className="absolute -top-24 -right-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent pointer-events-none" />
+          <div className="relative flex flex-col gap-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="text-xs md:text-sm text-muted-foreground capitalize min-h-[18px]">
+              <p className="eyebrow capitalize min-h-[16px]">
                 {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
               </p>
-              <h1 className="text-2xl md:text-4xl font-display font-bold mt-1 truncate">
-                {saudacao}, {nomeOperador} {emoji}
+              <h1 className="mt-3 text-[clamp(1.75rem,6vw,3.25rem)] font-display font-bold leading-[1.05] tracking-[-0.04em] truncate">
+                {saudacao}, <span className="text-gradient">{nomeOperador}</span> {emoji}
               </h1>
-              <p className="text-sm md:text-base text-muted-foreground mt-1 truncate">
+              <p className="mt-3 max-w-xl text-sm md:text-base leading-relaxed text-muted-foreground truncate">
                 {fazendaNome ? `${fazendaNome} · Resumo de hoje no sítio` : "Resumo de hoje no sítio"}
               </p>
             </div>
@@ -115,26 +116,29 @@ function Dashboard() {
           </div>
         </header>
 
-        <section aria-label="Acesso rápido">
-          <div className="flex items-center justify-between mb-2.5">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Acesso rápido</h2>
-            <Link to="/modulos" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-              Todos os módulos <ArrowRight className="h-3 w-3" />
+        <section aria-label="Acesso rápido" className="reveal" style={{ "--reveal-delay": "80ms" } as React.CSSProperties}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="eyebrow">Acesso rápido</h2>
+            <Link to="/modulos" className="group text-xs font-medium text-primary inline-flex items-center gap-1.5">
+              Todos os módulos
+              <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-            {ATALHOS.map((a) => (
+          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
+            {ATALHOS.map((a, i) => (
               <Link
                 key={a.to}
                 to={a.to}
-                className="card-elevated flex flex-col items-center justify-center gap-1.5 py-3 px-1 text-center transition-all hover:border-primary/40 hover:-translate-y-0.5"
+                style={{ "--reveal-delay": `${120 + i * 40}ms` } as React.CSSProperties}
+                className="reveal card-elevated lift sheen group flex flex-col items-center justify-center gap-2 py-4 px-1.5 text-center"
               >
-                <a.icon className="h-5 w-5 text-primary" />
-                <span className="text-[10px] leading-tight text-muted-foreground line-clamp-2">{a.label}</span>
+                <a.icon className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
+                <span className="text-[10px] leading-tight tracking-tight text-muted-foreground line-clamp-2 transition-colors group-hover:text-foreground">{a.label}</span>
               </Link>
             ))}
           </div>
         </section>
+
 
 
         {(diaLeitura || estoqueBaixo.length > 0 || tarefasPend.length > 0 || contasVencendo.length > 0 || lembretesHoje.length > 0) && (
