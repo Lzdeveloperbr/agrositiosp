@@ -853,6 +853,74 @@ export type Database = {
           },
         ]
       }
+      funcionarios: {
+        Row: {
+          admissao: string | null
+          ativo: boolean
+          autor: string | null
+          cpf: string | null
+          created_at: string
+          demissao: string | null
+          fazenda_id: string
+          funcao: string | null
+          id: string
+          nome: string
+          observacoes: string | null
+          salario: number | null
+          setor: string | null
+          telefone: string | null
+          tipo_pagamento: string
+          updated_at: string
+          valor_hora: number | null
+        }
+        Insert: {
+          admissao?: string | null
+          ativo?: boolean
+          autor?: string | null
+          cpf?: string | null
+          created_at?: string
+          demissao?: string | null
+          fazenda_id: string
+          funcao?: string | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          salario?: number | null
+          setor?: string | null
+          telefone?: string | null
+          tipo_pagamento?: string
+          updated_at?: string
+          valor_hora?: number | null
+        }
+        Update: {
+          admissao?: string | null
+          ativo?: boolean
+          autor?: string | null
+          cpf?: string | null
+          created_at?: string
+          demissao?: string | null
+          fazenda_id?: string
+          funcao?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          salario?: number | null
+          setor?: string | null
+          telefone?: string | null
+          tipo_pagamento?: string
+          updated_at?: string
+          valor_hora?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funcionarios_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gdrive_arquivos: {
         Row: {
           caminho: string | null
@@ -1722,6 +1790,59 @@ export type Database = {
           },
         ]
       }
+      orcamento_metas: {
+        Row: {
+          ano: number
+          atividade: string
+          autor: string | null
+          categoria: string
+          created_at: string
+          fazenda_id: string
+          id: string
+          mes: number
+          observacoes: string | null
+          previsto: number
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ano: number
+          atividade?: string
+          autor?: string | null
+          categoria: string
+          created_at?: string
+          fazenda_id: string
+          id?: string
+          mes: number
+          observacoes?: string | null
+          previsto?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ano?: number
+          atividade?: string
+          autor?: string | null
+          categoria?: string
+          created_at?: string
+          fazenda_id?: string
+          id?: string
+          mes?: number
+          observacoes?: string | null
+          previsto?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orcamento_metas_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pastos: {
         Row: {
           area_ha: number | null
@@ -1885,6 +2006,75 @@ export type Database = {
         }
         Relationships: []
       }
+      pontos: {
+        Row: {
+          atividade: string | null
+          autor: string | null
+          created_at: string
+          data: string
+          entrada: string | null
+          extras: number
+          fazenda_id: string
+          funcionario_id: string | null
+          horas: number
+          id: string
+          intervalo_min: number
+          observacoes: string | null
+          saida: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          atividade?: string | null
+          autor?: string | null
+          created_at?: string
+          data: string
+          entrada?: string | null
+          extras?: number
+          fazenda_id: string
+          funcionario_id?: string | null
+          horas?: number
+          id?: string
+          intervalo_min?: number
+          observacoes?: string | null
+          saida?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          atividade?: string | null
+          autor?: string | null
+          created_at?: string
+          data?: string
+          entrada?: string | null
+          extras?: number
+          fazenda_id?: string
+          funcionario_id?: string | null
+          horas?: number
+          id?: string
+          intervalo_min?: number
+          observacoes?: string | null
+          saida?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pontos_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pontos_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "funcionarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prioridades: {
         Row: {
           autor: string | null
@@ -1949,6 +2139,92 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "prioridades_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sanidade_registros: {
+        Row: {
+          alvo: string
+          autor: string | null
+          brincos: string | null
+          carencia_ate: string | null
+          carencia_dias: number
+          created_at: string
+          crmv: string | null
+          custo: number | null
+          data: string
+          documento: string | null
+          dose: string | null
+          especie: string
+          fabricante: string | null
+          fazenda_id: string
+          id: string
+          lote_produto: string | null
+          observacoes: string | null
+          produto: string | null
+          quantidade: number | null
+          responsavel: string | null
+          tipo: string
+          updated_at: string
+          via: string | null
+        }
+        Insert: {
+          alvo: string
+          autor?: string | null
+          brincos?: string | null
+          carencia_ate?: string | null
+          carencia_dias?: number
+          created_at?: string
+          crmv?: string | null
+          custo?: number | null
+          data: string
+          documento?: string | null
+          dose?: string | null
+          especie?: string
+          fabricante?: string | null
+          fazenda_id: string
+          id?: string
+          lote_produto?: string | null
+          observacoes?: string | null
+          produto?: string | null
+          quantidade?: number | null
+          responsavel?: string | null
+          tipo?: string
+          updated_at?: string
+          via?: string | null
+        }
+        Update: {
+          alvo?: string
+          autor?: string | null
+          brincos?: string | null
+          carencia_ate?: string | null
+          carencia_dias?: number
+          created_at?: string
+          crmv?: string | null
+          custo?: number | null
+          data?: string
+          documento?: string | null
+          dose?: string | null
+          especie?: string
+          fabricante?: string | null
+          fazenda_id?: string
+          id?: string
+          lote_produto?: string | null
+          observacoes?: string | null
+          produto?: string | null
+          quantidade?: number | null
+          responsavel?: string | null
+          tipo?: string
+          updated_at?: string
+          via?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sanidade_registros_fazenda_id_fkey"
             columns: ["fazenda_id"]
             isOneToOne: false
             referencedRelation: "fazendas"

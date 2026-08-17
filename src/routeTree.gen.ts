@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SanidadeRouteImport } from './routes/sanidade'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
 import { Route as QuizRouteImport } from './routes/quiz'
@@ -20,6 +21,7 @@ import { Route as PrioridadesRouteImport } from './routes/prioridades'
 import { Route as PlantiosRouteImport } from './routes/plantios'
 import { Route as PlanilhasRouteImport } from './routes/planilhas'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
+import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as OnedriveRouteImport } from './routes/onedrive'
 import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as ModulosRouteImport } from './routes/modulos'
@@ -31,6 +33,7 @@ import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
 import { Route as LeiteRouteImport } from './routes/leite'
 import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
+import { Route as IndicadoresRouteImport } from './routes/indicadores'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
 import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
 import { Route as GadoProRouteImport } from './routes/gado-pro'
@@ -40,6 +43,7 @@ import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
 import { Route as EstoqueRouteImport } from './routes/estoque'
+import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
 import { Route as EngordaRouteImport } from './routes/engorda'
 import { Route as EnergiaRouteImport } from './routes/energia'
@@ -76,6 +80,11 @@ const TarefasRoute = TarefasRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SanidadeRoute = SanidadeRouteImport.update({
+  id: '/sanidade',
+  path: '/sanidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
@@ -116,6 +125,11 @@ const PlanilhasRoute = PlanilhasRouteImport.update({
 const PesagemProRoute = PesagemProRouteImport.update({
   id: '/pesagem-pro',
   path: '/pesagem-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrcamentoRoute = OrcamentoRouteImport.update({
+  id: '/orcamento',
+  path: '/orcamento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnedriveRoute = OnedriveRouteImport.update({
@@ -173,6 +187,11 @@ const IntegracoesGovRoute = IntegracoesGovRouteImport.update({
   path: '/integracoes-gov',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndicadoresRoute = IndicadoresRouteImport.update({
+  id: '/indicadores',
+  path: '/indicadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
   id: '/historico-lotes',
   path: '/historico-lotes',
@@ -216,6 +235,11 @@ const ExcelenciaLoteRoute = ExcelenciaLoteRouteImport.update({
 const EstoqueRoute = EstoqueRouteImport.update({
   id: '/estoque',
   path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipeRoute = EquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntregasRacaoRoute = EntregasRacaoRouteImport.update({
@@ -348,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/energia': typeof EnergiaRoute
   '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
+  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
@@ -357,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -368,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/onedrive': typeof OnedriveRoute
+  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
@@ -376,6 +403,7 @@ export interface FileRoutesByFullPath {
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sanidade': typeof SanidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -403,6 +431,7 @@ export interface FileRoutesByTo {
   '/energia': typeof EnergiaRoute
   '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
+  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
@@ -412,6 +441,7 @@ export interface FileRoutesByTo {
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -423,6 +453,7 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/onedrive': typeof OnedriveRoute
+  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
@@ -431,6 +462,7 @@ export interface FileRoutesByTo {
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sanidade': typeof SanidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -459,6 +491,7 @@ export interface FileRoutesById {
   '/energia': typeof EnergiaRoute
   '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
+  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
@@ -468,6 +501,7 @@ export interface FileRoutesById {
   '/gado-pro': typeof GadoProRoute
   '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
+  '/indicadores': typeof IndicadoresRoute
   '/integracoes-gov': typeof IntegracoesGovRoute
   '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
@@ -479,6 +513,7 @@ export interface FileRoutesById {
   '/modulos': typeof ModulosRoute
   '/monitoramento': typeof MonitoramentoRoute
   '/onedrive': typeof OnedriveRoute
+  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/planilhas': typeof PlanilhasRoute
   '/plantios': typeof PlantiosRoute
@@ -487,6 +522,7 @@ export interface FileRoutesById {
   '/quiz': typeof QuizRoute
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
+  '/sanidade': typeof SanidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -516,6 +552,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/engorda'
     | '/entregas-racao'
+    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
@@ -525,6 +562,7 @@ export interface FileRouteTypes {
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/indicadores'
     | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
@@ -536,6 +574,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/monitoramento'
     | '/onedrive'
+    | '/orcamento'
     | '/pesagem-pro'
     | '/planilhas'
     | '/plantios'
@@ -544,6 +583,7 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/racao'
     | '/relatorios'
+    | '/sanidade'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -571,6 +611,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/engorda'
     | '/entregas-racao'
+    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
@@ -580,6 +621,7 @@ export interface FileRouteTypes {
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/indicadores'
     | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
@@ -591,6 +633,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/monitoramento'
     | '/onedrive'
+    | '/orcamento'
     | '/pesagem-pro'
     | '/planilhas'
     | '/plantios'
@@ -599,6 +642,7 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/racao'
     | '/relatorios'
+    | '/sanidade'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -626,6 +670,7 @@ export interface FileRouteTypes {
     | '/energia'
     | '/engorda'
     | '/entregas-racao'
+    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
@@ -635,6 +680,7 @@ export interface FileRouteTypes {
     | '/gado-pro'
     | '/guia-cultivo'
     | '/historico-lotes'
+    | '/indicadores'
     | '/integracoes-gov'
     | '/leite'
     | '/lembretes'
@@ -646,6 +692,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/monitoramento'
     | '/onedrive'
+    | '/orcamento'
     | '/pesagem-pro'
     | '/planilhas'
     | '/plantios'
@@ -654,6 +701,7 @@ export interface FileRouteTypes {
     | '/quiz'
     | '/racao'
     | '/relatorios'
+    | '/sanidade'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -682,6 +730,7 @@ export interface RootRouteChildren {
   EnergiaRoute: typeof EnergiaRoute
   EngordaRoute: typeof EngordaRoute
   EntregasRacaoRoute: typeof EntregasRacaoRoute
+  EquipeRoute: typeof EquipeRoute
   EstoqueRoute: typeof EstoqueRoute
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
@@ -691,6 +740,7 @@ export interface RootRouteChildren {
   GadoProRoute: typeof GadoProRoute
   GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
+  IndicadoresRoute: typeof IndicadoresRoute
   IntegracoesGovRoute: typeof IntegracoesGovRoute
   LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
@@ -702,6 +752,7 @@ export interface RootRouteChildren {
   ModulosRoute: typeof ModulosRoute
   MonitoramentoRoute: typeof MonitoramentoRoute
   OnedriveRoute: typeof OnedriveRoute
+  OrcamentoRoute: typeof OrcamentoRoute
   PesagemProRoute: typeof PesagemProRoute
   PlanilhasRoute: typeof PlanilhasRoute
   PlantiosRoute: typeof PlantiosRoute
@@ -710,6 +761,7 @@ export interface RootRouteChildren {
   QuizRoute: typeof QuizRoute
   RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  SanidadeRoute: typeof SanidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
   VeterinarioRoute: typeof VeterinarioRoute
@@ -740,6 +792,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sanidade': {
+      id: '/sanidade'
+      path: '/sanidade'
+      fullPath: '/sanidade'
+      preLoaderRoute: typeof SanidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relatorios': {
@@ -796,6 +855,13 @@ declare module '@tanstack/react-router' {
       path: '/pesagem-pro'
       fullPath: '/pesagem-pro'
       preLoaderRoute: typeof PesagemProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orcamento': {
+      id: '/orcamento'
+      path: '/orcamento'
+      fullPath: '/orcamento'
+      preLoaderRoute: typeof OrcamentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onedrive': {
@@ -875,6 +941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IntegracoesGovRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/indicadores': {
+      id: '/indicadores'
+      path: '/indicadores'
+      fullPath: '/indicadores'
+      preLoaderRoute: typeof IndicadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/historico-lotes': {
       id: '/historico-lotes'
       path: '/historico-lotes'
@@ -936,6 +1009,13 @@ declare module '@tanstack/react-router' {
       path: '/estoque'
       fullPath: '/estoque'
       preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipe': {
+      id: '/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof EquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entregas-racao': {
@@ -1114,6 +1194,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnergiaRoute: EnergiaRoute,
   EngordaRoute: EngordaRoute,
   EntregasRacaoRoute: EntregasRacaoRoute,
+  EquipeRoute: EquipeRoute,
   EstoqueRoute: EstoqueRoute,
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
@@ -1123,6 +1204,7 @@ const rootRouteChildren: RootRouteChildren = {
   GadoProRoute: GadoProRoute,
   GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
+  IndicadoresRoute: IndicadoresRoute,
   IntegracoesGovRoute: IntegracoesGovRoute,
   LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
@@ -1134,6 +1216,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModulosRoute: ModulosRoute,
   MonitoramentoRoute: MonitoramentoRoute,
   OnedriveRoute: OnedriveRoute,
+  OrcamentoRoute: OrcamentoRoute,
   PesagemProRoute: PesagemProRoute,
   PlanilhasRoute: PlanilhasRoute,
   PlantiosRoute: PlantiosRoute,
@@ -1142,6 +1225,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuizRoute: QuizRoute,
   RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
+  SanidadeRoute: SanidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
   VeterinarioRoute: VeterinarioRoute,
