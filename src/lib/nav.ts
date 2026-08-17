@@ -4,7 +4,7 @@ import {
   Boxes, Wallet, Database, Tractor, CloudRain, Bug, ShoppingCart, Sprout, BellRing,
   Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
   ClipboardCheck, Trophy, BarChart3, Syringe, History, Ruler, Calculator, MapPin,
-  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2,
+  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2, Users, ShieldCheck, PieChart,
 } from "lucide-react";
 
 export type NavItem = {
@@ -62,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp, desc: "GMD, reprodução e lotação de pasto", tags: ["gmd", "reproducao", "pasto"] },
       { to: "/leite", label: "Gado de Leite", icon: Milk, desc: "Rebanho leiteiro, controle leiteiro, lactações e reprodução", tags: ["ordenha", "litros", "vaca", "leite"] },
       { to: "/engorda", label: "Gado de Engorda", icon: Scale, desc: "Lotes de engorda com GMD, arrobas e lucro por cabeça", tags: ["boi", "gmd", "arroba", "confinamento"] },
+      { to: "/sanidade", label: "Rastreabilidade & Sanidade", icon: ShieldCheck, desc: "Vacinas, medicamentos, carência e histórico rastreável por brinco ou lote", tags: ["vacina", "carencia", "rastreabilidade", "sanidade", "medicamento"] },
       { to: "/veterinario", label: "Veterinário", icon: Stethoscope, desc: "Atendimentos, tratamentos e carências", tags: ["saude", "medicamento"] },
       { to: "/racao", label: "Fábrica de Ração", icon: Factory, desc: "Fórmulas e custo por tonelada", tags: ["formula", "nutricao"] },
     ],
@@ -95,6 +96,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/financeiro", label: "Finanças", icon: Wallet, desc: "Receitas, despesas e contas a pagar", tags: ["dinheiro", "caixa"] },
       { to: "/custos", label: "Custos por Lote", icon: TrendingUp, desc: "Rateio de custo e margem por lote", tags: ["margem", "lucro"] },
       { to: "/financeiro-lote", label: "Painel Financeiro do Lote", icon: Wallet, desc: "Custo por ave, custo/kg, participação e lucro projetado", tags: ["custo", "ave", "lucro", "participacao"] },
+      { to: "/indicadores", label: "Indicadores Comparativos", icon: PieChart, desc: "Ranking de lotes, comparativo de safras e evolução financeira", tags: ["comparar", "ranking", "iep", "grafico", "kpi"] },
+      { to: "/orcamento", label: "Orçamento & Metas", icon: Target, desc: "Planejamento anual por atividade com previsto x realizado", tags: ["orcamento", "meta", "planejamento", "anual"] },
+      { to: "/equipe", label: "Equipe & Ponto", icon: Users, desc: "Funcionários, jornada, horas extras e custo de mão de obra", tags: ["funcionario", "ponto", "rh", "folha", "horas"] },
       { to: "/mercado", label: "Mercado Agro", icon: BarChart3, desc: "Cotações e notícias do agronegócio", tags: ["cotacao", "boi", "soja"] },
       { to: "/relatorios", label: "Relatórios", icon: FileText, desc: "PDFs técnicos e fechamento de lote", tags: ["pdf", "impressao"] },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
