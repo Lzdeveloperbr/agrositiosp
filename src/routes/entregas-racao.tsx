@@ -794,20 +794,71 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         </p>
       ) : (
         <>
+          {/* ===== Painel AO VIVO ===== */}
+          {live && (
+            <div className="rounded-xl border p-4 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <h4 className="text-sm font-semibold">Estoque ao vivo</h4>
+                  <Badge variant="outline" className="text-[10px]">{agora.toLocaleTimeString("pt-BR")}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">motor recalculado a cada 1 min</Badge>
+                  <Badge className={`text-[10px] ${calc.confianca >= 85 ? "bg-emerald-600 text-white" : calc.confianca >= 65 ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                    precisão {calc.confianca}%
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {calc.cal
+                    ? <>Curva recalibrada pela pesagem de D{calc.cal.idadePesagem} (fator {calc.cal.fator.toFixed(3)}× · há {calc.diasDesdePesagem} d)</>
+                    : "Sem pesagem real — usando curva padrão da linhagem"}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Ração no silo agora</p>
+                  <p className={`font-display text-2xl font-bold tabular-nums ${live.estoqueAgoraKg <= 0 ? "text-destructive" : ""}`}>
+                    {live.estoqueAgoraKg.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal">kg</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{(live.estoqueAgoraKg / 1000).toFixed(3)} t</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Consumo instantâneo</p>
+                  <p className="font-display text-2xl font-bold tabular-nums">{live.gPorSeg.toFixed(1)} <span className="text-xs font-normal">g/s</span></p>
+                  <p className="text-[10px] text-muted-foreground">{(live.kgPorSeg * 3600).toFixed(1)} kg/h · perfil intradiário</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Consumido hoje</p>
+                  <p className="font-display text-2xl font-bold tabular-nums">{live.consumidoHojeKg.toFixed(1)} <span className="text-xs font-normal">kg</span></p>
+                  <p className="text-[10px] text-muted-foreground">{(live.frac * 100).toFixed(1)}% do dia · meta {Math.round(calc.consumoHojeKg)} kg</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Autonomia</p>
+                  <p className={`font-display text-2xl font-bold tabular-nums ${live.horasAutonomia < 24 ? "text-destructive" : ""}`}>
+                    {live.horasAutonomia > 0 ? `${Math.floor(live.horasAutonomia)}h ${Math.round((live.horasAutonomia % 1) * 60)}m` : "0h"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{calc.rupturaData ? `Ruptura prevista ${calc.rupturaData}` : "Sem ruptura em 14 dias"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Idade do lote" value={`D${calc.idade}`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas${calc.baixas ? ` · ${calc.baixas} baixas` : ""}`} icon={CalIcon} tone="primary" />
             <StatCard
-              label={calc.usandoPesoReal ? "Peso médio (real)" : "Peso médio (curva)"}
+              label={calc.usandoPesoReal ? "Peso esperado (calibrado)" : "Peso médio (curva)"}
               value={`${calc.pesoMedioKg.toFixed(3)} kg`}
               hint={calc.desvioPesoPct != null
-                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
+                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva na pesagem · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
                 : `Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`}
               icon={Scale}
               tone="accent"
             />
-            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
+            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoCalibradoDiaG(calc.idade, cfg.linhagem, cfg.sexo, calc.cal))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
-              label="Estoque estimado"
+              label="Estoque fim do dia"
               value={fmtKg(Math.max(0, Math.round(calc.estoqueKg)))}
               hint={calc.estoqueKg < 0
                 ? `Faltaram ${fmtKg(Math.round(-calc.estoqueKg))}`
@@ -816,6 +867,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               tone={calc.estoqueKg <= 0 ? "destructive" : calc.diasRestantes < 2 ? "destructive" : "primary"}
             />
           </div>
+
 
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs">
