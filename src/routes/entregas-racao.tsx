@@ -82,6 +82,53 @@ function classificaCA(real: number, alvo: number): { label: string; cor: string;
   return            { label: "Ruim",       cor: "bg-destructive text-destructive-foreground", desc: `Muito acima do alvo (${alvo.toFixed(3)}). Investigar manejo, água e sanidade.` };
 }
 
+// ===== Calibração dinâmica pela última pesagem real =====
+// Após uma pesagem, toda a curva (peso e consumo) é reescalada pelo desvio medido.
+// O desvio é amortecido exponencialmente (meia-vida ~28 d) porque o lote tende a
+// reconvergir para o padrão genético conforme envelhece.
+export type Calib = { fator: number; idadePesagem: number } | null;
+
+function criarCalib(pesoRealG: number | undefined, idadePesagem: number | undefined, lin: Linhagem, sx: Sexo): Calib {
+  if (!pesoRealG || idadePesagem == null || idadePesagem < 0) return null;
+  const base = pesoMedioGPorAve(idadePesagem, lin, sx);
+  if (!base) return null;
+  const f = pesoRealG / base;
+  if (!Number.isFinite(f) || f <= 0.3 || f > 2.5) return null;
+  return { fator: f, idadePesagem };
+}
+// fator aplicado no dia d (amortecido após a data da pesagem)
+function fatorNoDia(cal: Calib, d: number): number {
+  if (!cal) return 1;
+  const dt = Math.max(0, d - cal.idadePesagem);
+  return 1 + (cal.fator - 1) * Math.exp(-dt / 28);
+}
+const pesoCalibradoG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  pesoMedioGPorAve(d, lin, sx) * fatorNoDia(cal, d);
+// Consumo escala com o peso metabólico (P^0,75) — padrão zootécnico.
+const consumoCalibradoAcumG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  consumoAcumGPorAve(d, lin, sx) * Math.pow(fatorNoDia(cal, d), 0.75);
+const consumoCalibradoDiaG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  Math.max(0, consumoCalibradoAcumG(d, lin, sx, cal) - consumoCalibradoAcumG(Math.max(0, d - 1), lin, sx, cal));
+
+// Curva de consumo intradiário (fração acumulada do dia por hora local).
+// Aves comem em picos após acender a luz e antes de apagar — perfil típico de aviário.
+const PERFIL_HORA = [1.5, 1.2, 1.0, 1.0, 1.5, 3.0, 5.5, 7.0, 7.5, 6.5, 5.5, 5.0, 4.5, 4.5, 5.0, 5.5, 6.5, 7.5, 7.0, 5.5, 4.0, 2.8, 2.0, 1.0];
+const PERFIL_SOMA = PERFIL_HORA.reduce((a, b) => a + b, 0);
+/** fração (0..1) do consumo diário já realizado até este instante */
+function fracaoDiaConsumida(agora: Date): number {
+  const h = agora.getHours();
+  const fracHora = (agora.getMinutes() * 60 + agora.getSeconds()) / 3600;
+  let acc = 0;
+  for (let i = 0; i < h; i++) acc += PERFIL_HORA[i];
+  acc += PERFIL_HORA[h] * fracHora;
+  return Math.min(1, acc / PERFIL_SOMA);
+}
+/** consumo instantâneo (kg/s) considerando o perfil intradiário */
+function consumoInstantaneoKgS(consumoDiaKg: number, agora: Date): number {
+  const peso = PERFIL_HORA[agora.getHours()] / PERFIL_SOMA; // fração daquela hora
+  return (consumoDiaKg * peso) / 3600;
+}
+
 type LoteCfg = {
   dataAlojamento: string;
   qtdInicial: number;
@@ -536,6 +583,15 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
 
 
 
+  // Relógio ao vivo (1 s) e recálculo do motor (1 min)
+  const [agora, setAgora] = useState(() => new Date());
+  const [tickMin, setTickMin] = useState(0);
+  useEffect(() => {
+    const s = setInterval(() => setAgora(new Date()), 1000);
+    const m = setInterval(() => setTickMin((v) => v + 1), 60000);
+    return () => { clearInterval(s); clearInterval(m); };
+  }, []);
+
   const calc = useMemo(() => {
     if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
     const lin = cfg.linhagem, sx = cfg.sexo;
@@ -546,41 +602,78 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const baixas = (cfg.mortalidadeAcum || 0) + (cfg.eliminadosAcum || 0);
     const avesVivas = Math.max(0, cfg.qtdInicial - baixas);
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
-    const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
-    const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
+
+    // ---- Calibração pela última pesagem real ----
+    const idadePesagem = cfg.pesoMedioRealData
+      ? Math.max(0, Math.round((new Date(cfg.pesoMedioRealData + "T00:00").getTime() - aloj.getTime()) / 86400000))
+      : (cfg.pesoMedioRealG ? idade : undefined);
+    const cal = criarCalib(cfg.pesoMedioRealG, idadePesagem, lin, sx);
+    const usandoPesoReal = !!cal;
+    const diasDesdePesagem = cal ? idade - cal.idadePesagem : null;
+
+    const consumoAcumOntemKg = (consumoCalibradoAcumG(Math.max(0, idade - 1), lin, sx, cal) * avesMediasParaConsumo) / 1000;
+    const consumoHojeKg = (consumoCalibradoDiaG(idade, lin, sx, cal) * avesVivas) / 1000;
+    const consumoAcumKg = consumoAcumOntemKg + consumoHojeKg;
+    const estoqueMeiaNoiteKg = totalEntregueKg - consumoAcumOntemKg;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    // Peso médio: prioriza pesagem real informada
+
+    // Peso médio calibrado (curva reescalada pela pesagem)
     const pesoMedioCurvaKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
-    const pesoMedioRealKg = cfg.pesoMedioRealG ? cfg.pesoMedioRealG / 1000 : undefined;
-    const pesoMedioKg = pesoMedioRealKg ?? pesoMedioCurvaKg;
-    const usandoPesoReal = !!pesoMedioRealKg;
+    const pesoMedioKg = pesoCalibradoG(idade, lin, sx, cal) / 1000;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
-    // CA real = ração consumida ÷ peso vivo produzido (usa peso real quando disponível)
+    // CA real = ração consumida ÷ peso vivo produzido
     const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
     const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
     const caTarget = caAlvo(idade, lin, sx);
     const caStatus = classificaCA(caReal, caTarget);
-    const desvioPesoPct = pesoMedioRealKg && pesoMedioCurvaKg > 0
-      ? ((pesoMedioRealKg - pesoMedioCurvaKg) / pesoMedioCurvaKg) * 100
+    const desvioPesoPct = cal && pesoMedioCurvaKg > 0
+      ? ((cfg.pesoMedioRealG! / 1000) - (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000)) / (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000) * 100
       : null;
 
-    const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
+    // Confiança do modelo: cai com o tempo desde a última pesagem
+    const confianca = cal
+      ? Math.max(45, Math.round(98 - Math.max(0, diasDesdePesagem ?? 0) * 3))
+      : 62;
+
+    // Projeção 14 dias + data prevista de ruptura do estoque
+    const proj: { dia: string; idade: number; consumo: number; estoque: number; peso: number }[] = [];
     let estoque = estoqueKg;
+    let rupturaData: string | null = null;
     for (let i = 1; i <= 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
-      const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
+      const c = (consumoCalibradoDiaG(idd, lin, sx, cal) * avesVivas) / 1000;
       estoque -= c;
+      if (estoque <= 0 && !rupturaData) rupturaData = d.toLocaleDateString("pt-BR");
       proj.push({
         dia: d.toISOString().slice(5, 10).split("-").reverse().join("/"),
         idade: idd,
         consumo: Math.round(c),
         estoque: Math.round(estoque),
+        peso: Math.round(pesoCalibradoG(idd, lin, sx, cal)),
       });
     }
-    return { idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus, usandoPesoReal, desvioPesoPct };
-  }, [cfg, totalEntregueKg]);
+    return {
+      idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, estoqueMeiaNoiteKg,
+      pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus,
+      usandoPesoReal, desvioPesoPct, cal, diasDesdePesagem, confianca, rupturaData,
+    };
+    // tickMin força recálculo do motor a cada minuto
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg, totalEntregueKg, tickMin]);
+
+  // Estoque ao vivo (perfil intradiário de consumo, atualiza a cada segundo)
+  const live = useMemo(() => {
+    if (!calc) return null;
+    const frac = fracaoDiaConsumida(agora);
+    const consumidoHojeKg = calc.consumoHojeKg * frac;
+    const estoqueAgoraKg = calc.estoqueMeiaNoiteKg - consumidoHojeKg;
+    const kgPorSeg = consumoInstantaneoKgS(calc.consumoHojeKg, agora);
+    const horasAutonomia = kgPorSeg > 0 ? estoqueAgoraKg / (calc.consumoHojeKg / 24) : 0;
+    return { frac, consumidoHojeKg, estoqueAgoraKg, kgPorSeg, gPorSeg: kgPorSeg * 1000, horasAutonomia };
+  }, [calc, agora]);
+
 
 
   return (
@@ -701,20 +794,71 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
         </p>
       ) : (
         <>
+          {/* ===== Painel AO VIVO ===== */}
+          {live && (
+            <div className="rounded-xl border p-4 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <h4 className="text-sm font-semibold">Estoque ao vivo</h4>
+                  <Badge variant="outline" className="text-[10px]">{agora.toLocaleTimeString("pt-BR")}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">motor recalculado a cada 1 min</Badge>
+                  <Badge className={`text-[10px] ${calc.confianca >= 85 ? "bg-emerald-600 text-white" : calc.confianca >= 65 ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                    precisão {calc.confianca}%
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {calc.cal
+                    ? <>Curva recalibrada pela pesagem de D{calc.cal.idadePesagem} (fator {calc.cal.fator.toFixed(3)}× · há {calc.diasDesdePesagem} d)</>
+                    : "Sem pesagem real — usando curva padrão da linhagem"}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Ração no silo agora</p>
+                  <p className={`font-display text-2xl font-bold tabular-nums ${live.estoqueAgoraKg <= 0 ? "text-destructive" : ""}`}>
+                    {live.estoqueAgoraKg.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs font-normal">kg</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{(live.estoqueAgoraKg / 1000).toFixed(3)} t</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Consumo instantâneo</p>
+                  <p className="font-display text-2xl font-bold tabular-nums">{live.gPorSeg.toFixed(1)} <span className="text-xs font-normal">g/s</span></p>
+                  <p className="text-[10px] text-muted-foreground">{(live.kgPorSeg * 3600).toFixed(1)} kg/h · perfil intradiário</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Consumido hoje</p>
+                  <p className="font-display text-2xl font-bold tabular-nums">{live.consumidoHojeKg.toFixed(1)} <span className="text-xs font-normal">kg</span></p>
+                  <p className="text-[10px] text-muted-foreground">{(live.frac * 100).toFixed(1)}% do dia · meta {Math.round(calc.consumoHojeKg)} kg</p>
+                </div>
+                <div className="p-3 rounded-lg bg-background/70 border">
+                  <p className="text-[10px] uppercase text-muted-foreground">Autonomia</p>
+                  <p className={`font-display text-2xl font-bold tabular-nums ${live.horasAutonomia < 24 ? "text-destructive" : ""}`}>
+                    {live.horasAutonomia > 0 ? `${Math.floor(live.horasAutonomia)}h ${Math.round((live.horasAutonomia % 1) * 60)}m` : "0h"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{calc.rupturaData ? `Ruptura prevista ${calc.rupturaData}` : "Sem ruptura em 14 dias"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard label="Idade do lote" value={`D${calc.idade}`} hint={`${calc.avesVivas.toLocaleString("pt-BR")} aves vivas${calc.baixas ? ` · ${calc.baixas} baixas` : ""}`} icon={CalIcon} tone="primary" />
             <StatCard
-              label={calc.usandoPesoReal ? "Peso médio (real)" : "Peso médio (curva)"}
+              label={calc.usandoPesoReal ? "Peso esperado (calibrado)" : "Peso médio (curva)"}
               value={`${calc.pesoMedioKg.toFixed(3)} kg`}
               hint={calc.desvioPesoPct != null
-                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
+                ? `${calc.desvioPesoPct >= 0 ? "+" : ""}${calc.desvioPesoPct.toFixed(1)}% vs curva na pesagem · lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`
                 : `Lote ≈ ${fmtKg(Math.round(calc.pesoTotalLoteKg))}`}
               icon={Scale}
               tone="accent"
             />
-            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoDiarioGPorAve(calc.idade, cfg.linhagem, cfg.sexo))} g/ave/dia`} icon={Drumstick} tone="muted" />
+            <StatCard label="Consumo hoje" value={fmtKg(Math.round(calc.consumoHojeKg))} hint={`${Math.round(consumoCalibradoDiaG(calc.idade, cfg.linhagem, cfg.sexo, calc.cal))} g/ave/dia`} icon={Drumstick} tone="muted" />
             <StatCard
-              label="Estoque estimado"
+              label="Estoque fim do dia"
               value={fmtKg(Math.max(0, Math.round(calc.estoqueKg)))}
               hint={calc.estoqueKg < 0
                 ? `Faltaram ${fmtKg(Math.round(-calc.estoqueKg))}`
@@ -723,6 +867,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               tone={calc.estoqueKg <= 0 ? "destructive" : calc.diasRestantes < 2 ? "destructive" : "primary"}
             />
           </div>
+
 
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-xs">
@@ -782,14 +927,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               <Scale className="h-4 w-4 text-primary" /> Peso esperado por dia — {LIN_LABEL[cfg.linhagem]} ({cfg.sexo})
             </h4>
             <p className="text-[11px] text-muted-foreground mb-2">
-              Interpolação diária a partir das idades-marco (D4, D7, D14, D21, D28, D35, D42). GPD = ganho de peso/dia. CA alvo = consumo acumulado ÷ peso vivo.
+              Interpolação diária a partir das idades-marco. {calc.cal
+                ? <>A coluna <b>Peso projetado</b> está <b>recalibrada</b> pela última pesagem real (fator {calc.cal.fator.toFixed(3)}× em D{calc.cal.idadePesagem}, amortecido ao longo dos dias).</>
+                : <>Registre uma pesagem para o sistema recalibrar toda a projeção.</>}
             </p>
             <div className="overflow-x-auto rounded border">
               <table className="w-full text-[11px]">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-2 py-1.5 text-left">Idade</th>
-                    <th className="px-2 py-1.5 text-right">Peso esperado</th>
+                    <th className="px-2 py-1.5 text-right">Peso padrão</th>
+                    <th className="px-2 py-1.5 text-right">Peso projetado</th>
                     <th className="px-2 py-1.5 text-right">GPD</th>
                     <th className="px-2 py-1.5 text-right">Ração/dia</th>
                     <th className="px-2 py-1.5 text-right">Ração acum.</th>
@@ -799,19 +947,23 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
                 </thead>
                 <tbody>
                   {Array.from({ length: 50 }, (_, d) => {
-                    const pesoAve = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const pesoOnt = d > 0 ? pesoMedioGPorAve(d - 1, cfg.linhagem, cfg.sexo) : pesoAve;
+                    const pesoPadrao = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const pesoAve = pesoCalibradoG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const pesoOnt = d > 0 ? pesoCalibradoG(d - 1, cfg.linhagem, cfg.sexo, calc.cal) : pesoAve;
                     const gpd = pesoAve - pesoOnt;
-                    const racDia = consumoDiarioGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const racAcum = consumoAcumGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const ca = caAlvo(d, cfg.linhagem, cfg.sexo);
+                    const racDia = consumoCalibradoDiaG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const racAcum = consumoCalibradoAcumG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const ca = pesoAve > 0 ? racAcum / pesoAve : 0;
                     const loteDiaKg = (racDia * calc.avesVivas) / 1000;
                     const idadeAtual = d === calc.idade;
+                    const pesagem = calc.cal && d === calc.cal.idadePesagem;
                     const marco = [0, 4, 7, 14, 21, 28, 35, 42, 49].includes(d);
+                    const dif = pesoAve - pesoPadrao;
                     return (
-                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : marco ? "bg-muted/20" : ""}`}>
-                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}</td>
-                        <td className="px-2 py-1 text-right">{Math.round(pesoAve)} g</td>
+                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : pesagem ? "bg-emerald-500/10" : marco ? "bg-muted/20" : ""}`}>
+                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}{pesagem && <span className="ml-1 text-[9px] text-emerald-600">PESAGEM</span>}</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{Math.round(pesoPadrao)} g</td>
+                        <td className={`px-2 py-1 text-right font-semibold ${dif > 5 ? "text-emerald-600" : dif < -5 ? "text-destructive" : ""}`}>{Math.round(pesoAve)} g</td>
                         <td className="px-2 py-1 text-right text-muted-foreground">{gpd > 0 ? `+${Math.round(gpd)} g` : "—"}</td>
                         <td className="px-2 py-1 text-right">{Math.round(racDia)} g</td>
                         <td className="px-2 py-1 text-right text-muted-foreground">{(racAcum / 1000).toFixed(2)} kg</td>
@@ -821,6 +973,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
                     );
                   })}
                 </tbody>
+
               </table>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2">
