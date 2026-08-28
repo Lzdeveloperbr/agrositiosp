@@ -82,6 +82,53 @@ function classificaCA(real: number, alvo: number): { label: string; cor: string;
   return            { label: "Ruim",       cor: "bg-destructive text-destructive-foreground", desc: `Muito acima do alvo (${alvo.toFixed(3)}). Investigar manejo, água e sanidade.` };
 }
 
+// ===== Calibração dinâmica pela última pesagem real =====
+// Após uma pesagem, toda a curva (peso e consumo) é reescalada pelo desvio medido.
+// O desvio é amortecido exponencialmente (meia-vida ~28 d) porque o lote tende a
+// reconvergir para o padrão genético conforme envelhece.
+export type Calib = { fator: number; idadePesagem: number } | null;
+
+function criarCalib(pesoRealG: number | undefined, idadePesagem: number | undefined, lin: Linhagem, sx: Sexo): Calib {
+  if (!pesoRealG || idadePesagem == null || idadePesagem < 0) return null;
+  const base = pesoMedioGPorAve(idadePesagem, lin, sx);
+  if (!base) return null;
+  const f = pesoRealG / base;
+  if (!Number.isFinite(f) || f <= 0.3 || f > 2.5) return null;
+  return { fator: f, idadePesagem };
+}
+// fator aplicado no dia d (amortecido após a data da pesagem)
+function fatorNoDia(cal: Calib, d: number): number {
+  if (!cal) return 1;
+  const dt = Math.max(0, d - cal.idadePesagem);
+  return 1 + (cal.fator - 1) * Math.exp(-dt / 28);
+}
+const pesoCalibradoG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  pesoMedioGPorAve(d, lin, sx) * fatorNoDia(cal, d);
+// Consumo escala com o peso metabólico (P^0,75) — padrão zootécnico.
+const consumoCalibradoAcumG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  consumoAcumGPorAve(d, lin, sx) * Math.pow(fatorNoDia(cal, d), 0.75);
+const consumoCalibradoDiaG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
+  Math.max(0, consumoCalibradoAcumG(d, lin, sx, cal) - consumoCalibradoAcumG(Math.max(0, d - 1), lin, sx, cal));
+
+// Curva de consumo intradiário (fração acumulada do dia por hora local).
+// Aves comem em picos após acender a luz e antes de apagar — perfil típico de aviário.
+const PERFIL_HORA = [1.5, 1.2, 1.0, 1.0, 1.5, 3.0, 5.5, 7.0, 7.5, 6.5, 5.5, 5.0, 4.5, 4.5, 5.0, 5.5, 6.5, 7.5, 7.0, 5.5, 4.0, 2.8, 2.0, 1.0];
+const PERFIL_SOMA = PERFIL_HORA.reduce((a, b) => a + b, 0);
+/** fração (0..1) do consumo diário já realizado até este instante */
+function fracaoDiaConsumida(agora: Date): number {
+  const h = agora.getHours();
+  const fracHora = (agora.getMinutes() * 60 + agora.getSeconds()) / 3600;
+  let acc = 0;
+  for (let i = 0; i < h; i++) acc += PERFIL_HORA[i];
+  acc += PERFIL_HORA[h] * fracHora;
+  return Math.min(1, acc / PERFIL_SOMA);
+}
+/** consumo instantâneo (kg/s) considerando o perfil intradiário */
+function consumoInstantaneoKgS(consumoDiaKg: number, agora: Date): number {
+  const peso = PERFIL_HORA[agora.getHours()] / PERFIL_SOMA; // fração daquela hora
+  return (consumoDiaKg * peso) / 3600;
+}
+
 type LoteCfg = {
   dataAlojamento: string;
   qtdInicial: number;
