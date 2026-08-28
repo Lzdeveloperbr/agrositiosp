@@ -583,6 +583,15 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
 
 
 
+  // Relógio ao vivo (1 s) e recálculo do motor (1 min)
+  const [agora, setAgora] = useState(() => new Date());
+  const [tickMin, setTickMin] = useState(0);
+  useEffect(() => {
+    const s = setInterval(() => setAgora(new Date()), 1000);
+    const m = setInterval(() => setTickMin((v) => v + 1), 60000);
+    return () => { clearInterval(s); clearInterval(m); };
+  }, []);
+
   const calc = useMemo(() => {
     if (!cfg.qtdInicial || !cfg.dataAlojamento) return null;
     const lin = cfg.linhagem, sx = cfg.sexo;
@@ -593,41 +602,78 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const baixas = (cfg.mortalidadeAcum || 0) + (cfg.eliminadosAcum || 0);
     const avesVivas = Math.max(0, cfg.qtdInicial - baixas);
     const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
-    const consumoAcumKg = (consumoAcumGPorAve(idade, lin, sx) * avesMediasParaConsumo) / 1000;
-    const consumoHojeKg = (consumoDiarioGPorAve(idade, lin, sx) * avesVivas) / 1000;
+
+    // ---- Calibração pela última pesagem real ----
+    const idadePesagem = cfg.pesoMedioRealData
+      ? Math.max(0, Math.round((new Date(cfg.pesoMedioRealData + "T00:00").getTime() - aloj.getTime()) / 86400000))
+      : (cfg.pesoMedioRealG ? idade : undefined);
+    const cal = criarCalib(cfg.pesoMedioRealG, idadePesagem, lin, sx);
+    const usandoPesoReal = !!cal;
+    const diasDesdePesagem = cal ? idade - cal.idadePesagem : null;
+
+    const consumoAcumOntemKg = (consumoCalibradoAcumG(Math.max(0, idade - 1), lin, sx, cal) * avesMediasParaConsumo) / 1000;
+    const consumoHojeKg = (consumoCalibradoDiaG(idade, lin, sx, cal) * avesVivas) / 1000;
+    const consumoAcumKg = consumoAcumOntemKg + consumoHojeKg;
+    const estoqueMeiaNoiteKg = totalEntregueKg - consumoAcumOntemKg;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
-    // Peso médio: prioriza pesagem real informada
+
+    // Peso médio calibrado (curva reescalada pela pesagem)
     const pesoMedioCurvaKg = pesoMedioGPorAve(idade, lin, sx) / 1000;
-    const pesoMedioRealKg = cfg.pesoMedioRealG ? cfg.pesoMedioRealG / 1000 : undefined;
-    const pesoMedioKg = pesoMedioRealKg ?? pesoMedioCurvaKg;
-    const usandoPesoReal = !!pesoMedioRealKg;
+    const pesoMedioKg = pesoCalibradoG(idade, lin, sx, cal) / 1000;
     const pesoTotalLoteKg = pesoMedioKg * avesVivas;
     const diasRestantes = consumoHojeKg > 0 ? estoqueKg / consumoHojeKg : 0;
-    // CA real = ração consumida ÷ peso vivo produzido (usa peso real quando disponível)
+    // CA real = ração consumida ÷ peso vivo produzido
     const racaoConsumidaKg = Math.min(totalEntregueKg, consumoAcumKg);
     const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
     const caTarget = caAlvo(idade, lin, sx);
     const caStatus = classificaCA(caReal, caTarget);
-    const desvioPesoPct = pesoMedioRealKg && pesoMedioCurvaKg > 0
-      ? ((pesoMedioRealKg - pesoMedioCurvaKg) / pesoMedioCurvaKg) * 100
+    const desvioPesoPct = cal && pesoMedioCurvaKg > 0
+      ? ((cfg.pesoMedioRealG! / 1000) - (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000)) / (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000) * 100
       : null;
 
-    const proj: { dia: string; idade: number; consumo: number; estoque: number }[] = [];
+    // Confiança do modelo: cai com o tempo desde a última pesagem
+    const confianca = cal
+      ? Math.max(45, Math.round(98 - Math.max(0, diasDesdePesagem ?? 0) * 3))
+      : 62;
+
+    // Projeção 14 dias + data prevista de ruptura do estoque
+    const proj: { dia: string; idade: number; consumo: number; estoque: number; peso: number }[] = [];
     let estoque = estoqueKg;
+    let rupturaData: string | null = null;
     for (let i = 1; i <= 14; i++) {
       const d = new Date(); d.setDate(d.getDate() + i);
       const idd = idade + i;
-      const c = (consumoDiarioGPorAve(idd, lin, sx) * avesVivas) / 1000;
+      const c = (consumoCalibradoDiaG(idd, lin, sx, cal) * avesVivas) / 1000;
       estoque -= c;
+      if (estoque <= 0 && !rupturaData) rupturaData = d.toLocaleDateString("pt-BR");
       proj.push({
         dia: d.toISOString().slice(5, 10).split("-").reverse().join("/"),
         idade: idd,
         consumo: Math.round(c),
         estoque: Math.round(estoque),
+        peso: Math.round(pesoCalibradoG(idd, lin, sx, cal)),
       });
     }
-    return { idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus, usandoPesoReal, desvioPesoPct };
-  }, [cfg, totalEntregueKg]);
+    return {
+      idade, avesVivas, baixas, consumoAcumKg, consumoHojeKg, estoqueKg, estoqueMeiaNoiteKg,
+      pesoMedioKg, pesoMedioCurvaKg, pesoTotalLoteKg, diasRestantes, proj, caReal, caTarget, caStatus,
+      usandoPesoReal, desvioPesoPct, cal, diasDesdePesagem, confianca, rupturaData,
+    };
+    // tickMin força recálculo do motor a cada minuto
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg, totalEntregueKg, tickMin]);
+
+  // Estoque ao vivo (perfil intradiário de consumo, atualiza a cada segundo)
+  const live = useMemo(() => {
+    if (!calc) return null;
+    const frac = fracaoDiaConsumida(agora);
+    const consumidoHojeKg = calc.consumoHojeKg * frac;
+    const estoqueAgoraKg = calc.estoqueMeiaNoiteKg - consumidoHojeKg;
+    const kgPorSeg = consumoInstantaneoKgS(calc.consumoHojeKg, agora);
+    const horasAutonomia = kgPorSeg > 0 ? estoqueAgoraKg / (calc.consumoHojeKg / 24) : 0;
+    return { frac, consumidoHojeKg, estoqueAgoraKg, kgPorSeg, gPorSeg: kgPorSeg * 1000, horasAutonomia };
+  }, [calc, agora]);
+
 
 
   return (
