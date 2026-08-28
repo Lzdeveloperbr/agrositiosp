@@ -927,14 +927,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
               <Scale className="h-4 w-4 text-primary" /> Peso esperado por dia — {LIN_LABEL[cfg.linhagem]} ({cfg.sexo})
             </h4>
             <p className="text-[11px] text-muted-foreground mb-2">
-              Interpolação diária a partir das idades-marco (D4, D7, D14, D21, D28, D35, D42). GPD = ganho de peso/dia. CA alvo = consumo acumulado ÷ peso vivo.
+              Interpolação diária a partir das idades-marco. {calc.cal
+                ? <>A coluna <b>Peso projetado</b> está <b>recalibrada</b> pela última pesagem real (fator {calc.cal.fator.toFixed(3)}× em D{calc.cal.idadePesagem}, amortecido ao longo dos dias).</>
+                : <>Registre uma pesagem para o sistema recalibrar toda a projeção.</>}
             </p>
             <div className="overflow-x-auto rounded border">
               <table className="w-full text-[11px]">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-2 py-1.5 text-left">Idade</th>
-                    <th className="px-2 py-1.5 text-right">Peso esperado</th>
+                    <th className="px-2 py-1.5 text-right">Peso padrão</th>
+                    <th className="px-2 py-1.5 text-right">Peso projetado</th>
                     <th className="px-2 py-1.5 text-right">GPD</th>
                     <th className="px-2 py-1.5 text-right">Ração/dia</th>
                     <th className="px-2 py-1.5 text-right">Ração acum.</th>
@@ -944,19 +947,23 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
                 </thead>
                 <tbody>
                   {Array.from({ length: 50 }, (_, d) => {
-                    const pesoAve = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const pesoOnt = d > 0 ? pesoMedioGPorAve(d - 1, cfg.linhagem, cfg.sexo) : pesoAve;
+                    const pesoPadrao = pesoMedioGPorAve(d, cfg.linhagem, cfg.sexo);
+                    const pesoAve = pesoCalibradoG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const pesoOnt = d > 0 ? pesoCalibradoG(d - 1, cfg.linhagem, cfg.sexo, calc.cal) : pesoAve;
                     const gpd = pesoAve - pesoOnt;
-                    const racDia = consumoDiarioGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const racAcum = consumoAcumGPorAve(d, cfg.linhagem, cfg.sexo);
-                    const ca = caAlvo(d, cfg.linhagem, cfg.sexo);
+                    const racDia = consumoCalibradoDiaG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const racAcum = consumoCalibradoAcumG(d, cfg.linhagem, cfg.sexo, calc.cal);
+                    const ca = pesoAve > 0 ? racAcum / pesoAve : 0;
                     const loteDiaKg = (racDia * calc.avesVivas) / 1000;
                     const idadeAtual = d === calc.idade;
+                    const pesagem = calc.cal && d === calc.cal.idadePesagem;
                     const marco = [0, 4, 7, 14, 21, 28, 35, 42, 49].includes(d);
+                    const dif = pesoAve - pesoPadrao;
                     return (
-                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : marco ? "bg-muted/20" : ""}`}>
-                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}</td>
-                        <td className="px-2 py-1 text-right">{Math.round(pesoAve)} g</td>
+                      <tr key={d} className={`border-t ${idadeAtual ? "bg-primary/10 font-semibold" : pesagem ? "bg-emerald-500/10" : marco ? "bg-muted/20" : ""}`}>
+                        <td className="px-2 py-1">D{d}{idadeAtual && <span className="ml-1 text-[9px] text-primary">HOJE</span>}{pesagem && <span className="ml-1 text-[9px] text-emerald-600">PESAGEM</span>}</td>
+                        <td className="px-2 py-1 text-right text-muted-foreground">{Math.round(pesoPadrao)} g</td>
+                        <td className={`px-2 py-1 text-right font-semibold ${dif > 5 ? "text-emerald-600" : dif < -5 ? "text-destructive" : ""}`}>{Math.round(pesoAve)} g</td>
                         <td className="px-2 py-1 text-right text-muted-foreground">{gpd > 0 ? `+${Math.round(gpd)} g` : "—"}</td>
                         <td className="px-2 py-1 text-right">{Math.round(racDia)} g</td>
                         <td className="px-2 py-1 text-right text-muted-foreground">{(racAcum / 1000).toFixed(2)} kg</td>
@@ -966,6 +973,7 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
                     );
                   })}
                 </tbody>
+
               </table>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2">
