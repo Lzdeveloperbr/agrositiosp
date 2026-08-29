@@ -10,6 +10,7 @@ import { useLotes } from "@/lib/state";
 import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect } from "react";
+import { diffDias } from "@/lib/data";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
@@ -87,7 +88,7 @@ const PROTOCOLO: DiaProtocolo[] = [
 
 // Idade em dias começando em D0 (dia do alojamento = 0).
 function idadeDias(dataEntrada: string): number {
-  return Math.max(0, Math.floor((Date.now() - new Date(dataEntrada).getTime()) / 86400000));
+  return Math.max(0, diffDias(dataEntrada));
 }
 
 // ============ ÁGUA: vazão, pressão e altura dos equipamentos por idade ============

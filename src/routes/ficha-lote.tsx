@@ -13,6 +13,7 @@ import { Plus, Trash2, FileDown, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { savePdf } from "@/lib/pdfHistory";
 import { SITIO } from "@/lib/pdf";
+import { fmtData, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/ficha-lote")({ component: FichaLotePage });
 
@@ -54,7 +55,7 @@ function novaFicha(): Ficha {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     integrado: SITIO.proprietario, endereco: `${SITIO.nome} - ${SITIO.local}`,
     nAviario: "", nContrato: "", nCama: "", tempAviario: "",
-    dataAlojamento: hoje.toISOString().slice(0, 10), nAvesAlojadas: "",
+    dataAlojamento: isoLocal(hoje), nAvesAlojadas: "",
     incubatorio: "", horaChegada: "", pessoasDescarregar: "", sexo: "misto",
     tecnico: "", foneTecnico: "",
     matrizes: [{ nAves: "", linhagem: "", matriz: "", idadeMatriz: "", pesoPintinho: "", mortosChegada: "" }],
@@ -167,7 +168,7 @@ function FichaLotePage() {
           <CardContent className="p-3 flex flex-wrap gap-2">
             {fichas.map((f) => (
               <Button key={f.id} size="sm" variant={f.id === ativaId ? "default" : "outline"} onClick={() => setAtivaId(f.id)}>
-                AV {f.nAviario || "?"} · Contr. {f.nContrato || "?"} · {new Date(f.dataAlojamento).toLocaleDateString("pt-BR")}
+                AV {f.nAviario || "?"} · Contr. {f.nContrato || "?"} · {fmtData(f.dataAlojamento)}
               </Button>
             ))}
           </CardContent>
@@ -424,7 +425,7 @@ function gerarPdfFicha(f: Ficha, totais: Array<{ m: number; e: number; me: numbe
       [{ content: "INTEGRADO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.integrado || "—", { content: "END.", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.endereco || "—"],
       [{ content: "Nº AVIÁRIO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.nAviario || "—", { content: "Nº CONTRATO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.nContrato || "—"],
       [{ content: "Nº CAMA", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.nCama || "—", { content: "TEMP. AVIÁRIO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.tempAviario ? `${f.tempAviario} °C` : "—"],
-      [{ content: "DATA ALOJAMENTO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.dataAlojamento ? new Date(f.dataAlojamento + "T12:00:00").toLocaleDateString("pt-BR") : "—", { content: "Nº AVES ALOJADAS", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.nAvesAlojadas || "—"],
+      [{ content: "DATA ALOJAMENTO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.dataAlojamento ? fmtData(f.dataAlojamento + "T12:00:00") : "—", { content: "Nº AVES ALOJADAS", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.nAvesAlojadas || "—"],
       [{ content: "INCUBATÓRIO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.incubatorio || "—", { content: "HORA CHEGADA", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.horaChegada || "—"],
       [{ content: "PESSOAS DESCARREGAR", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.pessoasDescarregar || "—", { content: "SEXO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.sexo === "macho" ? "(X) Macho ( ) Fêmea ( ) Misto" : f.sexo === "femea" ? "( ) Macho (X) Fêmea ( ) Misto" : "( ) Macho ( ) Fêmea (X) Misto"],
       [{ content: "TÉCNICO", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.tecnico || "—", { content: "FONE", styles: { fontStyle: "bold", fillColor: [240, 240, 240] } }, f.foneTecnico || "—"],

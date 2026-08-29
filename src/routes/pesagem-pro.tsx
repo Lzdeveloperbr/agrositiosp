@@ -19,6 +19,7 @@ import {
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { CURVAS, metaPeso, type Linhagem, LINHAGEM_LABEL } from "@/lib/linhagens";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/pesagem-pro")({ component: PesagemPro });
 
@@ -77,7 +78,7 @@ const daysBetween = (iso: string, ref: Date = new Date()) => {
   return Math.max(0, Math.round((r.getTime() - d.getTime()) / 86400000));
 };
 const fmtDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
-const fmtDay = (iso: string) => new Date(iso).toLocaleDateString("pt-BR");
+const fmtDay = (iso: string) => fmtData(iso);
 const mean = (xs: number[]) => xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : 0;
 const std = (xs: number[]) => {
   if (xs.length < 2) return 0;
@@ -202,7 +203,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
 // ===== Dashboard =====
 function Dashboard({ lote, pesagens }: { lote: LotePesagem; pesagens: Pesagem[] }) {
   const idade = daysBetween(lote.dataAlojamento);
-  const hoje = new Date().toISOString().slice(0,10);
+  const hoje = hojeISO();
   const hojeP = pesagens.filter(p => p.data.slice(0,10) === hoje);
   const total = pesagens.flatMap(p=>p.registros);
 
@@ -306,7 +307,7 @@ function LotesPanel({ lotes, loteAtivoId, onAdd, onDel, onSelect }: {
   onAdd: (l: LotePesagem) => void; onDel: (id: string) => void; onSelect: (id: string)=>void;
 }) {
   const [f, setF] = useState<Partial<LotePesagem>>({
-    linhagem: "cobb500", dataAlojamento: new Date().toISOString().slice(0,10), intervaloDias: 7,
+    linhagem: "cobb500", dataAlojamento: hojeISO(), intervaloDias: 7,
   });
   const submit = () => {
     if (!f.nome || !f.dataAlojamento || !f.quantidade) return toast.error("Preencha nome, data e quantidade");
@@ -315,7 +316,7 @@ function LotesPanel({ lotes, loteAtivoId, onAdd, onDel, onSelect }: {
       dataAlojamento: f.dataAlojamento!, quantidade: Number(f.quantidade),
       aviario: f.aviario, responsavel: f.responsavel, intervaloDias: Number(f.intervaloDias ?? 7),
     });
-    setF({ linhagem:"cobb500", dataAlojamento:new Date().toISOString().slice(0,10), intervaloDias:7 });
+    setF({ linhagem:"cobb500", dataAlojamento:hojeISO(), intervaloDias:7 });
     toast.success("Lote criado");
   };
   return (

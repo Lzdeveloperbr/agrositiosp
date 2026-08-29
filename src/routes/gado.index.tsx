@@ -22,6 +22,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
   LineChart, Line, CartesianGrid, Legend,
 } from "recharts";
+import { hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado/")({
   head: () => ({
@@ -76,7 +77,7 @@ function GadoPage() {
 
   const [form, setForm] = useState<Partial<Animal>>({
     brinco: "", sexo: "macho", categoria: "bezerro", raca: "",
-    dataEntrada: new Date().toISOString().slice(0, 10),
+    dataEntrada: hojeISO(),
     origem: "nascido", status: "ativo", pesoEntradaKg: undefined,
     pastoId: "", nascimento: "", precoCompra: undefined,
   });
@@ -91,7 +92,7 @@ function GadoPage() {
     const mortesMes = animais.filter((a) => a.status === "morto" && a.saidaData && mesAtual(a.saidaData)).length;
     const comprasMes = animais.filter((a) => a.origem === "comprado" && mesAtual(a.dataEntrada)).length;
     const vendasMes = animais.filter((a) => (a.status === "vendido" || a.status === "abatido") && a.saidaData && mesAtual(a.saidaData)).length;
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = hojeISO();
     let vacPend = 0, vacFeitas = 0;
     ativos.forEach((a) => a.sanidade.forEach((s) => {
       if (s.tipo === "vacina") {
@@ -134,8 +135,8 @@ function GadoPage() {
     const hoje = new Date();
     for (let i = 11; i >= 0; i--) {
       const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      const fim = new Date(hoje.getFullYear(), hoje.getMonth() - i + 1, 0).toISOString().slice(0, 10);
-      const ini = d.toISOString().slice(0, 10);
+      const fim = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth() - i + 1, 0));
+      const ini = isoLocal(d);
       const total = animais.filter((a) => a.dataEntrada <= fim && (!a.saidaData || a.saidaData > fim)).length;
       meses.push({ mes: ini.slice(2, 7), rebanho: total });
     }
@@ -157,7 +158,7 @@ function GadoPage() {
 
   // ===== vacinações flat =====
   const todasVacinas = useMemo(() => {
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = hojeISO();
     return animais.flatMap((a) => a.sanidade
       .filter((s) => s.tipo === "vacina")
       .map((s) => ({ ...s, brinco: a.brinco, animalId: a.id, vencida: !!s.proximaData && s.proximaData <= hoje })))

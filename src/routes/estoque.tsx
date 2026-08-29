@@ -13,6 +13,7 @@ import { uid } from "@/lib/storage";
 import { Boxes, Plus, Trash2, ArrowDownToLine, ArrowUpFromLine, AlertTriangle, Bird, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { LiveRacaoBanner } from "@/components/LiveRacaoBanner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/estoque")({
   head: () => ({
@@ -82,7 +83,7 @@ function EstoquePage() {
       return {
         ...i,
         quantidade: i.quantidade + delta,
-        movimentacoes: [{ id: uid(), data: new Date().toISOString().slice(0, 10), tipo: movTipo, quantidade: movQtd, nota: movNota }, ...i.movimentacoes],
+        movimentacoes: [{ id: uid(), data: hojeISO(), tipo: movTipo, quantidade: movQtd, nota: movNota }, ...i.movimentacoes],
       };
     }));
     setMovItem(null); setMovQtd(0); setMovNota("");
@@ -123,7 +124,7 @@ function EstoquePage() {
           {loteAtivo ? (
             <>
               <span className="font-semibold">Ração do Lote {loteAtivo.numero}</span>
-              <Badge variant="outline" className="text-[10px]">entrada {new Date(loteAtivo.dataEntrada + "T00:00:00").toLocaleDateString("pt-BR")}</Badge>
+              <Badge variant="outline" className="text-[10px]">entrada {fmtData(loteAtivo.dataEntrada + "T00:00:00")}</Badge>
               <span className="text-xs text-muted-foreground">O estoque de ração é exclusivo deste lote — ao iniciar um novo lote ele começa zerado.</span>
             </>
           ) : (

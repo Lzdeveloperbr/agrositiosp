@@ -1,3 +1,4 @@
+import { hojeISO } from "@/lib/data";
 // Notificações locais (Notification API). Funciona com app aberto / instalado em foreground.
 // Sem service worker push (que exigiria FCM). Persiste IDs já notificados em localStorage.
 
@@ -28,7 +29,7 @@ export async function pedirPermissao(): Promise<NotificationPermission | "unsupp
 export function notificar(id: string, titulo: string, corpo: string, urlIcon = "/icon-192.png") {
   if (!notifSupportada() || Notification.permission !== "granted") return false;
   const sent = getSent();
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
   const key = `${id}:${hoje}`;
   if (sent[key]) return false;
   try {

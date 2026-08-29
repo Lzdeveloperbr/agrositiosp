@@ -1,6 +1,7 @@
 // Ponte inteligente OneDrive -> AgroSítio.
 // Lê arquivos da pasta monitorada, classifica com IA e grava nos módulos existentes.
 import { createServerFn } from "@tanstack/react-start";
+import { hojeISO } from "@/lib/data";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/microsoft_onedrive";
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -121,7 +122,7 @@ Regras: valores em reais sem símbolo; datas sempre AAAA-MM-DD; se não tiver ce
 async function classificar(nome: string, mime: string, conteudo: { texto?: string; base64?: string }) {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("IA indisponível");
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
   const content: any[] = [{ type: "text", text: `Arquivo: ${nome}\nData de hoje: ${hoje}` }];
   if (conteudo.texto) content.push({ type: "text", text: `Conteúdo:\n${conteudo.texto.slice(0, 60000)}` });
   if (conteudo.base64) {

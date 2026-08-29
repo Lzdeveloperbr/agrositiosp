@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLotes, useEstoque, useAnimais, useFinanceiro } from "@/lib/state";
 import { Zap, Bell, AlertTriangle, CheckCircle2, Bird, PackageX, Wallet, Syringe } from "lucide-react";
+import { hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/automacoes")({
   head: () => ({
@@ -40,9 +41,9 @@ function AutomacoesPage() {
   };
   const isOn = (id: string) => enabled[id] !== false; // default ON
 
-  const hoje = new Date().toISOString().slice(0, 10);
-  const em7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-  const em30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const hoje = hojeISO();
+  const em7 = isoLocal(new Date(Date.now() + 7 * 86400000));
+  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
 
   const regras: Regra[] = useMemo(() => [
     {

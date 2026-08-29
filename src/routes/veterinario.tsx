@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAnimais } from "@/lib/state";
 import { Stethoscope, Syringe, AlertTriangle, Calendar } from "lucide-react";
+import { hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/veterinario")({
   head: () => ({
@@ -21,8 +22,8 @@ type Evt = { id: string; brinco: string; nome?: string; data: string; tipo: stri
 
 function VetPage() {
   const [animais] = useAnimais();
-  const hoje = new Date().toISOString().slice(0, 10);
-  const em30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const hoje = hojeISO();
+  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
 
   const eventos: Evt[] = useMemo(() =>
     animais.flatMap((a) => a.sanidade.map((s) => ({ ...s, brinco: a.brinco, nome: a.nome, animalId: a.id }))),

@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { savePdf } from "./pdfHistory";
 import { SITIO } from "./pdf";
 import { rotuloResposta, type QuizDia } from "./quizQuestions";
+import { fmtData } from "@/lib/data";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 
@@ -23,7 +24,7 @@ function header(doc: jsPDF, title: string, subtitle?: string) {
   doc.setFontSize(9);
   doc.text("AgroSítio · Relatório Diário com IA", w - 14, 13, { align: "right" });
   doc.setFontSize(8);
-  doc.text(new Date().toLocaleDateString("pt-BR"), w - 14, 20, { align: "right" });
+  doc.text(fmtData(new Date()), w - 14, 20, { align: "right" });
 
   doc.setTextColor(40);
   doc.setFontSize(16);
@@ -77,7 +78,7 @@ function sectionTitle(doc: jsPDF, y: number, label: string): number {
 
 export function gerarPdfQuizDiario(q: QuizDia) {
   const doc = new jsPDF();
-  const dataLabel = new Date(q.data + "T12:00:00").toLocaleDateString("pt-BR", {
+  const dataLabel = fmtData(q.data + "T12:00:00", {
     weekday: "long", day: "2-digit", month: "long", year: "numeric",
   });
   header(doc, "Relatório Diário do Sítio", dataLabel);
@@ -119,7 +120,7 @@ export function gerarPdfQuizDiario(q: QuizDia) {
       body: q.energia.porMedidor.map((m) => [
         m.nome,
         m.ultimaLeitura !== undefined ? `${m.ultimaLeitura.toLocaleString("pt-BR")} kWh` : "—",
-        m.dataUltima ? new Date(m.dataUltima).toLocaleDateString("pt-BR") : "—",
+        m.dataUltima ? fmtData(m.dataUltima) : "—",
         `${m.consumoKwh.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kWh`,
       ]),
       foot: [["Total", "", "", `${q.energia.consumoTotalDiaKwh.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kWh`]],

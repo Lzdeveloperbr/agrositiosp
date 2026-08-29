@@ -15,6 +15,7 @@ import { compressFile } from "@/lib/cloud/uploadFoto";
 import jsPDF from "jspdf";
 import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/analise-aves")({
   head: () => ({
@@ -50,7 +51,7 @@ function AnaliseAvesPage() {
   })();
 
   const [ctx, setCtx] = useState({
-    dataAlojamento: cfgFromStorage?.dataAlojamento || new Date().toISOString().slice(0, 10),
+    dataAlojamento: cfgFromStorage?.dataAlojamento || hojeISO(),
     qtdInicial: cfgFromStorage?.qtdInicial || 0,
     mortalidadeAcum: cfgFromStorage?.mortalidadeAcum || 0,
     eliminadosAcum: cfgFromStorage?.eliminadosAcum || 0,
@@ -60,7 +61,7 @@ function AnaliseAvesPage() {
     observacoes: "",
   });
 
-  const idade = Math.max(0, Math.round((new Date(new Date().toISOString().slice(0,10) + "T00:00").getTime() - new Date(ctx.dataAlojamento + "T00:00").getTime()) / 86400000));
+  const idade = Math.max(0, Math.round((new Date(hojeISO() + "T00:00").getTime() - new Date(ctx.dataAlojamento + "T00:00").getTime()) / 86400000));
   const vivas = Math.max(0, (ctx.qtdInicial || 0) - (ctx.mortalidadeAcum || 0) - (ctx.eliminadosAcum || 0));
 
   async function adicionarFotos(files: FileList | null) {
@@ -99,7 +100,7 @@ function AnaliseAvesPage() {
         eliminados_acumulados: ctx.eliminadosAcum,
         peso_medio_real_g: ctx.pesoMedioRealG || null,
         observacoes_granjeiro: ctx.observacoes || null,
-        data_avaliacao: new Date().toISOString().slice(0, 10),
+        data_avaliacao: hojeISO(),
         propriedade: SITIO.nome,
       });
       const r = await fn({ data: { context, fotos: fotos.map(f => f.dataUrl) } });
@@ -181,7 +182,7 @@ function AnaliseAvesPage() {
       doc.text(`${SITIO.nome} · ${SITIO.local}`, 14, h - 8);
       doc.text(`Laudo IA · Página ${i}/${pages}`, w - 14, h - 8, { align: "right" });
     }
-    const filename = `laudo-aves-D${idade}-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const filename = `laudo-aves-D${idade}-${hojeISO()}.pdf`;
     savePdf(doc, filename, { titulo: `Laudo IA Aves D${idade}`, modulo: "Granja" });
   }
 

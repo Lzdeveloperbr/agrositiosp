@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAnimais, useFinanceiro } from "@/lib/state";
 import { Beef, TrendingUp, Heart, Syringe, Calculator } from "lucide-react";
+import { diffDias, fmtData, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado-pro")({
   head: () => ({
@@ -63,7 +64,7 @@ function GmdTab() {
       const ultimo = pes[pes.length - 1];
       let gmd: number | null = null;
       if (primeiro && ultimo && primeiro !== ultimo) {
-        const dias = (new Date(ultimo.data).getTime() - new Date(primeiro.data).getTime()) / 86400000;
+        const dias = diffDias(primeiro.data, ultimo.data);
         if (dias > 0) gmd = (ultimo.pesoKg - primeiro.pesoKg) / dias;
       }
       const pesoAtual = ultimo?.pesoKg ?? a.pesoEntradaKg ?? 0;
@@ -131,8 +132,8 @@ function ReproTab() {
     let diagPrev: string | null = null;
     if (ultIA) {
       const base = new Date(ultIA.data);
-      partoPrev = new Date(base.getTime() + 283 * 86400000).toISOString().slice(0, 10);
-      diagPrev = new Date(base.getTime() + 30 * 86400000).toISOString().slice(0, 10);
+      partoPrev = isoLocal(new Date(base.getTime() + 283 * 86400000));
+      diagPrev = isoLocal(new Date(base.getTime() + 30 * 86400000));
     }
     return { a, ultIA, partoPrev, diagPrev };
   });
@@ -163,9 +164,9 @@ function ReproTab() {
             {linhas.map((l) => (
               <TableRow key={l.a.id}>
                 <TableCell className="font-medium">{l.a.brinco}</TableCell>
-                <TableCell className="tabular-nums">{l.ultIA ? new Date(l.ultIA.data).toLocaleDateString("pt-BR") : "—"}</TableCell>
-                <TableCell className="tabular-nums">{l.diagPrev ? new Date(l.diagPrev).toLocaleDateString("pt-BR") : "—"}</TableCell>
-                <TableCell className="tabular-nums">{l.partoPrev ? new Date(l.partoPrev).toLocaleDateString("pt-BR") : "—"}</TableCell>
+                <TableCell className="tabular-nums">{l.ultIA ? fmtData(l.ultIA.data) : "—"}</TableCell>
+                <TableCell className="tabular-nums">{l.diagPrev ? fmtData(l.diagPrev) : "—"}</TableCell>
+                <TableCell className="tabular-nums">{l.partoPrev ? fmtData(l.partoPrev) : "—"}</TableCell>
                 <TableCell>
                   {l.ultIA ? (
                     <Badge variant={(l.ultIA as any).resultado === "prenhe" ? "default" : "secondary"}>{(l.ultIA as any).resultado ?? "aguardando"}</Badge>

@@ -14,6 +14,7 @@ import { useCloudCollection } from "@/lib/cloud/useCloudCollection";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Users, Clock, Wallet, UserPlus, Trash2, Plus, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/equipe")({
   head: () => ({
@@ -59,7 +60,7 @@ function EquipePage() {
 
   const [novoF, setNovoF] = useState({ nome: "", funcao: "", setor: "geral", telefone: "", admissao: "", salario: 0, tipo_pagamento: "mensal", valor_hora: 0 });
   const [novoP, setNovoP] = useState({
-    funcionario_id: "", data: new Date().toISOString().slice(0, 10),
+    funcionario_id: "", data: hojeISO(),
     entrada: "07:00", saida: "17:00", intervalo_min: 60, tipo: "normal", atividade: "",
   });
 

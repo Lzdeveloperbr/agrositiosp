@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { savePdf } from "@/lib/pdfHistory";
 import { SITIO } from "@/lib/pdf";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/checklist-granja")({
   head: () => ({
@@ -159,7 +160,7 @@ const LS_KEY = "agro:checklist-granja:v1";
 
 function novoEstado(): Estado {
   return {
-    data: new Date().toISOString().slice(0, 10),
+    data: hojeISO(),
     loteNumero: "",
     idadeDias: "",
     galpao: "",
@@ -242,7 +243,7 @@ function ChecklistGranjaPage() {
     doc.setFontSize(11).setFont("helvetica", "bold");
     doc.text("CHECKLIST DIÁRIO — GRANJA", w - 14, 13, { align: "right" });
     doc.setFontSize(9).setFont("helvetica", "normal");
-    doc.text(new Date(estado.data).toLocaleDateString("pt-BR"), w - 14, 20, { align: "right" });
+    doc.text(fmtData(estado.data), w - 14, 20, { align: "right" });
     doc.text(`Lote ${estado.loteNumero || "—"} · ${idade}d · ${fase}`, w - 14, 26, { align: "right" });
 
     doc.setTextColor(0);

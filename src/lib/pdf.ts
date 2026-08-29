@@ -4,6 +4,7 @@ import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 import { savePdf } from "./pdfHistory";
 import { fechamentoLote, type FechamentoLote, type FaseRacao } from "./fechamentoLote";
 import { CURVAS, type Linhagem } from "./linhagens";
+import { fmtData, hojeISO } from "@/lib/data";
 
 const BRAND = { r: 88, g: 165, b: 90 };
 const INK = { r: 30, g: 41, b: 59 };       // slate-800
@@ -39,7 +40,7 @@ function header(doc: jsPDF, title: string, subtitle?: string) {
   doc.setFontSize(9);
   doc.text("AgroSítio · Gestão Rural", w - 14, 13, { align: "right" });
   doc.setFontSize(8);
-  doc.text(new Date().toLocaleDateString("pt-BR"), w - 14, 20, { align: "right" });
+  doc.text(fmtData(new Date()), w - 14, 20, { align: "right" });
 
   doc.setTextColor(40);
   doc.setFontSize(16);
@@ -416,7 +417,7 @@ export function gerarRelatorioLote(lote: Lote) {
       ["Empresa integradora", lote.integradora || "Não informado"],
       ["Data de alojamento", entrada.toLocaleDateString("pt-BR")],
       ["Data prevista de abate", dataPrevAbate.toLocaleDateString("pt-BR")],
-      ["Data real de abate", abateReal ? new Date(abateReal).toLocaleDateString("pt-BR") : (f.encerrado ? "Lote encerrado sem data registrada" : "—")],
+      ["Data real de abate", abateReal ? fmtData(abateReal) : (f.encerrado ? "Lote encerrado sem data registrada" : "—")],
       ["Área da granja", areaM2 ? `${areaM2} m²` : "Não informado"],
       ["Densidade de alojamento", areaM2 ? `${(f.inicial / areaM2).toFixed(1)} aves/m²` : "Não informado"],
       ["Preço R$/kg vivo", `R$ ${(lote.precoKgVivo ?? 5.5).toFixed(2)}`],
@@ -477,7 +478,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const mort: Array<[string, string, string?, [number, number, number]?]> = [
     ["Mortalidade acumulada", `${f.baixas.toLocaleString("pt-BR")} aves`, `${f.mortPct.toFixed(2)}%`, f.mortPct > 5 ? [BAD.r, BAD.g, BAD.b] : [INK.r, INK.g, INK.b]],
     ["Média diária", `${mediaMortDia.toFixed(2)} aves/dia`],
-    ["Pico de mortalidade", `${picoMort.mort} aves`, picoMort.date ? `Dia ${new Date(picoMort.date).toLocaleDateString("pt-BR")}` : "—"],
+    ["Pico de mortalidade", `${picoMort.mort} aves`, picoMort.date ? `Dia ${fmtData(picoMort.date)}` : "—"],
     ["Viabilidade", `${f.viabilidade.toFixed(2)}%`, "100 − Mortalidade", [OK.r, OK.g, OK.b]],
   ];
   mort.forEach((k, i) => card(doc, 14 + i * (cwM + 3), y, cwM, ch, k[0], k[1], k[2], k[3]));
@@ -536,7 +537,7 @@ export function gerarRelatorioLote(lote: Lote) {
     alternateRowStyles: { fillColor: [248, 250, 252] },
     head: [["Data", "Idade", "Mort.", "Mort. acum.", "Peso (g)", "Ganho/dia", "Consumo (kg)", "CA dia", "Observações"]],
     body: dias.map(d => [
-      new Date(d.date).toLocaleDateString("pt-BR"),
+      fmtData(d.date),
       `D${d.idade}`,
       d.mort.toString(),
       d.mortAcum.toString(),
@@ -712,7 +713,7 @@ export function gerarRelatorioEnergia(medidores: Medidor[]) {
       const prev = i > 0 ? sorted[i - 1].valor : null;
       const consumo = prev !== null ? l.valor - prev : null;
       return [
-        new Date(l.data).toLocaleDateString("pt-BR"),
+        fmtData(l.data),
         l.valor.toLocaleString("pt-BR") + " kWh",
         consumo !== null ? consumo.toLocaleString("pt-BR") + " kWh" : "—",
       ];
@@ -728,12 +729,12 @@ export function gerarRelatorioEnergia(medidores: Medidor[]) {
   }
 
   footer(doc);
-  savePdf(doc, `relatorio-energia-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Consumo de Energia", modulo: "Energia" });
+  savePdf(doc, `relatorio-energia-${hojeISO()}.pdf`, { titulo: "Consumo de Energia", modulo: "Energia" });
 }
 
 export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais: Animal[]) {
   const doc = new jsPDF();
-  header(doc, "Relatório Geral do Sítio", new Date().toLocaleDateString("pt-BR"));
+  header(doc, "Relatório Geral do Sítio", fmtData(new Date()));
 
   const lotesAtivos = lotes.filter((l) => !l.encerrado);
   const totalAves = lotesAtivos.reduce((s, l) => s + l.quantidadeInicial - l.entries.reduce((a, e) => a + e.mortalidade, 0), 0);
@@ -753,7 +754,7 @@ export function gerarRelatorioGeral(lotes: Lote[], medidores: Medidor[], animais
   });
 
   footer(doc);
-  savePdf(doc, `relatorio-geral-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Relatório Geral do Sítio", modulo: "Geral" });
+  savePdf(doc, `relatorio-geral-${hojeISO()}.pdf`, { titulo: "Relatório Geral do Sítio", modulo: "Geral" });
 }
 
 function ultimoPeso(a: Animal) {
@@ -781,7 +782,7 @@ export function gerarRelatorioRebanho(animais: Animal[]) {
   });
 
   footer(doc);
-  savePdf(doc, `relatorio-rebanho-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Relatório do Rebanho", modulo: "Gado" });
+  savePdf(doc, `relatorio-rebanho-${hojeISO()}.pdf`, { titulo: "Relatório do Rebanho", modulo: "Gado" });
 }
 
 export function gerarRelatorioAnimal(a: Animal) {
@@ -795,8 +796,8 @@ export function gerarRelatorioAnimal(a: Animal) {
     body: [
       ["Brinco", a.brinco],
       ["Nome", a.nome ?? "—"],
-      ["Nascimento", a.nascimento ? new Date(a.nascimento).toLocaleDateString("pt-BR") : "—"],
-      ["Entrada", new Date(a.dataEntrada).toLocaleDateString("pt-BR")],
+      ["Nascimento", a.nascimento ? fmtData(a.nascimento) : "—"],
+      ["Entrada", fmtData(a.dataEntrada)],
       ["Origem", a.origem ?? "—"],
       ["Status", a.status],
       ["Peso atual", ultimoPeso(a) ? `${ultimoPeso(a)} kg` : "—"],
@@ -809,7 +810,7 @@ export function gerarRelatorioAnimal(a: Animal) {
       headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
       head: [["Data", "Peso (kg)", "Obs"]],
       body: [...a.pesagens].sort((x, y) => x.data.localeCompare(y.data)).map((p) => [
-        new Date(p.data).toLocaleDateString("pt-BR"), p.pesoKg, p.observacoes ?? "",
+        fmtData(p.data), p.pesoKg, p.observacoes ?? "",
       ]),
     });
   }
@@ -820,8 +821,8 @@ export function gerarRelatorioAnimal(a: Animal) {
       headStyles: { fillColor: [BRAND.r, BRAND.g, BRAND.b] },
       head: [["Data", "Tipo", "Produto", "Dose", "Próx."]],
       body: a.sanidade.map((s) => [
-        new Date(s.data).toLocaleDateString("pt-BR"), s.tipo, s.produto, s.dose ?? "",
-        s.proximaData ? new Date(s.proximaData).toLocaleDateString("pt-BR") : "—",
+        fmtData(s.data), s.tipo, s.produto, s.dose ?? "",
+        s.proximaData ? fmtData(s.proximaData) : "—",
       ]),
     });
   }
@@ -840,7 +841,7 @@ export async function gerarRelatorioDiario(entries: DiarioEntry[], titulo = "Di�
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(40);
-    doc.text(`${new Date(e.data).toLocaleDateString("pt-BR")} — ${e.titulo}`, 14, y);
+    doc.text(`${fmtData(e.data)} — ${e.titulo}`, 14, y);
     y += 6;
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
@@ -876,7 +877,7 @@ export async function gerarRelatorioDiario(entries: DiarioEntry[], titulo = "Di�
   }
 
   footer(doc);
-  savePdf(doc, `diario-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo, modulo: "Diário" });
+  savePdf(doc, `diario-${hojeISO()}.pdf`, { titulo, modulo: "Diário" });
 }
 
 export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string) {
@@ -890,7 +891,7 @@ export function gerarLivroCaixa(lancamentos: Lancamento[], periodoLabel: string)
     const s = l.tipo === "despesa" ? l.valor : 0;
     saldo += e - s;
     return [
-      new Date(l.data).toLocaleDateString("pt-BR"),
+      fmtData(l.data),
       l.descricao + (l.categoria ? ` (${l.categoria})` : ""),
       l.modulo ?? "—",
       e ? e.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—",
@@ -1019,5 +1020,5 @@ export function gerarComparativoLotesPDF(dados: FechamentoLote[]) {
   });
 
   footer(doc);
-  savePdf(doc, `comparativo-lotes-${new Date().toISOString().slice(0, 10)}.pdf`, { titulo: "Comparativo de Lotes", modulo: "Granja" });
+  savePdf(doc, `comparativo-lotes-${hojeISO()}.pdf`, { titulo: "Comparativo de Lotes", modulo: "Granja" });
 }

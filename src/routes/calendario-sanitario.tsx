@@ -12,6 +12,7 @@ import { useLotes } from "@/lib/state";
 import { gerarCalendario, type ItemCalendario, type AplicacaoSanitaria } from "@/lib/calendarioSanitario";
 import { Syringe, Pill, ShieldCheck, ClipboardCheck, AlertTriangle, CheckCircle2, Calendar, Bird, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/calendario-sanitario")({
   head: () => ({
@@ -31,7 +32,7 @@ function CalendarioSanitario() {
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
   const lote = lotes.find((l) => l.id === loteId) ?? ativos[0];
   const [aplicar, setAplicar] = useState<ItemCalendario | null>(null);
-  const [form, setForm] = useState<AplicacaoSanitaria>({ codigo: "", data: new Date().toISOString().slice(0, 10), status: "feito" });
+  const [form, setForm] = useState<AplicacaoSanitaria>({ codigo: "", data: hojeISO(), status: "feito" });
 
   if (!lote) {
     return (
@@ -60,7 +61,7 @@ function CalendarioSanitario() {
     setAplicar(item);
     setForm({
       codigo: item.codigo,
-      data: item.aplicado?.data ?? new Date().toISOString().slice(0, 10),
+      data: item.aplicado?.data ?? hojeISO(),
       status: item.aplicado?.status ?? "feito",
       dose: item.aplicado?.dose ?? item.dose ?? "",
       responsavel: item.aplicado?.responsavel ?? "",
@@ -137,12 +138,12 @@ function CalendarioSanitario() {
                     {item.obrigatorio && <Badge variant="secondary" className="text-[10px]">obrigatório</Badge>}
                     {item.status === "hoje" && <Badge className="text-[10px]">HOJE</Badge>}
                     {item.status === "atraso" && <Badge variant="destructive" className="text-[10px]">ATRASO {idade - item.dia}d</Badge>}
-                    {item.status === "feito" && item.aplicado && <Badge variant="outline" className="text-[10px] border-success/40 text-success">✓ {new Date(item.aplicado.data).toLocaleDateString("pt-BR")}</Badge>}
+                    {item.status === "feito" && item.aplicado && <Badge variant="outline" className="text-[10px] border-success/40 text-success">✓ {fmtData(item.aplicado.data)}</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {item.via && <span className="capitalize">via {item.via} · </span>}
                     {item.dose && <span>{item.dose} · </span>}
-                    Previsto {new Date(item.dataPrevista).toLocaleDateString("pt-BR")}
+                    Previsto {fmtData(item.dataPrevista)}
                   </p>
                   {item.obs && <p className="text-xs text-muted-foreground mt-1 italic">{item.obs}</p>}
                   {item.aplicado?.observacoes && <p className="text-xs mt-1"><strong>Obs aplicação:</strong> {item.aplicado.observacoes}</p>}

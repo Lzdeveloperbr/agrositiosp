@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, RefreshCw, MapPin, Newspaper, ExternalLink } from "lucide-react";
 import { buscarNoticiasAgro, type Noticia } from "@/lib/noticias.functions";
+import { fmtData } from "@/lib/data";
 
 export const Route = createFileRoute("/mercado")({
   head: () => ({
@@ -223,7 +224,7 @@ function NoticiasTab() {
                     <Badge variant="secondary" className="text-[10px]">{n.fonte}</Badge>
                     {n.data && (
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(n.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {fmtData(n.data, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </span>
                     )}
                   </div>

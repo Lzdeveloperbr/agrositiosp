@@ -1,3 +1,4 @@
+import { isoLocal } from "@/lib/data";
 // Calendário sanitário automático para frango de corte.
 // Baseado em protocolos padrão de integradoras (Cobb/Ross). Ajustável.
 
@@ -56,7 +57,7 @@ export function gerarCalendario(opts: {
   const idade = Math.floor((hoje.getTime() - entrada.getTime()) / 86400000);
 
   return proto.map((p) => {
-    const dataPrevista = new Date(entrada.getTime() + p.dia * 86400000).toISOString().slice(0, 10);
+    const dataPrevista = isoLocal(new Date(entrada.getTime() + p.dia * 86400000));
     const aplicado = opts.aplicacoes.find((a) => a.codigo === p.codigo);
     let status: ItemCalendario["status"];
     if (aplicado?.status === "feito") status = "feito";

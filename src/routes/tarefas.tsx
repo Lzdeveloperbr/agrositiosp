@@ -14,6 +14,7 @@ import { useTarefas } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import { ListChecks, Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData } from "@/lib/data";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({
@@ -139,7 +140,7 @@ function TarefasPage() {
                       {vencida && <Badge variant="destructive" className="text-[10px] flex gap-1 items-center"><AlertCircle className="h-3 w-3" /> vencida</Badge>}
                     </div>
                     {t.descricao && <p className="text-xs text-muted-foreground mt-0.5">{t.descricao}</p>}
-                    {t.vencimento && <p className="text-[11px] text-muted-foreground mt-0.5">📅 {new Date(t.vencimento).toLocaleDateString("pt-BR")}</p>}
+                    {t.vencimento && <p className="text-[11px] text-muted-foreground mt-0.5">📅 {fmtData(t.vencimento)}</p>}
                   </div>
                   <Button size="icon" variant="ghost" onClick={() => remover(t.id)}><Trash2 className="h-4 w-4" /></Button>
                 </Card>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Cloud, Droplets, Wind, Thermometer, Sunrise, Sunset, MapPin, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData } from "@/lib/data";
 
 export function WeatherWidget({ compact }: { compact?: boolean }) {
   const { coords, setCoords } = useFazenda();
@@ -145,14 +146,14 @@ export function WeatherWidget({ compact }: { compact?: boolean }) {
 
         {proxChuva && (
           <div className="text-xs p-2 rounded bg-primary/10 border border-primary/30 mb-4">
-            🌧️ Próxima chuva: <strong>{new Date(proxChuva.date).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" })}</strong> · {proxChuva.chuvaMm.toFixed(0)} mm ({proxChuva.chuvaProb}%)
+            🌧️ Próxima chuva: <strong>{fmtData(proxChuva.date, { weekday: "short", day: "2-digit", month: "2-digit" })}</strong> · {proxChuva.chuvaMm.toFixed(0)} mm ({proxChuva.chuvaProb}%)
           </div>
         )}
 
         <div className="grid grid-cols-7 gap-1.5">
           {data.daily.map((d) => (
             <div key={d.date} className="text-center p-1.5 rounded bg-muted/40">
-              <div className="text-[10px] text-muted-foreground uppercase">{new Date(d.date).toLocaleDateString("pt-BR", { weekday: "short" }).slice(0, 3)}</div>
+              <div className="text-[10px] text-muted-foreground uppercase">{fmtData(d.date, { weekday: "short" }).slice(0, 3)}</div>
               <div className="text-xl my-0.5">{wmoEmoji(d.code, true)}</div>
               <div className="text-[11px] font-semibold">{d.tMax.toFixed(0)}°</div>
               <div className="text-[10px] text-muted-foreground">{d.tMin.toFixed(0)}°</div>

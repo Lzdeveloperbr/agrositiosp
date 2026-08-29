@@ -22,6 +22,7 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { useMedidores } from "@/lib/state";
 import { fetchWeather, wmoLabel } from "@/lib/weather";
 import { compressFile } from "@/lib/cloud/uploadFoto";
+import { fmtData } from "@/lib/data";
 
 export const Route = createFileRoute("/quiz")({
   head: () => ({
@@ -349,7 +350,7 @@ function QuizPage() {
               {historico.slice(0, 15).map((q) => (
                 <div key={q.data} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-card/50">
                   <div className="min-w-0">
-                    <p className="font-medium">{new Date(q.data + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</p>
+                    <p className="font-medium">{fmtData(q.data + "T12:00:00", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</p>
                     <p className="text-xs text-muted-foreground">
                       {Object.keys(q.respostas).length} respostas · {q.fotos?.length ?? 0} fotos {q.analise ? "· com IA" : "· rascunho"}
                     </p>

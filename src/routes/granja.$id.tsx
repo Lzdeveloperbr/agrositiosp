@@ -13,6 +13,7 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { FechamentoLoteCard } from "@/components/FechamentoLoteCard";
 import { toast } from "sonner";
+import { diffDias, fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/granja/$id")({
   head: () => ({
@@ -36,7 +37,7 @@ function LoteDetalhe() {
   const estoqueRacaoKg = estoque.filter((i) => i.categoria === "racao").reduce((s, i) => s + (i.quantidade || 0), 0);
 
   const [entry, setEntry] = useState({
-    date: new Date().toISOString().slice(0, 10),
+    date: hojeISO(),
     mortalidade: 0,
     eliminados: 0,
     pesoMedioG: undefined as number | undefined,
@@ -56,7 +57,7 @@ function LoteDetalhe() {
   const totalElim = lote.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
   const vivas = lote.quantidadeInicial - totalMort - totalElim;
   // Idade começa em D0 (dia do alojamento)
-  const dias = Math.max(0, Math.round((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000));
+  const dias = Math.max(0, diffDias(lote.dataEntrada));
   const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
   const pesoTotalKg = (vivas * ultPeso) / 1000;
   const previsao = new Date(new Date(lote.dataEntrada).getTime() + lote.previsaoAbateDias * 86400000);
@@ -97,7 +98,7 @@ function LoteDetalhe() {
                 <h1 className="text-3xl md:text-4xl font-display font-bold">Lote {lote.numero}</h1>
                 {lote.encerrado ? <Badge variant="secondary">Encerrado</Badge> : <Badge>Ativo</Badge>}
               </div>
-              <p className="text-muted-foreground mt-1">Entrada {new Date(lote.dataEntrada).toLocaleDateString("pt-BR")} · D{dias} · {lote.integradora}</p>
+              <p className="text-muted-foreground mt-1">Entrada {fmtData(lote.dataEntrada)} · D{dias} · {lote.integradora}</p>
               <p className="text-xs text-muted-foreground">Previsão de abate: {previsao.toLocaleDateString("pt-BR")}</p>
             </div>
             <div className="flex gap-2">
@@ -185,7 +186,7 @@ function LoteDetalhe() {
                     const realIdx = lote.entries.indexOf(e);
                     return (
                       <tr key={idx} className="border-b border-border/50">
-                        <td className="py-2">{new Date(e.date).toLocaleDateString("pt-BR")}</td>
+                        <td className="py-2">{fmtData(e.date)}</td>
                         <td className="py-2 text-right tabular-nums">{e.mortalidade}</td>
                         <td className="py-2 text-right tabular-nums">{e.eliminados ?? 0}</td>
                         <td className="py-2 text-right tabular-nums">{e.pesoMedioG ?? "—"}</td>

@@ -8,6 +8,7 @@ import { useLotes } from "@/lib/state";
 import { fechamentoLote } from "@/lib/fechamentoLote";
 import { History, Trophy, TrendingUp, TrendingDown, Bird, ArrowRight, Award } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { fmtData } from "@/lib/data";
 
 export const Route = createFileRoute("/historico-lotes")({
   head: () => ({
@@ -154,7 +155,7 @@ function HistoricoLotes() {
                 {[...dados].reverse().map((d) => (
                   <tr key={d.lote.id} className="border-t border-border/40 hover:bg-muted/20">
                     <td className="py-3 px-4 font-semibold">{d.lote.numero} {d.lote.encerrado && <Badge variant="secondary" className="ml-1 text-[10px]">encerrado</Badge>}</td>
-                    <td className="py-3 text-muted-foreground text-xs">{new Date(d.lote.dataEntrada).toLocaleDateString("pt-BR")}</td>
+                    <td className="py-3 text-muted-foreground text-xs">{fmtData(d.lote.dataEntrada)}</td>
                     <td className="py-3 text-right">
                       <div className="tabular-nums">{d.f.mortPct.toFixed(2)}%</div>
                       <div className="mt-0.5">{badgeBenchmark(d.f.mortPct, media.mort, true)}</div>

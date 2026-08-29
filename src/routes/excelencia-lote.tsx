@@ -14,6 +14,7 @@ import { CURVAS, metaPeso, type Linhagem } from "@/lib/linhagens";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { Trophy, ShieldCheck, Syringe, Scale, TrendingUp, Truck, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { diffDias } from "@/lib/data";
 
 export const Route = createFileRoute("/excelencia-lote")({
   head: () => ({
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/excelencia-lote")({
 
 // ===== Helpers =====
 function idadeDias(dataEntrada: string): number {
-  return Math.max(0, Math.floor((Date.now() - new Date(dataEntrada).getTime()) / 86400000));
+  return Math.max(0, diffDias(dataEntrada));
 }
 
 // IEP (Índice de Eficiência Produtiva) = (Viab% × Peso(kg) × 100) / (Idade × CA)
