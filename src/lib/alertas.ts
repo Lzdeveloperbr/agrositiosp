@@ -142,7 +142,7 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
       detalhe: `${brl(total)} vencidos. Regularize para evitar juros.`,
     });
   }
-  const em7 = new isoLocal(Date(Date.now() + 7 * 86400000));
+  const em7 = isoLocal(new Date(Date.now() + 7 * 86400000));
   const aVencer = financeiro.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento >= hj && l.vencimento <= em7);
   if (aVencer.length) {
     out.push({
@@ -153,7 +153,7 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
   }
 
   // ===== Gado: vacinas e reforços =====
-  const em30 = new isoLocal(Date(Date.now() + 30 * 86400000));
+  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
   const vac = animais
     .filter((a) => a.status === "ativo")
     .flatMap((a) => (a.sanidade ?? []).filter((s) => s.proximaData && s.proximaData <= em30).map((s) => ({ a, s })));

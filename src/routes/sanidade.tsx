@@ -40,7 +40,7 @@ const TIPOS = ["vacina", "medicamento", "vermífugo", "exame", "carrapaticida", 
 const ESPECIES = ["aves", "bovino de corte", "bovino de leite", "suíno", "outro"];
 const VIAS = ["oral", "intramuscular", "subcutânea", "intravenosa", "tópica", "spray", "água de bebida", "ração"];
 const hoje = () => hojeISO();
-const addDias = (d: string, n: number) => new isoLocal(Date(new Date(d).getTime() + n * 86400000));
+const addDias = (d: string, n: number) => isoLocal(new Date(new Date(d).getTime() + n * 86400000));
 const fmtD = (d?: string | null) => (d ? d.split("-").reverse().join("/") : "—");
 
 function SanidadePage() {

@@ -310,7 +310,7 @@ function Lactacoes({ lactacoes, animais }: any) {
   const salvar = async () => {
     if (!f.animal_id) return toast.error("Escolha a vaca");
     const parto = new Date(f.data_parto + "T12:00");
-    const secagem = new isoLocal(Date(parto.getTime() + 305 * 86400000));
+    const secagem = isoLocal(new Date(parto.getTime() + 305 * 86400000));
     await lactacoes.add({
       animal_id: f.animal_id, numero: Number(f.numero) || 1, data_parto: f.data_parto,
       data_secagem_prevista: secagem, pico_litros: f.pico_litros ? Number(f.pico_litros) : null, status: "ativa",
@@ -393,8 +393,8 @@ function Eventos({ eventos, animais, operador }: any) {
   const salvar = async () => {
     if (!f.animal_id) return toast.error("Escolha o animal");
     let prevista: string | null = null;
-    if (f.tipo === "ia") prevista = new isoLocal(Date(new Date(f.data + "T12:00").getTime() + 283 * 86400000));
-    if (f.tipo === "cio") prevista = new isoLocal(Date(new Date(f.data + "T12:00").getTime() + 21 * 86400000));
+    if (f.tipo === "ia") prevista = isoLocal(new Date(new Date(f.data + "T12:00").getTime() + 283 * 86400000));
+    if (f.tipo === "cio") prevista = isoLocal(new Date(new Date(f.data + "T12:00").getTime() + 21 * 86400000));
     await eventos.add({
       animal_id: f.animal_id, tipo: f.tipo, data: f.data, touro_semen: f.touro_semen || null,
       resultado: f.resultado || null, data_prevista: prevista, problema: f.problema || null,

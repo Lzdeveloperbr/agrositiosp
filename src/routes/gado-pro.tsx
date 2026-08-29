@@ -132,8 +132,8 @@ function ReproTab() {
     let diagPrev: string | null = null;
     if (ultIA) {
       const base = new Date(ultIA.data);
-      partoPrev = new isoLocal(Date(base.getTime() + 283 * 86400000));
-      diagPrev = new isoLocal(Date(base.getTime() + 30 * 86400000));
+      partoPrev = isoLocal(new Date(base.getTime() + 283 * 86400000));
+      diagPrev = isoLocal(new Date(base.getTime() + 30 * 86400000));
     }
     return { a, ultIA, partoPrev, diagPrev };
   });

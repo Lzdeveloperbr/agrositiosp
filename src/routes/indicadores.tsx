@@ -86,7 +86,7 @@ function IndicadoresPage() {
 
   const porCategoria = useMemo(() => {
     const map = new Map<string, number>();
-    const limite = new isoLocal(Date(new Date().setMonth(new Date().getMonth() - meses)));
+    const limite = isoLocal(new Date(new Date().setMonth(new Date().getMonth() - meses)));
     financ.filter((l) => l.tipo === "despesa" && (l.data ?? "") >= limite)
       .forEach((l) => map.set(l.categoria || "Outros", (map.get(l.categoria || "Outros") ?? 0) + l.valor));
     return [...map.entries()].map(([categoria, valor]) => ({ categoria, valor })).sort((a, b) => b.valor - a.valor).slice(0, 8);

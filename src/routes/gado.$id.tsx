@@ -73,7 +73,7 @@ function AnimalDetalhe() {
   const addRepro = () => {
     if (!repro.tipo) { toast.error("Informe o tipo"); return; }
     const previsao = repro.tipo === "cobertura" || repro.tipo === "ia"
-      ? (repro.previsaoParto || new isoLocal(Date(new Date(repro.data).getTime() + 283 * 86400000)))
+      ? (repro.previsaoParto || isoLocal(new Date(new Date(repro.data).getTime() + 283 * 86400000)))
       : (repro.previsaoParto || undefined);
     setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: [{ id: uid(), ...repro, resultado: repro.resultado || undefined, previsaoParto: previsao }, ...(x.reproducao || [])] } : x));
     setRepro({ data: hojeISO(), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });

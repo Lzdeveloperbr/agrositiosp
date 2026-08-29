@@ -42,8 +42,8 @@ function AutomacoesPage() {
   const isOn = (id: string) => enabled[id] !== false; // default ON
 
   const hoje = hojeISO();
-  const em7 = new isoLocal(Date(Date.now() + 7 * 86400000));
-  const em30 = new isoLocal(Date(Date.now() + 30 * 86400000));
+  const em7 = isoLocal(new Date(Date.now() + 7 * 86400000));
+  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
 
   const regras: Regra[] = useMemo(() => [
     {

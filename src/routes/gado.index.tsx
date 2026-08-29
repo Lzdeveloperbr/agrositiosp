@@ -135,7 +135,7 @@ function GadoPage() {
     const hoje = new Date();
     for (let i = 11; i >= 0; i--) {
       const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      const fim = new isoLocal(Date(hoje.getFullYear(), hoje.getMonth() - i + 1, 0));
+      const fim = isoLocal(new Date(hoje.getFullYear(), hoje.getMonth() - i + 1, 0));
       const ini = isoLocal(d);
       const total = animais.filter((a) => a.dataEntrada <= fim && (!a.saidaData || a.saidaData > fim)).length;
       meses.push({ mes: ini.slice(2, 7), rebanho: total });

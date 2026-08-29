@@ -23,7 +23,7 @@ type Evt = { id: string; brinco: string; nome?: string; data: string; tipo: stri
 function VetPage() {
   const [animais] = useAnimais();
   const hoje = hojeISO();
-  const em30 = new isoLocal(Date(Date.now() + 30 * 86400000));
+  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
 
   const eventos: Evt[] = useMemo(() =>
     animais.flatMap((a) => a.sanidade.map((s) => ({ ...s, brinco: a.brinco, nome: a.nome, animalId: a.id }))),
