@@ -63,8 +63,8 @@ function Dashboard() {
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
   const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
-  const hojeStr = today?isoLocal() ?? "";
-  const em7 = today ? new isoLocal(Date(today.getTime() + 7 * 86400000)) : "";
+  const hojeStr = today ? isoLocal(today) : "";
+  const em7 = today ? isoLocal(new Date(today.getTime() + 7 * 86400000)) : "";
   const contasVencendo = financ.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento <= em7);
   const contasAtrasadas = contasVencendo.filter((l) => l.vencimento! < hojeStr);
   const totalAVencer = contasVencendo.reduce((s, l) => s + (l.tipo === "despesa" ? l.valor : -l.valor), 0);

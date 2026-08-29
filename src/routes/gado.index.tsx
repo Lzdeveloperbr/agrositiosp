@@ -19,10 +19,10 @@ import {
 import { toast } from "sonner";
 import { gerarRelatorioRebanho } from "@/lib/pdf";
 import {
-import { hojeISO, isoLocal } from "@/lib/data";
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
   LineChart, Line, CartesianGrid, Legend,
 } from "recharts";
+import { hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado/")({
   head: () => ({

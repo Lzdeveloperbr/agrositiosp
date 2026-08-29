@@ -213,8 +213,8 @@ function EntregasRacaoPage() {
 
   const stats = useMemo(() => {
     const hoje = todayISO();
-    const d7 = new Date(); d7.setDate(d7.getDate() - 7); const iso7 = isoLocal(d7));
-    const d30 = new Date(); d30.setDate(d30.getDate() - 30); const iso30 = isoLocal(d30));
+    const d7 = new Date(); d7.setDate(d7.getDate() - 7); const iso7 = isoLocal(d7);
+    const d30 = new Date(); d30.setDate(d30.getDate() - 30); const iso30 = isoLocal(d30);
     const sum = (arr: Entrega[]) => arr.reduce((s, x) => s + (Number(x.quantidade_kg) || 0), 0);
     const hojeArr = entregas.filter(e => e.data === hoje);
     const semArr = entregas.filter(e => e.data >= iso7);
@@ -231,7 +231,7 @@ function EntregasRacaoPage() {
     const map = new Map<string, number>();
     for (let i = 13; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
-      map.set(isoLocal(d)), 0);
+      map.set(isoLocal(d), 0);
     }
     entregas.forEach(e => {
       if (map.has(e.data)) map.set(e.data, (map.get(e.data) || 0) + Number(e.quantidade_kg || 0));

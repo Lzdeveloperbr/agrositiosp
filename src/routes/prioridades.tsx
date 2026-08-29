@@ -18,10 +18,10 @@ import {
   CATEGORIAS, CATEGORIA_LABEL, sugestoesDoMes, mesLabel, mesAtual, deslocarMes,
 } from "@/lib/prioridadesSugestoes";
 import {
-import { fmtData, hojeISO } from "@/lib/data";
   ChevronLeft, ChevronRight, Plus, Target, CheckCircle2, Clock, AlertTriangle,
   Wallet, Trash2, Copy, Download, Sparkles, ArrowUp, ArrowDown, Flag,
 } from "lucide-react";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/prioridades")({
   head: () => ({

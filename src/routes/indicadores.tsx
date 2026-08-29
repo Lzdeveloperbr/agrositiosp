@@ -10,9 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useLotes, useFinanceiro, usePlantios, useAnimais } from "@/lib/state";
 import { BarChart3, Trophy, TrendingUp, Wallet, Sprout } from "lucide-react";
 import {
-import { isoLocal } from "@/lib/data";
   BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
+import { isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/indicadores")({
   head: () => ({
