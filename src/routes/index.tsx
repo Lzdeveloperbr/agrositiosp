@@ -17,7 +17,7 @@ import { AlertasInteligentes } from "@/components/AlertasInteligentes";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 import { ALL_NAV_ITEMS, type NavItem } from "@/lib/nav";
-import { isoLocal } from "@/lib/data";
+import { diffDias, isoLocal } from "@/lib/data";
 
 const ATALHOS: NavItem[] = ["/granja", "/pesagem-pro", "/entregas-racao", "/estoque", "/gado", "/financeiro", "/chat", "/agro-ia"]
   .map((to) => ALL_NAV_ITEMS.find((i) => i.to === to)!)
@@ -194,7 +194,7 @@ function Dashboard() {
           <AIInsightsCard context={JSON.stringify({
             granja: { aves_vivas: vivas, mortalidade_pct: Number(mortPct.toFixed(2)), lote: ativo?.numero, dias: ativo ? ativo.entries.length : 0 },
             gado: { cabecas_ativas: ativosGado.length, total_historico: animais.length },
-            plantios_ativos: plantiosAtivos.map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, dias_para_colheita: p.previsaoColheita ? Math.ceil((new Date(p.previsaoColheita).getTime() - Date.now()) / 86400000) : null })),
+            plantios_ativos: plantiosAtivos.map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, dias_para_colheita: p.previsaoColheita ? diffDias(new Date(), p.previsaoColheita) : null })),
             estoque_baixo: estoqueBaixo.map((i) => ({ nome: i.nome, qtd: i.quantidade, min: i.minimo })),
             financeiro: { contas_a_vencer: contasVencendo.length, saldo_previsto: -totalAVencer },
             tarefas_pendentes: tarefasPend.length,

@@ -13,7 +13,7 @@ import { usePlantios } from "@/lib/state";
 import { CULTURAS, MESES, recomendacoesDoMes, type Plantio } from "@/lib/agro";
 import { Sprout, Plus, Calendar, Trash2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { fmtData, hojeISO, isoLocal } from "@/lib/data";
+import { diffDias, fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/plantios")({
   head: () => ({
@@ -66,7 +66,7 @@ function PlantiosPage() {
 
   function diasRestantes(p: Plantio): number | null {
     if (!p.previsaoColheita) return null;
-    return Math.ceil((new Date(p.previsaoColheita).getTime() - Date.now()) / 86400000);
+    return diffDias(new Date(), p.previsaoColheita);
   }
 
   function encerrar(p: Plantio) {

@@ -15,7 +15,7 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { StatCard } from "@/components/StatCard";
 import { Beef, Plus, Trash2, Scale, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { fmtData, hojeISO } from "@/lib/data";
+import { diffDias, fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/engorda")({
   head: () => ({
@@ -46,7 +46,7 @@ type Pesagem = {
 const hoje = () => hojeISO();
 const fmt = (n: number, d = 1) => n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-const diasEntre = (a: string, b: string) => Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000));
+const diasEntre = (a: string, b: string) => Math.max(1, diffDias(a, b));
 
 function EngordaPage() {
   const { operador } = useFazenda();

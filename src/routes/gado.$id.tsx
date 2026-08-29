@@ -15,7 +15,7 @@ import { ArrowLeft, FileText, Trash2, Plus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { gerarRelatorioAnimal } from "@/lib/pdf";
 import { toast } from "sonner";
-import { fmtData, hojeISO, isoLocal } from "@/lib/data";
+import { addDias, diffDias, fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado/$id")({
   head: () => ({
@@ -48,7 +48,7 @@ function AnimalDetalhe() {
   const ultimo = pesagensSorted[pesagensSorted.length - 1];
   const primeiro = pesagensSorted[0];
   const dias = primeiro && ultimo && primeiro !== ultimo
-    ? Math.max(1, Math.floor((new Date(ultimo.data).getTime() - new Date(primeiro.data).getTime()) / 86400000))
+    ? Math.max(1, diffDias(primeiro.data, ultimo.data))
     : 0;
   const gmd = dias > 0 ? ((ultimo.pesoKg - primeiro.pesoKg) / dias).toFixed(3) : "—";
   const idade = a.nascimento ? Math.floor((Date.now() - new Date(a.nascimento).getTime()) / 86400000 / 30) : null;
@@ -73,7 +73,7 @@ function AnimalDetalhe() {
   const addRepro = () => {
     if (!repro.tipo) { toast.error("Informe o tipo"); return; }
     const previsao = repro.tipo === "cobertura" || repro.tipo === "ia"
-      ? (repro.previsaoParto || isoLocal(new Date(new Date(repro.data).getTime() + 283 * 86400000)))
+      ? (repro.previsaoParto || addDias(repro.data, 283))
       : (repro.previsaoParto || undefined);
     setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: [{ id: uid(), ...repro, resultado: repro.resultado || undefined, previsaoParto: previsao }, ...(x.reproducao || [])] } : x));
     setRepro({ data: hojeISO(), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });

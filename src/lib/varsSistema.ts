@@ -2,7 +2,7 @@
 // usadas pelas Planilhas Inteligentes e pelo painel unificado da propriedade.
 import { useEffect, useState, useCallback } from "react";
 import { useFazenda } from "@/lib/cloud/fazenda";
-import { hojeISO } from "@/lib/data";
+import { diffDias, hojeISO } from "@/lib/data";
 
 export type ResumoPropriedade = {
   leite: {
@@ -113,7 +113,7 @@ export function useResumoPropriedade(intervaloMs = 60_000) {
       : (lotesE.length ? lotesE.reduce((s, l) => s + num(l.peso_medio_inicial_kg), 0) / lotesE.length : 0);
     const loteRef = lotesE[0];
     if (loteRef && r.engorda.pesoMedio && r.engorda.pesoEntrada) {
-      const dias = Math.max(1, Math.round((Date.now() - new Date(loteRef.data_entrada).getTime()) / 86400000));
+      const dias = Math.max(1, diffDias(loteRef.data_entrada));
       r.engorda.gmd = (r.engorda.pesoMedio - r.engorda.pesoEntrada) / dias;
     }
     r.engorda.arrobasTotais = (r.engorda.pesoMedio * 0.52 / 15) * r.engorda.cabecas;
@@ -126,7 +126,7 @@ export function useResumoPropriedade(intervaloMs = 60_000) {
       r.granja.lote = lote.numero;
       r.granja.alojadas = num(lote.quantidade_inicial);
       r.granja.vivas = Math.max(0, r.granja.alojadas - mortos);
-      r.granja.dias = Math.max(0, Math.round((Date.now() - new Date(lote.data_entrada).getTime()) / 86400000));
+      r.granja.dias = Math.max(0, diffDias(lote.data_entrada));
       const comPeso = entries.filter((e) => num(e.pesoMedioG) > 0).sort((a, b) => (a.date < b.date ? 1 : -1));
       r.granja.pesoMedio = comPeso.length ? num(comPeso[0].pesoMedioG) / 1000 : 0;
       r.granja.mortalidadePct = r.granja.alojadas ? (mortos / r.granja.alojadas) * 100 : 0;

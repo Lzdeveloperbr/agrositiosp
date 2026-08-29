@@ -12,7 +12,7 @@ import { uid } from "@/lib/storage";
 import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
-import { fmtData, hojeISO } from "@/lib/data";
+import { diffDias, fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/granja/")({
   head: () => ({
@@ -64,7 +64,7 @@ function GranjaPage() {
       vivas += l.quantidadeInicial - mort;
       const ult = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
       if (ult) { somaPeso += ult; comPeso++; }
-      diasSoma += Math.max(0, Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000));
+      diasSoma += Math.max(0, diffDias(l.dataEntrada));
     }
     return {
       ativos: ativos.length,
@@ -171,7 +171,7 @@ function GranjaPage() {
               const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
               const vivas = l.quantidadeInicial - mort;
               const ultPeso = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
-              const dias = Math.floor((Date.now() - new Date(l.dataEntrada).getTime()) / 86400000);
+              const dias = diffDias(l.dataEntrada);
               const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
               return (
                 <Card key={l.id} className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>

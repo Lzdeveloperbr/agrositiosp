@@ -1,7 +1,7 @@
 // Motor de alertas inteligentes — analisa os dados da fazenda e devolve avisos priorizados.
 import type { Lote, ItemEstoque, Lancamento, Tarefa, Animal } from "./types";
 import { fechamentoLote } from "./fechamentoLote";
-import { fmtData, hojeISO, isoLocal } from "@/lib/data";
+import { diffDias, fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export type Severidade = "critico" | "atencao" | "info";
 
@@ -15,7 +15,7 @@ export type Alerta = {
 };
 
 const hoje = () => hojeISO();
-const dias = (a: string, b: string) => Math.round((new Date(a).getTime() - new Date(b).getTime()) / 86400000);
+const dias = (a: string, b: string) => diffDias(b, a);
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 const ORDEM: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };

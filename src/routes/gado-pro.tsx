@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAnimais, useFinanceiro } from "@/lib/state";
 import { Beef, TrendingUp, Heart, Syringe, Calculator } from "lucide-react";
-import { fmtData, isoLocal } from "@/lib/data";
+import { diffDias, fmtData, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado-pro")({
   head: () => ({
@@ -64,7 +64,7 @@ function GmdTab() {
       const ultimo = pes[pes.length - 1];
       let gmd: number | null = null;
       if (primeiro && ultimo && primeiro !== ultimo) {
-        const dias = (new Date(ultimo.data).getTime() - new Date(primeiro.data).getTime()) / 86400000;
+        const dias = diffDias(primeiro.data, ultimo.data);
         if (dias > 0) gmd = (ultimo.pesoKg - primeiro.pesoKg) / dias;
       }
       const pesoAtual = ultimo?.pesoKg ?? a.pesoEntradaKg ?? 0;

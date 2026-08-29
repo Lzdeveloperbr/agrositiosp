@@ -16,7 +16,7 @@ import { StatCard } from "@/components/StatCard";
 import { baixarCSV } from "@/lib/exportar";
 import { Milk, Plus, Trash2, Droplets, HeartPulse, Baby, Download, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
-import { fmtData, hojeISO, isoLocal } from "@/lib/data";
+import { diffDias, fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/leite")({
   head: () => ({
@@ -63,7 +63,7 @@ const CAT_LABEL = Object.fromEntries(CATEGORIAS.map((c) => [c.v, c.l]));
 const hoje = () => hojeISO();
 const fmt = (n: number, d = 1) => n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const dias = (de: string) => Math.max(0, Math.floor((Date.now() - new Date(de).getTime()) / 86400000));
+const dias = (de: string) => Math.max(0, diffDias(de));
 
 function LeitePage() {
   const { operador } = useFazenda();

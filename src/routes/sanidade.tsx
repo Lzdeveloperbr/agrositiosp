@@ -15,7 +15,7 @@ import { useCloudCollection } from "@/lib/cloud/useCloudCollection";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { ShieldCheck, Syringe, AlertTriangle, Search, Plus, Trash2, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
-import { hojeISO, isoLocal } from "@/lib/data";
+import { addDias, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/sanidade")({
   head: () => ({
@@ -40,7 +40,7 @@ const TIPOS = ["vacina", "medicamento", "vermífugo", "exame", "carrapaticida", 
 const ESPECIES = ["aves", "bovino de corte", "bovino de leite", "suíno", "outro"];
 const VIAS = ["oral", "intramuscular", "subcutânea", "intravenosa", "tópica", "spray", "água de bebida", "ração"];
 const hoje = () => hojeISO();
-const addDias = (d: string, n: number) => isoLocal(new Date(new Date(d).getTime() + n * 86400000));
+const addDias = (d: string, n: number) => addDias(d, n);
 const fmtD = (d?: string | null) => (d ? d.split("-").reverse().join("/") : "—");
 
 function SanidadePage() {

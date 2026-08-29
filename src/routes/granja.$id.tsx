@@ -13,7 +13,7 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { FechamentoLoteCard } from "@/components/FechamentoLoteCard";
 import { toast } from "sonner";
-import { fmtData, hojeISO } from "@/lib/data";
+import { diffDias, fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/granja/$id")({
   head: () => ({
@@ -57,7 +57,7 @@ function LoteDetalhe() {
   const totalElim = lote.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
   const vivas = lote.quantidadeInicial - totalMort - totalElim;
   // Idade começa em D0 (dia do alojamento)
-  const dias = Math.max(0, Math.round((Date.now() - new Date(lote.dataEntrada).getTime()) / 86400000));
+  const dias = Math.max(0, diffDias(lote.dataEntrada));
   const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
   const pesoTotalKg = (vivas * ultPeso) / 1000;
   const previsao = new Date(new Date(lote.dataEntrada).getTime() + lote.previsaoAbateDias * 86400000);
