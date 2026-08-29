@@ -15,6 +15,7 @@ import { ArrowLeft, FileText, Trash2, Plus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { gerarRelatorioAnimal } from "@/lib/pdf";
 import { toast } from "sonner";
+import { fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/gado/$id")({
   head: () => ({
@@ -36,10 +37,10 @@ function AnimalDetalhe() {
   const [, setFinanc] = useFinanceiro();
   const a = animais.find((x) => x.id === id);
 
-  const [pesagem, setPesagem] = useState({ data: new Date().toISOString().slice(0, 10), pesoKg: 0, observacoes: "" });
-  const [sani, setSani] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "vacina" as any, produto: "", dose: "", proximaData: "", observacoes: "" });
-  const [repro, setRepro] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura" as any, resultado: "" as any, touroOuSemen: "", previsaoParto: "", observacoes: "" });
-  const [saida, setSaida] = useState({ tipo: "vendido" as "vendido" | "morto" | "abatido", data: new Date().toISOString().slice(0, 10), pesoKg: 0, preco: 0, motivo: "" });
+  const [pesagem, setPesagem] = useState({ data: hojeISO(), pesoKg: 0, observacoes: "" });
+  const [sani, setSani] = useState({ data: hojeISO(), tipo: "vacina" as any, produto: "", dose: "", proximaData: "", observacoes: "" });
+  const [repro, setRepro] = useState({ data: hojeISO(), tipo: "cobertura" as any, resultado: "" as any, touroOuSemen: "", previsaoParto: "", observacoes: "" });
+  const [saida, setSaida] = useState({ tipo: "vendido" as "vendido" | "morto" | "abatido", data: hojeISO(), pesoKg: 0, preco: 0, motivo: "" });
 
   if (!a) return <AppShell><p>Animal não encontrado.</p><Button asChild variant="link"><Link to="/gado">Voltar</Link></Button></AppShell>;
 
@@ -55,14 +56,14 @@ function AnimalDetalhe() {
   const addPesagem = () => {
     if (!pesagem.pesoKg) { toast.error("Informe o peso"); return; }
     setAnimais((p) => p.map((x) => x.id === id ? { ...x, pesagens: [...x.pesagens, { ...pesagem }] } : x));
-    setPesagem({ data: new Date().toISOString().slice(0, 10), pesoKg: 0, observacoes: "" });
+    setPesagem({ data: hojeISO(), pesoKg: 0, observacoes: "" });
     toast.success("Pesagem registrada");
   };
 
   const addSani = () => {
     if (!sani.produto) { toast.error("Informe o produto"); return; }
     setAnimais((p) => p.map((x) => x.id === id ? { ...x, sanidade: [{ id: uid(), ...sani, proximaData: sani.proximaData || undefined }, ...x.sanidade] } : x));
-    setSani({ data: new Date().toISOString().slice(0, 10), tipo: "vacina", produto: "", dose: "", proximaData: "", observacoes: "" });
+    setSani({ data: hojeISO(), tipo: "vacina", produto: "", dose: "", proximaData: "", observacoes: "" });
     toast.success("Evento sanitário adicionado");
   };
 
@@ -72,10 +73,10 @@ function AnimalDetalhe() {
   const addRepro = () => {
     if (!repro.tipo) { toast.error("Informe o tipo"); return; }
     const previsao = repro.tipo === "cobertura" || repro.tipo === "ia"
-      ? (repro.previsaoParto || new Date(new Date(repro.data).getTime() + 283 * 86400000).toISOString().slice(0, 10))
+      ? (repro.previsaoParto || new isoLocal(Date(new Date(repro.data).getTime() + 283 * 86400000)))
       : (repro.previsaoParto || undefined);
     setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: [{ id: uid(), ...repro, resultado: repro.resultado || undefined, previsaoParto: previsao }, ...(x.reproducao || [])] } : x));
-    setRepro({ data: new Date().toISOString().slice(0, 10), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });
+    setRepro({ data: hojeISO(), tipo: "cobertura", resultado: "", touroOuSemen: "", previsaoParto: "", observacoes: "" });
     toast.success("Evento reprodutivo registrado");
   };
   const remRepro = (rid: string) => setAnimais((p) => p.map((x) => x.id === id ? { ...x, reproducao: (x.reproducao || []).filter((r) => r.id !== rid) } : x));
@@ -148,7 +149,7 @@ function AnimalDetalhe() {
                 <h3 className="font-display font-semibold mb-3">Evolução do peso</h3>
                 {pesagensSorted.length > 1 ? (
                   <ResponsiveContainer width="100%" height={240}>
-                    <LineChart data={pesagensSorted.map((p) => ({ data: new Date(p.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }), peso: p.pesoKg }))}>
+                    <LineChart data={pesagensSorted.map((p) => ({ data: fmtData(p.data, { day: "2-digit", month: "short" }), peso: p.pesoKg }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                       <XAxis dataKey="data" fontSize={11} />
                       <YAxis fontSize={11} />
@@ -180,7 +181,7 @@ function AnimalDetalhe() {
                       const realIdx = a.pesagens.indexOf(p);
                       return (
                         <tr key={i} className="border-b border-border/50">
-                          <td className="py-2">{new Date(p.data).toLocaleDateString("pt-BR")}</td>
+                          <td className="py-2">{fmtData(p.data)}</td>
                           <td className="py-2 text-right tabular-nums">{p.pesoKg} kg</td>
                           <td className="py-2 text-right"><Button size="icon" variant="ghost" onClick={() => remPesagem(realIdx)}><Trash2 className="h-3.5 w-3.5" /></Button></td>
                         </tr>
@@ -225,7 +226,7 @@ function AnimalDetalhe() {
                       <Badge variant="outline" className="capitalize">{s.tipo}</Badge>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">{s.produto} {s.dose && <span className="text-muted-foreground">· {s.dose}</span>}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(s.data).toLocaleDateString("pt-BR")}{s.proximaData && ` · próx: ${new Date(s.proximaData).toLocaleDateString("pt-BR")}`}</p>
+                        <p className="text-xs text-muted-foreground">{fmtData(s.data)}{s.proximaData && ` · próx: ${fmtData(s.proximaData)}`}</p>
                         {s.observacoes && <p className="text-xs text-muted-foreground mt-1">{s.observacoes}</p>}
                       </div>
                       <Button size="icon" variant="ghost" onClick={() => remSani(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -293,11 +294,11 @@ function AnimalDetalhe() {
                         <Badge variant="outline" className="capitalize">{r.tipo}</Badge>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm">
-                            {new Date(r.data).toLocaleDateString("pt-BR")}
+                            {fmtData(r.data)}
                             {r.resultado && <span className="text-muted-foreground"> · {r.resultado}</span>}
                             {r.touroOuSemen && <span className="text-muted-foreground"> · {r.touroOuSemen}</span>}
                           </p>
-                          {r.previsaoParto && <p className="text-xs text-muted-foreground">Previsão de parto: {new Date(r.previsaoParto).toLocaleDateString("pt-BR")}</p>}
+                          {r.previsaoParto && <p className="text-xs text-muted-foreground">Previsão de parto: {fmtData(r.previsaoParto)}</p>}
                           {r.observacoes && <p className="text-xs text-muted-foreground mt-1">{r.observacoes}</p>}
                         </div>
                         <Button size="icon" variant="ghost" onClick={() => remRepro(r.id)}><Trash2 className="h-3.5 w-3.5" /></Button>

@@ -10,6 +10,7 @@ import { Sparkles, Send, Loader2, Trash2, RefreshCw, Bot, User } from "lucide-re
 import { toast } from "sonner";
 import { chatAgroIA, type ChatMsg } from "@/lib/agroChat.functions";
 import { useLotes, useAnimais, useEstoque, useFinanceiro, usePlantios, useChuvas, useTarefas } from "@/lib/state";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/agro-ia")({
   head: () => ({
@@ -68,7 +69,7 @@ function AgroIAPage() {
     const lancMes = fin.filter((l) => l.data?.startsWith(new Date().toISOString().slice(0, 7)));
     const ativosGado = animais.filter((a) => a.status === "ativo");
     return JSON.stringify({
-      data: new Date().toISOString().slice(0, 10),
+      data: hojeISO(),
       granja_lote_ativo: ativo ? {
         numero: ativo.numero,
         integradora: ativo.integradora ?? null,

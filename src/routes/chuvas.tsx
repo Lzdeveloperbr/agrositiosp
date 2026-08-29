@@ -10,6 +10,7 @@ import { uid } from "@/lib/storage";
 import { CloudRain, Plus, Trash2 } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/chuvas")({
   head: () => ({
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/chuvas")({
 
 function ChuvasPage() {
   const [chuvas, setChuvas] = useChuvas();
-  const [form, setForm] = useState({ data: new Date().toISOString().slice(0, 10), mm: 0, local: "", observacoes: "" });
+  const [form, setForm] = useState({ data: hojeISO(), mm: 0, local: "", observacoes: "" });
   const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
 
   const add = () => {
@@ -43,7 +44,7 @@ function ChuvasPage() {
   const grafico = useMemo(() => {
     const byDay: Record<string, number> = {};
     visiveis.forEach((c) => { byDay[c.data] = (byDay[c.data] ?? 0) + c.mm; });
-    return Object.entries(byDay).map(([data, mm]) => ({ data: new Date(data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }), mm }));
+    return Object.entries(byDay).map(([data, mm]) => ({ data: fmtData(data, { day: "2-digit", month: "short" }), mm }));
   }, [visiveis]);
 
   return (
@@ -91,7 +92,7 @@ function ChuvasPage() {
             <div className="mt-4 space-y-1">
               {[...visiveis].reverse().map((c) => (
                 <div key={c.id} className="flex items-center gap-3 p-2 rounded border border-border/40">
-                  <span className="text-sm w-28 text-muted-foreground">{new Date(c.data).toLocaleDateString("pt-BR")}</span>
+                  <span className="text-sm w-28 text-muted-foreground">{fmtData(c.data)}</span>
                   <span className="font-bold tabular-nums">{c.mm.toFixed(1)} mm</span>
                   {c.local && <span className="text-xs text-muted-foreground">{c.local}</span>}
                   <span className="flex-1 text-xs text-muted-foreground">{c.observacoes}</span>

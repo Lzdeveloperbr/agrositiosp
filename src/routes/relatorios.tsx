@@ -9,6 +9,7 @@ import { gerarRelatorioLote, gerarRelatorioEnergia, gerarRelatorioGeral, gerarRe
 import { listPdfHistory, deletePdfHistory, downloadFromHistory, printFromHistory, clearPdfHistory, type PdfHistoryItem } from "@/lib/pdfHistory";
 import { baixarCSV } from "@/lib/exportar";
 import { FileText, Bird, Zap, Layers, Beef, BookOpen, Wallet, History, Download, Printer, Trash2, Table } from "lucide-react";
+import { fmtData } from "@/lib/data";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
@@ -59,7 +60,7 @@ function RelatoriosPage() {
                 <div key={l.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card/50">
                   <div>
                     <p className="font-medium">Lote {l.numero}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(l.dataEntrada).toLocaleDateString("pt-BR")} · {l.entries.length} lançamentos</p>
+                    <p className="text-xs text-muted-foreground">{fmtData(l.dataEntrada)} · {l.entries.length} lançamentos</p>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => gerarRelatorioLote(l)}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
                 </div>

@@ -11,6 +11,7 @@ import { Zap, Plus, Trash2, FileText } from "lucide-react";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { gerarRelatorioEnergia } from "@/lib/pdf";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/energia")({
   head: () => ({
@@ -32,7 +33,7 @@ function EnergiaPage() {
     const f = forms[mid];
     if (!f?.data || !f?.valor) { toast.error("Informe data e valor"); return; }
     setMedidores((prev) => prev.map((m) => m.id === mid ? { ...m, leituras: [...m.leituras, { data: f.data, valor: +f.valor }] } : m));
-    setForms((p) => ({ ...p, [mid]: { data: new Date().toISOString().slice(0, 10), valor: "" } }));
+    setForms((p) => ({ ...p, [mid]: { data: hojeISO(), valor: "" } }));
     toast.success("Leitura registrada");
   };
 
@@ -64,10 +65,10 @@ function EnergiaPage() {
           {medidores.map((m) => {
             const sorted = [...m.leituras].sort((a, b) => a.data.localeCompare(b.data));
             const chartData = sorted.map((l, i) => ({
-              mes: new Date(l.data).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }),
+              mes: fmtData(l.data, { month: "short", year: "2-digit" }),
               consumo: i > 0 ? l.valor - sorted[i - 1].valor : 0,
             })).filter((d, i) => i > 0);
-            const f = forms[m.id] ?? { data: new Date().toISOString().slice(0, 10), valor: "" };
+            const f = forms[m.id] ?? { data: hojeISO(), valor: "" };
             const ult = sorted[sorted.length - 1];
 
             return (
@@ -83,7 +84,7 @@ function EnergiaPage() {
                     </div>
                     <div className="text-xs text-muted-foreground space-y-1 mb-4">
                       <p>Relógio: <span className="font-mono text-foreground">{m.codigoRelogio}</span></p>
-                      {ult && <p>Última: <Badge variant="secondary">{ult.valor.toLocaleString("pt-BR")} kWh em {new Date(ult.data).toLocaleDateString("pt-BR")}</Badge></p>}
+                      {ult && <p>Última: <Badge variant="secondary">{ult.valor.toLocaleString("pt-BR")} kWh em {fmtData(ult.data)}</Badge></p>}
                     </div>
                     <div className="space-y-2">
                       <Field label="Data"><Input type="date" value={f.data} onChange={(e) => setForms((p) => ({ ...p, [m.id]: { ...f, data: e.target.value } }))} /></Field>
@@ -118,7 +119,7 @@ function EnergiaPage() {
                               const realIdx = m.leituras.indexOf(l);
                               return (
                                 <tr key={idx} className="border-b border-border/40">
-                                  <td className="py-1.5">{new Date(l.data).toLocaleDateString("pt-BR")}</td>
+                                  <td className="py-1.5">{fmtData(l.data)}</td>
                                   <td className="py-1.5 text-right tabular-nums">{l.valor.toLocaleString("pt-BR")} kWh</td>
                                   <td className="py-1.5 text-right"><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removerLeitura(m.id, realIdx)}><Trash2 className="h-3 w-3" /></Button></td>
                                 </tr>

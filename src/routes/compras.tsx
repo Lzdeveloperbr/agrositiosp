@@ -13,6 +13,7 @@ import { uid } from "@/lib/storage";
 import { ShoppingCart, Plus, Trash2, Check, Package } from "lucide-react";
 import { toast } from "sonner";
 import type { CompraItem } from "@/lib/types";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/compras")({
   head: () => ({
@@ -39,7 +40,7 @@ function ComprasPage() {
   const [estoque, setEstoque] = useEstoque();
   const [, setFin] = useFinanceiro();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ data: new Date().toISOString().slice(0, 10), fornecedor: "", solicitante: "", observacoes: "" });
+  const [form, setForm] = useState({ data: hojeISO(), fornecedor: "", solicitante: "", observacoes: "" });
   const [itens, setItens] = useState<CompraItem[]>([]);
   const [novoItem, setNovoItem] = useState({ nome: "", quantidade: 0, unidade: "un", precoUnit: 0 });
 
@@ -54,7 +55,7 @@ function ComprasPage() {
   const salvar = () => {
     if (itens.length === 0) { toast.error("Adicione pelo menos 1 item"); return; }
     setCompras((p) => [{ id: uid(), ...form, status: "solicitado", itens, total }, ...p]);
-    setOpen(false); setForm({ data: new Date().toISOString().slice(0, 10), fornecedor: "", solicitante: "", observacoes: "" }); setItens([]);
+    setOpen(false); setForm({ data: hojeISO(), fornecedor: "", solicitante: "", observacoes: "" }); setItens([]);
     toast.success("Solicitação criada");
   };
 
@@ -62,8 +63,8 @@ function ComprasPage() {
     setCompras((p) => p.map((c) => {
       if (c.id !== id) return c;
       const updates: any = { status };
-      if (status === "pedido") updates.dataPedido = new Date().toISOString().slice(0, 10);
-      if (status === "recebido") updates.dataRecebimento = new Date().toISOString().slice(0, 10);
+      if (status === "pedido") updates.dataPedido = hojeISO();
+      if (status === "recebido") updates.dataRecebimento = hojeISO();
       return { ...c, ...updates };
     }));
 
@@ -76,16 +77,16 @@ function ComprasPage() {
         c.itens.forEach((it) => {
           const existente = updated.find((e) => e.nome.toLowerCase() === it.nome.toLowerCase());
           if (existente) {
-            updated = updated.map((e) => e.id === existente.id ? { ...e, quantidade: e.quantidade + it.quantidade, movimentacoes: [{ id: uid(), data: new Date().toISOString().slice(0, 10), tipo: "entrada" as const, quantidade: it.quantidade, nota: `Compra ${c.fornecedor || ""}` }, ...e.movimentacoes] } : e);
+            updated = updated.map((e) => e.id === existente.id ? { ...e, quantidade: e.quantidade + it.quantidade, movimentacoes: [{ id: uid(), data: hojeISO(), tipo: "entrada" as const, quantidade: it.quantidade, nota: `Compra ${c.fornecedor || ""}` }, ...e.movimentacoes] } : e);
           } else {
-            updated = [{ id: uid(), nome: it.nome, categoria: "insumo" as const, unidade: it.unidade, quantidade: it.quantidade, movimentacoes: [{ id: uid(), data: new Date().toISOString().slice(0, 10), tipo: "entrada" as const, quantidade: it.quantidade, nota: `Compra ${c.fornecedor || ""}` }] }, ...updated];
+            updated = [{ id: uid(), nome: it.nome, categoria: "insumo" as const, unidade: it.unidade, quantidade: it.quantidade, movimentacoes: [{ id: uid(), data: hojeISO(), tipo: "entrada" as const, quantidade: it.quantidade, nota: `Compra ${c.fornecedor || ""}` }] }, ...updated];
           }
         });
         return updated;
       });
       // Lançamento financeiro
       if (c.total > 0) {
-        setFin((p) => [{ id: uid(), data: new Date().toISOString().slice(0, 10), tipo: "despesa", categoria: "Compras", descricao: `Compra ${c.fornecedor || ""}`, valor: c.total, modulo: "geral", status: "pago" }, ...p]);
+        setFin((p) => [{ id: uid(), data: hojeISO(), tipo: "despesa", categoria: "Compras", descricao: `Compra ${c.fornecedor || ""}`, valor: c.total, modulo: "geral", status: "pago" }, ...p]);
       }
       toast.success("Estoque e financeiro atualizados");
     }
@@ -146,7 +147,7 @@ function ComprasPage() {
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                     <div>
                       <h3 className="font-display font-bold flex items-center gap-2"><Package className="h-4 w-4" /> {c.fornecedor || "Sem fornecedor"}</h3>
-                      <p className="text-xs text-muted-foreground">{new Date(c.data).toLocaleDateString("pt-BR")}{c.solicitante && ` · solicitou: ${c.solicitante}`}</p>
+                      <p className="text-xs text-muted-foreground">{fmtData(c.data)}{c.solicitante && ` · solicitou: ${c.solicitante}`}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={st.c as any}>{st.l}</Badge>

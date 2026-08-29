@@ -2,6 +2,7 @@
 // usadas pelas Planilhas Inteligentes e pelo painel unificado da propriedade.
 import { useEffect, useState, useCallback } from "react";
 import { useFazenda } from "@/lib/cloud/fazenda";
+import { hojeISO } from "@/lib/data";
 
 export type ResumoPropriedade = {
   leite: {
@@ -39,7 +40,7 @@ export const RESUMO_VAZIO: ResumoPropriedade = {
   mercado: { arroba: 0, leite: 0 },
 };
 
-const hoje = () => new Date().toISOString().slice(0, 10);
+const hoje = () => hojeISO();
 const inicioMes = () => `${new Date().toISOString().slice(0, 7)}-01`;
 const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 

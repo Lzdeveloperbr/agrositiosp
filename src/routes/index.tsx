@@ -17,6 +17,7 @@ import { AlertasInteligentes } from "@/components/AlertasInteligentes";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLembretes, lembretesDoDia, proximosLembretes, verificarENotificar } from "@/lib/lembretes";
 import { ALL_NAV_ITEMS, type NavItem } from "@/lib/nav";
+import { isoLocal } from "@/lib/data";
 
 const ATALHOS: NavItem[] = ["/granja", "/pesagem-pro", "/entregas-racao", "/estoque", "/gado", "/financeiro", "/chat", "/agro-ia"]
   .map((to) => ALL_NAV_ITEMS.find((i) => i.to === to)!)
@@ -62,8 +63,8 @@ function Dashboard() {
 
   const tarefasPend = tarefas.filter((t) => !t.concluida);
   const estoqueBaixo = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
-  const hojeStr = today?.toISOString().slice(0, 10) ?? "";
-  const em7 = today ? new Date(today.getTime() + 7 * 86400000).toISOString().slice(0, 10) : "";
+  const hojeStr = today?isoLocal() ?? "";
+  const em7 = today ? new isoLocal(Date(today.getTime() + 7 * 86400000)) : "";
   const contasVencendo = financ.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento <= em7);
   const contasAtrasadas = contasVencendo.filter((l) => l.vencimento! < hojeStr);
   const totalAVencer = contasVencendo.reduce((s, l) => s + (l.tipo === "despesa" ? l.valor : -l.valor), 0);

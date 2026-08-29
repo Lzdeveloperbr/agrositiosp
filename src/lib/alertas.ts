@@ -1,6 +1,7 @@
 // Motor de alertas inteligentes — analisa os dados da fazenda e devolve avisos priorizados.
 import type { Lote, ItemEstoque, Lancamento, Tarefa, Animal } from "./types";
 import { fechamentoLote } from "./fechamentoLote";
+import { fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export type Severidade = "critico" | "atencao" | "info";
 
@@ -13,7 +14,7 @@ export type Alerta = {
   modulo: "granja" | "estoque" | "financeiro" | "gado" | "tarefas";
 };
 
-const hoje = () => new Date().toISOString().slice(0, 10);
+const hoje = () => hojeISO();
 const dias = (a: string, b: string) => Math.round((new Date(a).getTime() - new Date(b).getTime()) / 86400000);
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
@@ -141,7 +142,7 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
       detalhe: `${brl(total)} vencidos. Regularize para evitar juros.`,
     });
   }
-  const em7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  const em7 = new isoLocal(Date(Date.now() + 7 * 86400000));
   const aVencer = financeiro.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento >= hj && l.vencimento <= em7);
   if (aVencer.length) {
     out.push({
@@ -152,7 +153,7 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
   }
 
   // ===== Gado: vacinas e reforços =====
-  const em30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const em30 = new isoLocal(Date(Date.now() + 30 * 86400000));
   const vac = animais
     .filter((a) => a.status === "ativo")
     .flatMap((a) => (a.sanidade ?? []).filter((s) => s.proximaData && s.proximaData <= em30).map((s) => ({ a, s })));
@@ -167,7 +168,7 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
     out.push({
       id: "vacina-proxima", severidade: "atencao", modulo: "gado", to: "/gado",
       titulo: `${vac.length} manejo(s) sanitário(s) em 30 dias`,
-      detalhe: `Próximo: brinco ${vac[0]!.a.brinco} — ${vac[0]!.s.produto} em ${new Date(vac[0]!.s.proximaData!).toLocaleDateString("pt-BR")}.`,
+      detalhe: `Próximo: brinco ${vac[0]!.a.brinco} — ${vac[0]!.s.produto} em ${fmtData(vac[0]!.s.proximaData!)}.`,
     });
   }
 

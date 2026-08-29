@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Newspaper, ExternalLink, RefreshCw } from "lucide-react";
 import { buscarNoticiasAgro, type Noticia } from "@/lib/noticias.functions";
+import { fmtData } from "@/lib/data";
 
 type Props = { limit?: number; compact?: boolean };
 
@@ -74,7 +75,7 @@ export function NoticiasAgro({ limit = 6, compact = false }: Props) {
                     <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{n.fonte}</Badge>
                     {n.data && (
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(n.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                        {fmtData(n.data, { day: "2-digit", month: "short" })}
                       </span>
                     )}
                   </div>
@@ -99,7 +100,7 @@ export function NoticiasAgro({ limit = 6, compact = false }: Props) {
                     <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{n.fonte}</Badge>
                     {n.data && (
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(n.data).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                        {fmtData(n.data, { day: "2-digit", month: "short" })}
                       </span>
                     )}
                   </div>

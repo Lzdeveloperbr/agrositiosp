@@ -12,6 +12,7 @@ import { Camera, MapPin, ScanLine, Mic, MicOff, CheckCircle2, AlertTriangle, Loa
 import { toast } from "sonner";
 import { useDiario, useAnimais } from "@/lib/state";
 import { uid } from "@/lib/storage";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/modo-campo")({
   head: () => ({
@@ -114,7 +115,7 @@ function FotoGPS() {
     setDiario((prev) => [
       {
         id: uid(),
-        data: new Date().toISOString().slice(0, 10),
+        data: hojeISO(),
         titulo: titulo.trim() || "Registro de campo",
         categoria: "geral",
         texto: txt,
@@ -346,7 +347,7 @@ function DitadoVoz() {
     setDiario((prev) => [
       {
         id: uid(),
-        data: new Date().toISOString().slice(0, 10),
+        data: hojeISO(),
         titulo: titulo.trim() || "Ditado de voz",
         categoria: "geral",
         texto,

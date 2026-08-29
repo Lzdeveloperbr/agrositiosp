@@ -15,6 +15,7 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { StatCard } from "@/components/StatCard";
 import { Beef, Plus, Trash2, Scale, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/engorda")({
   head: () => ({
@@ -42,7 +43,7 @@ type Pesagem = {
   peso_total_kg: number | null; peso_medio_kg: number | null; observacoes: string | null;
 };
 
-const hoje = () => new Date().toISOString().slice(0, 10);
+const hoje = () => hojeISO();
 const fmt = (n: number, d = 1) => n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const diasEntre = (a: string, b: string) => Math.max(1, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000));
@@ -279,7 +280,7 @@ function Pesagens({ pesagens, lotes, operador }: any) {
           <TableBody>
             {pesagens.items.map((p: Pesagem) => (
               <TableRow key={p.id}>
-                <TableCell>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR")}</TableCell>
+                <TableCell>{fmtData(p.data + "T12:00")}</TableCell>
                 <TableCell className="font-medium">{numero(p.lote_id)}</TableCell>
                 <TableCell className="text-right">{p.quantidade ?? "—"}</TableCell>
                 <TableCell className="text-right">{p.peso_total_kg ? `${fmt(Number(p.peso_total_kg), 0)} kg` : "—"}</TableCell>

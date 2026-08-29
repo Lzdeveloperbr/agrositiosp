@@ -15,6 +15,7 @@ import { Bug, Plus, Trash2, MapPin, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import { useFazenda } from "@/lib/cloud/fazenda";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/monitoramento")({
   head: () => ({
@@ -32,7 +33,7 @@ function MonitPage() {
   const [items, setItems] = useMonitoramentos();
   const { codigo, fazendaId } = useFazenda();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({ data: new Date().toISOString().slice(0, 10), modulo: "gado", alvo: "", severidade: "media", acao: "", produto: "", dose: "", local: "", observacoes: "" });
+  const [form, setForm] = useState<any>({ data: hojeISO(), modulo: "gado", alvo: "", severidade: "media", acao: "", produto: "", dose: "", local: "", observacoes: "" });
   const [fotos, setFotos] = useState<{ id: string; dataUrl: string }[]>([]);
   const [gps, setGps] = useState<{ lat: number; lon: number } | null>(null);
 
@@ -141,7 +142,7 @@ function MonitPage() {
                     <div className="flex gap-1 mt-1 flex-wrap">
                       <Badge variant="outline" className="text-[10px] capitalize">{m.modulo}</Badge>
                       <Badge variant={sevColor[m.severidade]} className="text-[10px]">{m.severidade}</Badge>
-                      <span className="text-[11px] text-muted-foreground">{new Date(m.data).toLocaleDateString("pt-BR")}</span>
+                      <span className="text-[11px] text-muted-foreground">{fmtData(m.data)}</span>
                     </div>
                   </div>
                   <Button size="icon" variant="ghost" onClick={() => setItems((p) => p.filter((x) => x.id !== m.id))}><Trash2 className="h-4 w-4" /></Button>

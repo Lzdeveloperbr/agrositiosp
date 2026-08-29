@@ -13,6 +13,7 @@ import { usePlantios } from "@/lib/state";
 import { CULTURAS, MESES, recomendacoesDoMes, type Plantio } from "@/lib/agro";
 import { Sprout, Plus, Calendar, Trash2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/plantios")({
   head: () => ({
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/plantios")({
 function PlantiosPage() {
   const [plantios, setPlantios] = usePlantios();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Partial<Plantio>>({ cultura: "Milho", areaHa: 1, dataPlantio: new Date().toISOString().slice(0, 10), status: "plantado", tratos: [] });
+  const [form, setForm] = useState<Partial<Plantio>>({ cultura: "Milho", areaHa: 1, dataPlantio: hojeISO(), status: "plantado", tratos: [] });
 
   const ativos = plantios.filter((p) => p.status !== "encerrado");
   const colhidos = plantios.filter((p) => p.status === "encerrado");
@@ -52,14 +53,14 @@ function PlantiosPage() {
       tipoSolo: form.tipoSolo,
       local: form.local,
       dataPlantio: form.dataPlantio!,
-      previsaoColheita: form.previsaoColheita ?? prev.toISOString().slice(0, 10),
+      previsaoColheita: form.previsaoColheita ?? isoLocal(prev),
       status: "plantado",
       tratos: [],
       observacoes: form.observacoes,
     };
     setPlantios([novo, ...plantios]);
     setOpen(false);
-    setForm({ cultura: "Milho", areaHa: 1, dataPlantio: new Date().toISOString().slice(0, 10), status: "plantado", tratos: [] });
+    setForm({ cultura: "Milho", areaHa: 1, dataPlantio: hojeISO(), status: "plantado", tratos: [] });
     toast.success("Plantio registrado");
   }
 
@@ -69,7 +70,7 @@ function PlantiosPage() {
   }
 
   function encerrar(p: Plantio) {
-    setPlantios(plantios.map((x) => x.id === p.id ? { ...x, status: "encerrado", dataColheita: new Date().toISOString().slice(0, 10) } : x));
+    setPlantios(plantios.map((x) => x.id === p.id ? { ...x, status: "encerrado", dataColheita: hojeISO() } : x));
   }
 
   return (
@@ -122,11 +123,11 @@ function PlantiosPage() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
                       <div className="flex items-center gap-2"><span className="text-2xl">{ci?.emoji ?? "🌱"}</span><h3 className="font-display font-semibold text-lg">{p.cultura}</h3>{p.variedade && <Badge variant="outline">{p.variedade}</Badge>}</div>
-                      <p className="text-xs text-muted-foreground mt-0.5">Plantado {new Date(p.dataPlantio).toLocaleDateString("pt-BR")} · {p.areaHa} ha {p.local ? `· ${p.local}` : ""}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Plantado {fmtData(p.dataPlantio)} · {p.areaHa} ha {p.local ? `· ${p.local}` : ""}</p>
                     </div>
                     <div className="text-right">
                       {dias !== null && <Badge variant={dias < 0 ? "destructive" : dias < 14 ? "default" : "secondary"}>{dias < 0 ? `Atrasado ${Math.abs(dias)}d` : `Faltam ${dias}d`}</Badge>}
-                      <p className="text-[10px] text-muted-foreground mt-1">Colheita {p.previsaoColheita ? new Date(p.previsaoColheita).toLocaleDateString("pt-BR") : "—"}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Colheita {p.previsaoColheita ? fmtData(p.previsaoColheita) : "—"}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -180,7 +181,7 @@ function PlantiosPage() {
               const ci = CULTURAS.find((c) => c.nome === p.cultura);
               return (
                 <Card key={p.id} className="p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2"><span className="text-xl">{ci?.emoji}</span><div><div className="font-semibold text-sm">{p.cultura}</div><div className="text-[11px] text-muted-foreground">{p.areaHa} ha · colhido {p.dataColheita ? new Date(p.dataColheita).toLocaleDateString("pt-BR") : "—"}</div></div></div>
+                  <div className="flex items-center gap-2"><span className="text-xl">{ci?.emoji}</span><div><div className="font-semibold text-sm">{p.cultura}</div><div className="text-[11px] text-muted-foreground">{p.areaHa} ha · colhido {p.dataColheita ? fmtData(p.dataColheita) : "—"}</div></div></div>
                   {p.produtividadeKg && <Badge>{p.produtividadeKg} kg</Badge>}
                 </Card>
               );

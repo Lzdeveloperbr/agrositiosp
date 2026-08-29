@@ -19,6 +19,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SITIO } from "@/lib/pdf";
 import { savePdf } from "@/lib/pdfHistory";
+import { fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 // ===== Curvas de referência por linhagem (base = misto) =====
 // Consumo acumulado (g) e peso (g) por idade, baseados em manuais Cobb 500 / Ross 308 / Ross AP 95.
@@ -169,7 +170,7 @@ function fmtKg(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 2)} t`;
   return `${n.toLocaleString("pt-BR")} kg`;
 }
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() { return hojeISO(); }
 
 function EntregasRacaoPage() {
   const { client, fazendaId } = useFazenda();
@@ -212,8 +213,8 @@ function EntregasRacaoPage() {
 
   const stats = useMemo(() => {
     const hoje = todayISO();
-    const d7 = new Date(); d7.setDate(d7.getDate() - 7); const iso7 = d7.toISOString().slice(0,10);
-    const d30 = new Date(); d30.setDate(d30.getDate() - 30); const iso30 = d30.toISOString().slice(0,10);
+    const d7 = new Date(); d7.setDate(d7.getDate() - 7); const iso7 = isoLocal(d7));
+    const d30 = new Date(); d30.setDate(d30.getDate() - 30); const iso30 = isoLocal(d30));
     const sum = (arr: Entrega[]) => arr.reduce((s, x) => s + (Number(x.quantidade_kg) || 0), 0);
     const hojeArr = entregas.filter(e => e.data === hoje);
     const semArr = entregas.filter(e => e.data >= iso7);
@@ -230,7 +231,7 @@ function EntregasRacaoPage() {
     const map = new Map<string, number>();
     for (let i = 13; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
-      map.set(d.toISOString().slice(0,10), 0);
+      map.set(isoLocal(d)), 0);
     }
     entregas.forEach(e => {
       if (map.has(e.data)) map.set(e.data, (map.get(e.data) || 0) + Number(e.quantidade_kg || 0));
@@ -294,7 +295,7 @@ function EntregasRacaoPage() {
             <>
               <span className="font-semibold">Lote {loteAtivo.numero}</span>
               <Badge variant="outline" className="text-[10px]">
-                alojado em {new Date(loteAtivo.dataEntrada + "T00:00").toLocaleDateString("pt-BR")}
+                alojado em {fmtData(loteAtivo.dataEntrada + "T00:00")}
               </Badge>
               <span className="text-xs text-muted-foreground">
                 Todas as entregas e o estoque abaixo são só deste lote — ao iniciar um novo lote tudo começa zerado.
@@ -371,7 +372,7 @@ function EntregasRacaoPage() {
                       <Badge variant="outline" className="text-xs">{e.placa || "sem placa"}</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(e.data + "T00:00").toLocaleDateString("pt-BR")}
+                      {fmtData(e.data + "T00:00")}
                       {e.observacoes ? ` · ${e.observacoes}` : ""}
                     </div>
                   </div>
@@ -505,7 +506,7 @@ function exportarRelatorio(entregas: Entrega[]) {
   doc.text(SITIO.nome, 14, 12);
   doc.setFontSize(10); doc.setFont("helvetica", "normal");
   doc.text("Relatório de Entregas de Ração", 14, 19);
-  doc.text(new Date().toLocaleDateString("pt-BR"), w - 14, 12, { align: "right" });
+  doc.text(fmtData(new Date()), w - 14, 12, { align: "right" });
   doc.setTextColor(40);
 
   const total = entregas.reduce((s, e) => s + Number(e.quantidade_kg || 0), 0);
@@ -516,7 +517,7 @@ function exportarRelatorio(entregas: Entrega[]) {
     startY: 44,
     head: [["Data", "Motorista", "Placa", "Quantidade (kg)", "Obs."]],
     body: entregas.slice(0, 300).map(e => [
-      new Date(e.data + "T00:00").toLocaleDateString("pt-BR"),
+      fmtData(e.data + "T00:00"),
       e.motorista || "—",
       e.placa || "—",
       Number(e.quantidade_kg || 0).toLocaleString("pt-BR"),

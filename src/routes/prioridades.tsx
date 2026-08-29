@@ -18,6 +18,7 @@ import {
   CATEGORIAS, CATEGORIA_LABEL, sugestoesDoMes, mesLabel, mesAtual, deslocarMes,
 } from "@/lib/prioridadesSugestoes";
 import {
+import { fmtData, hojeISO } from "@/lib/data";
   ChevronLeft, ChevronRight, Plus, Target, CheckCircle2, Clock, AlertTriangle,
   Wallet, Trash2, Copy, Download, Sparkles, ArrowUp, ArrowDown, Flag,
 } from "lucide-react";
@@ -77,7 +78,7 @@ function Prioridades() {
   });
 
   const doMes = useMemo(() => items.filter((p) => p.mes === mes), [items, mes]);
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
 
   const kpis = useMemo(() => {
     const total = doMes.length;
@@ -252,7 +253,7 @@ function Prioridades() {
                       {p.descricao && <p className="text-sm text-muted-foreground mt-1">{p.descricao}</p>}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-2">
                         {p.responsavel && <span>👤 {p.responsavel}</span>}
-                        {p.prazo && <span>📅 {new Date(p.prazo + "T12:00:00").toLocaleDateString("pt-BR")}</span>}
+                        {p.prazo && <span>📅 {fmtData(p.prazo + "T12:00:00")}</span>}
                         {p.custo_estimado != null && <span>💰 {fmtBRL(Number(p.custo_estimado))}</span>}
                       </div>
                       <div className="flex items-center gap-3 mt-3">

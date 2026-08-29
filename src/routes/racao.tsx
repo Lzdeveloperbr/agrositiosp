@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useLocalStorage, uid } from "@/lib/storage";
 import { Factory, Plus, Trash2, Calculator, Beaker } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/racao")({
   head: () => ({
@@ -306,7 +307,7 @@ function FormulasTab({ ingredientes, formulas, setFormulas, setProducoes, setIng
       const consumo = (it.percentual / 100) * kg;
       return { ...ing, estoqueKg: Math.max(0, ing.estoqueKg - consumo) };
     }));
-    setProducoes((prev) => [{ id: uid(), data: new Date().toISOString().slice(0, 10), formulaId: formula.id, totalKg: kg, custoTotal: custoKg * kg }, ...prev]);
+    setProducoes((prev) => [{ id: uid(), data: hojeISO(), formulaId: formula.id, totalKg: kg, custoTotal: custoKg * kg }, ...prev]);
     setProduzir(null);
     toast.success(`Batida de ${kg}kg registrada — custo R$ ${(custoKg * kg).toFixed(2)}`);
   };
@@ -489,7 +490,7 @@ function ProducaoTab({ producoes, setProducoes, formulas }: { producoes: Produca
           <TableBody>
             {producoes.map((p) => (
               <TableRow key={p.id}>
-                <TableCell>{new Date(p.data).toLocaleDateString("pt-BR")}</TableCell>
+                <TableCell>{fmtData(p.data)}</TableCell>
                 <TableCell>{formulas.find((f) => f.id === p.formulaId)?.nome ?? "—"}</TableCell>
                 <TableCell className="text-right tabular-nums">{p.totalKg.toFixed(0)}</TableCell>
                 <TableCell className="text-right tabular-nums">R$ {p.custoTotal.toFixed(2)}</TableCell>

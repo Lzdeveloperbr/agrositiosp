@@ -12,6 +12,7 @@ import { uid } from "@/lib/storage";
 import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/granja/")({
   head: () => ({
@@ -30,7 +31,7 @@ function GranjaPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     numero: "",
-    dataEntrada: new Date().toISOString().slice(0, 10),
+    dataEntrada: hojeISO(),
     quantidadeInicial: 28000,
     integradora: "Bello Alimentos",
     previsaoAbateDias: 42,
@@ -180,7 +181,7 @@ function GranjaPage() {
                         <h3 className="font-display text-xl font-bold">Lote {l.numero}</h3>
                         {l.encerrado ? <Badge variant="secondary">Encerrado</Badge> : <Badge>Ativo</Badge>}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">Entrada: {new Date(l.dataEntrada).toLocaleDateString("pt-BR")} · {dias}d</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Entrada: {fmtData(l.dataEntrada)} · {dias}d</p>
                     </div>
                     <Button size="icon" variant="ghost" onClick={() => remover(l.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>

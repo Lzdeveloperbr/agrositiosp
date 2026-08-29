@@ -12,6 +12,7 @@ import { useFinanceiro } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import { Wallet, Plus, Trash2, TrendingUp, TrendingDown, Banknote } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/financeiro")({
   head: () => ({
@@ -34,7 +35,7 @@ function FinanceiroPage() {
   const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
 
   const [form, setForm] = useState({
-    data: new Date().toISOString().slice(0, 10),
+    data: hojeISO(),
     tipo: "despesa" as "receita" | "despesa",
     categoria: "",
     descricao: "",
@@ -52,7 +53,7 @@ function FinanceiroPage() {
     toast.success("Lançamento registrado");
   };
 
-  const togglePago = (id: string) => setLan((p) => p.map((l) => l.id === id ? { ...l, status: l.status === "pago" ? "pendente" : "pago", dataPagamento: l.status === "pago" ? undefined : new Date().toISOString().slice(0, 10) } : l));
+  const togglePago = (id: string) => setLan((p) => p.map((l) => l.id === id ? { ...l, status: l.status === "pago" ? "pendente" : "pago", dataPagamento: l.status === "pago" ? undefined : hojeISO() } : l));
 
   const remover = (id: string) => setLan((p) => p.filter((l) => l.id !== id));
 
@@ -153,10 +154,10 @@ function FinanceiroPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm">{l.descricao}</p>
                     <div className="flex flex-wrap gap-1 mt-0.5">
-                      <span className="text-[11px] text-muted-foreground">{new Date(l.data).toLocaleDateString("pt-BR")}</span>
+                      <span className="text-[11px] text-muted-foreground">{fmtData(l.data)}</span>
                       {l.categoria && <Badge variant="outline" className="text-[10px]">{l.categoria}</Badge>}
                       {l.modulo && <Badge variant="secondary" className="text-[10px] capitalize">{l.modulo}</Badge>}
-                      {l.vencimento && <Badge variant="outline" className="text-[10px]">venc. {new Date(l.vencimento).toLocaleDateString("pt-BR")}</Badge>}
+                      {l.vencimento && <Badge variant="outline" className="text-[10px]">venc. {fmtData(l.vencimento)}</Badge>}
                       <Badge variant={l.status === "pago" ? "default" : l.status === "atrasado" ? "destructive" : "secondary"} className="text-[10px] cursor-pointer" onClick={() => togglePago(l.id)}>{l.status}</Badge>
                     </div>
                   </div>

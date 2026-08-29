@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { Database, Download, Cloud, Users, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/backup")({
   head: () => ({
@@ -33,7 +34,7 @@ function BackupPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `agrositio-${codigo}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `agrositio-${codigo}-${hojeISO()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Backup baixado");

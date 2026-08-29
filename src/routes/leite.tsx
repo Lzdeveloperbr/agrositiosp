@@ -16,6 +16,7 @@ import { StatCard } from "@/components/StatCard";
 import { baixarCSV } from "@/lib/exportar";
 import { Milk, Plus, Trash2, Droplets, HeartPulse, Baby, Download, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
+import { fmtData, hojeISO, isoLocal } from "@/lib/data";
 
 export const Route = createFileRoute("/leite")({
   head: () => ({
@@ -59,7 +60,7 @@ const CATEGORIAS = [
   { v: "touro", l: "Touro" },
 ];
 const CAT_LABEL = Object.fromEntries(CATEGORIAS.map((c) => [c.v, c.l]));
-const hoje = () => new Date().toISOString().slice(0, 10);
+const hoje = () => hojeISO();
 const fmt = (n: number, d = 1) => n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const dias = (de: string) => Math.max(0, Math.floor((Date.now() - new Date(de).getTime()) / 86400000));
@@ -193,7 +194,7 @@ function Ordenhas({ producao, animais, operador }: any) {
           <TableBody>
             {producao.items.slice(0, 60).map((p: Producao) => (
               <TableRow key={p.id}>
-                <TableCell>{new Date(p.data + "T12:00").toLocaleDateString("pt-BR")}</TableCell>
+                <TableCell>{fmtData(p.data + "T12:00")}</TableCell>
                 <TableCell className="text-muted-foreground">{nome(p.animal_id)}</TableCell>
                 <TableCell className="text-right">{fmt(Number(p.manha))}</TableCell>
                 <TableCell className="text-right">{fmt(Number(p.tarde))}</TableCell>
@@ -309,7 +310,7 @@ function Lactacoes({ lactacoes, animais }: any) {
   const salvar = async () => {
     if (!f.animal_id) return toast.error("Escolha a vaca");
     const parto = new Date(f.data_parto + "T12:00");
-    const secagem = new Date(parto.getTime() + 305 * 86400000).toISOString().slice(0, 10);
+    const secagem = new isoLocal(Date(parto.getTime() + 305 * 86400000));
     await lactacoes.add({
       animal_id: f.animal_id, numero: Number(f.numero) || 1, data_parto: f.data_parto,
       data_secagem_prevista: secagem, pico_litros: f.pico_litros ? Number(f.pico_litros) : null, status: "ativa",
@@ -356,9 +357,9 @@ function Lactacoes({ lactacoes, animais }: any) {
                 <TableRow key={l.id}>
                   <TableCell className="font-medium">{brinco(l.animal_id)}</TableCell>
                   <TableCell>{l.numero}</TableCell>
-                  <TableCell>{new Date(l.data_parto + "T12:00").toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>{fmtData(l.data_parto + "T12:00")}</TableCell>
                   <TableCell className="text-right">{del} dias</TableCell>
-                  <TableCell>{l.data_secagem_prevista ? new Date(l.data_secagem_prevista + "T12:00").toLocaleDateString("pt-BR") : "—"}</TableCell>
+                  <TableCell>{l.data_secagem_prevista ? fmtData(l.data_secagem_prevista + "T12:00") : "—"}</TableCell>
                   <TableCell><Badge variant={del > 305 ? "destructive" : "secondary"}>{del > 305 ? "Secar agora" : l.status}</Badge></TableCell>
                   <TableCell className="text-right"><Button size="icon" variant="ghost" onClick={() => lactacoes.remove(l.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                 </TableRow>
@@ -392,8 +393,8 @@ function Eventos({ eventos, animais, operador }: any) {
   const salvar = async () => {
     if (!f.animal_id) return toast.error("Escolha o animal");
     let prevista: string | null = null;
-    if (f.tipo === "ia") prevista = new Date(new Date(f.data + "T12:00").getTime() + 283 * 86400000).toISOString().slice(0, 10);
-    if (f.tipo === "cio") prevista = new Date(new Date(f.data + "T12:00").getTime() + 21 * 86400000).toISOString().slice(0, 10);
+    if (f.tipo === "ia") prevista = new isoLocal(Date(new Date(f.data + "T12:00").getTime() + 283 * 86400000));
+    if (f.tipo === "cio") prevista = new isoLocal(Date(new Date(f.data + "T12:00").getTime() + 21 * 86400000));
     await eventos.add({
       animal_id: f.animal_id, tipo: f.tipo, data: f.data, touro_semen: f.touro_semen || null,
       resultado: f.resultado || null, data_prevista: prevista, problema: f.problema || null,
@@ -417,7 +418,7 @@ function Eventos({ eventos, animais, operador }: any) {
               <div key={e.id} className="rounded-lg border border-border/60 p-2 text-sm">
                 <div className="font-medium">{brinco(e.animal_id)} · {TIPO_LABEL[e.tipo] ?? e.tipo}</div>
                 <div className="text-xs text-muted-foreground">
-                  {e.tipo === "ia" ? "Parto previsto" : "Retorno previsto"}: {new Date(e.data_prevista! + "T12:00").toLocaleDateString("pt-BR")}
+                  {e.tipo === "ia" ? "Parto previsto" : "Retorno previsto"}: {fmtData(e.data_prevista! + "T12:00")}
                 </div>
               </div>
             ))}
@@ -469,7 +470,7 @@ function Eventos({ eventos, animais, operador }: any) {
             <TableBody>
               {eventos.items.map((e: Evento) => (
                 <TableRow key={e.id}>
-                  <TableCell>{new Date(e.data + "T12:00").toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>{fmtData(e.data + "T12:00")}</TableCell>
                   <TableCell className="font-medium">{brinco(e.animal_id)}</TableCell>
                   <TableCell><Badge variant="secondary">{TIPO_LABEL[e.tipo] ?? e.tipo}</Badge></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{e.touro_semen || e.medicamento || e.problema || e.resultado || "—"}</TableCell>

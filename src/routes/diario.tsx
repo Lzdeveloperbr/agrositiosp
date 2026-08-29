@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { gerarRelatorioDiario } from "@/lib/pdf";
 import { compressFile, uploadFotoBlob } from "@/lib/cloud/uploadFoto";
 import { useFazenda } from "@/lib/cloud/fazenda";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/diario")({
   head: () => ({
@@ -46,7 +47,7 @@ function DiarioPage() {
   const galeriaRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<{ data: string; titulo: string; categoria: any; texto: string; condicao: string; temperatura?: number; chuvaMm?: number; gps?: { lat: number; lon: number }; fotos: DiarioFoto[] }>({
-    data: new Date().toISOString().slice(0, 10),
+    data: hojeISO(),
     titulo: "",
     categoria: "geral",
     texto: "",
@@ -57,7 +58,7 @@ function DiarioPage() {
     fotos: [],
   });
 
-  const reset = () => setForm({ data: new Date().toISOString().slice(0, 10), titulo: "", categoria: "geral", texto: "", condicao: "", temperatura: undefined, chuvaMm: undefined, gps: undefined, fotos: [] });
+  const reset = () => setForm({ data: hojeISO(), titulo: "", categoria: "geral", texto: "", condicao: "", temperatura: undefined, chuvaMm: undefined, gps: undefined, fotos: [] });
 
   const addFotos = async (files: FileList | null) => {
     if (!files || !fazendaId || !codigo) return;
@@ -198,7 +199,7 @@ function DiarioPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="capitalize">{e.categoria}</Badge>
-                      <span className="text-xs text-muted-foreground">{new Date(e.data).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })}</span>
+                      <span className="text-xs text-muted-foreground">{fmtData(e.data, { weekday: "short", day: "2-digit", month: "short" })}</span>
                     </div>
                     <h3 className="font-display font-bold text-lg mt-1">{e.titulo}</h3>
                   </div>

@@ -1,6 +1,7 @@
 // Lembretes mensais recorrentes (energia dia 30, internet dia 14, etc).
 // Armazenados em localStorage por fazenda. Notificações nativas via Notification API.
 import { useEffect, useState, useCallback } from "react";
+import { hojeISO } from "@/lib/data";
 
 export type Lembrete = {
   id: string;
@@ -90,7 +91,7 @@ export function dispararNotificacao(titulo: string, body: string) {
 // Verifica e dispara notificações para os lembretes de hoje (uma vez por dia)
 export function verificarENotificar(fazendaId: string) {
   const items = carregarLembretes(fazendaId);
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = hojeISO();
   const doDia = lembretesDoDia(items);
   let alterado = false;
   for (const l of doDia) {

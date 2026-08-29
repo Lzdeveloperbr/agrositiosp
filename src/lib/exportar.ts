@@ -1,3 +1,4 @@
+import { hojeISO } from "@/lib/data";
 // Exportação de dados em CSV/Excel (abre direto no Excel com separador ";").
 export function toCSV(rows: Record<string, any>[], headers?: string[]): string {
   if (!rows.length) return "";
@@ -16,7 +17,7 @@ export function baixarCSV(nome: string, rows: Record<string, any>[], headers?: s
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${nome}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `${nome}-${hojeISO()}.csv`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -26,7 +27,7 @@ export function baixarJSON(nome: string, data: unknown) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${nome}-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `${nome}-${hojeISO()}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

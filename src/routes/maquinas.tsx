@@ -14,6 +14,7 @@ import { uid } from "@/lib/storage";
 import { Tractor, Plus, Trash2, Fuel, Wrench, ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import type { Maquina } from "@/lib/types";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/maquinas")({
   head: () => ({
@@ -129,8 +130,8 @@ function MaquinasPage() {
 
 function DetalheMaquina({ maquina, setMaquinas, setFin, voltar }: any) {
   const m: Maquina = maquina;
-  const [ab, setAb] = useState({ data: new Date().toISOString().slice(0, 10), litros: 0, precoLitro: 0, horimetro: 0, posto: "", combustivel: "diesel" as any });
-  const [mn, setMn] = useState({ data: new Date().toISOString().slice(0, 10), tipo: "preventiva" as any, descricao: "", custo: 0, horimetro: 0, proximaData: "", proximoHorimetro: 0 });
+  const [ab, setAb] = useState({ data: hojeISO(), litros: 0, precoLitro: 0, horimetro: 0, posto: "", combustivel: "diesel" as any });
+  const [mn, setMn] = useState({ data: hojeISO(), tipo: "preventiva" as any, descricao: "", custo: 0, horimetro: 0, proximaData: "", proximoHorimetro: 0 });
 
   const totalLitros = m.abastecimentos.reduce((s, a) => s + a.litros, 0);
   const totalGasto = m.abastecimentos.reduce((s, a) => s + (a.total ?? a.litros * (a.precoLitro || 0)), 0);
@@ -152,7 +153,7 @@ function DetalheMaquina({ maquina, setMaquinas, setFin, voltar }: any) {
     if (total > 0) {
       setFin((p: any) => [{ id: uid(), data: ab.data, tipo: "despesa", categoria: "Combustível", descricao: `${m.nome} - ${ab.litros}L`, valor: total, modulo: "maquina", status: "pago" }, ...p]);
     }
-    setAb({ data: new Date().toISOString().slice(0, 10), litros: 0, precoLitro: 0, horimetro: 0, posto: "", combustivel: "diesel" });
+    setAb({ data: hojeISO(), litros: 0, precoLitro: 0, horimetro: 0, posto: "", combustivel: "diesel" });
     toast.success("Abastecimento registrado");
   };
 
@@ -163,7 +164,7 @@ function DetalheMaquina({ maquina, setMaquinas, setFin, voltar }: any) {
     if (mn.custo > 0) {
       setFin((p: any) => [{ id: uid(), data: mn.data, tipo: "despesa", categoria: "Manutenção", descricao: `${m.nome} - ${mn.descricao}`, valor: mn.custo, modulo: "maquina", status: "pago" }, ...p]);
     }
-    setMn({ data: new Date().toISOString().slice(0, 10), tipo: "preventiva", descricao: "", custo: 0, horimetro: 0, proximaData: "", proximoHorimetro: 0 });
+    setMn({ data: hojeISO(), tipo: "preventiva", descricao: "", custo: 0, horimetro: 0, proximaData: "", proximoHorimetro: 0 });
     toast.success("Manutenção registrada");
   };
 
@@ -217,7 +218,7 @@ function DetalheMaquina({ maquina, setMaquinas, setFin, voltar }: any) {
                       <Fuel className="h-4 w-4 text-primary" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{a.litros}L · {a.combustivel}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(a.data).toLocaleDateString("pt-BR")}{a.horimetro && ` · ${a.horimetro}h`}{a.posto && ` · ${a.posto}`}</p>
+                        <p className="text-xs text-muted-foreground">{fmtData(a.data)}{a.horimetro && ` · ${a.horimetro}h`}{a.posto && ` · ${a.posto}`}</p>
                       </div>
                       {a.total ? <p className="font-bold tabular-nums">R$ {a.total.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}</p> : null}
                       <Button size="icon" variant="ghost" onClick={() => setMaquinas((p: Maquina[]) => p.map((x) => x.id === m.id ? { ...x, abastecimentos: x.abastecimentos.filter((z) => z.id !== a.id) } : x))}><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -257,7 +258,7 @@ function DetalheMaquina({ maquina, setMaquinas, setFin, voltar }: any) {
                       <Wrench className="h-4 w-4 text-primary mt-1" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{mt.descricao}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(mt.data).toLocaleDateString("pt-BR")} · {mt.tipo.replace("_", " ")}{mt.proximaData && ` · próx: ${new Date(mt.proximaData).toLocaleDateString("pt-BR")}`}{mt.proximoHorimetro && ` · @${mt.proximoHorimetro}h`}</p>
+                        <p className="text-xs text-muted-foreground">{fmtData(mt.data)} · {mt.tipo.replace("_", " ")}{mt.proximaData && ` · próx: ${fmtData(mt.proximaData)}`}{mt.proximoHorimetro && ` · @${mt.proximoHorimetro}h`}</p>
                       </div>
                       {mt.custo ? <p className="font-bold tabular-nums">R$ {mt.custo.toLocaleString("pt-BR")}</p> : null}
                       <Button size="icon" variant="ghost" onClick={() => setMaquinas((p: Maquina[]) => p.map((x) => x.id === m.id ? { ...x, manutencoes: x.manutencoes.filter((z) => z.id !== mt.id) } : x))}><Trash2 className="h-3.5 w-3.5" /></Button>

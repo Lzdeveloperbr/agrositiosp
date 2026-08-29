@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLotes, useFinanceiro, useEstoque } from "@/lib/state";
 import { TrendingUp, TrendingDown, Bird, Wallet, Percent, Scale, ArrowRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+import { hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/custos")({
   head: () => ({
@@ -35,7 +36,7 @@ function CustosPage() {
     if (!lote) return null;
     const inicio = lote.dataEntrada;
     const ents = [...lote.entries].sort((a, b) => a.date.localeCompare(b.date));
-    const fim = ents[ents.length - 1]?.date ?? new Date().toISOString().slice(0, 10);
+    const fim = ents[ents.length - 1]?.date ?? hojeISO();
     const mort = ents.reduce((s, e) => s + e.mortalidade, 0);
     const vivas = lote.quantidadeInicial - mort;
     const mortPct = (mort / lote.quantidadeInicial) * 100;
