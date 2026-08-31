@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat } from "lucide-react";
+import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
@@ -83,11 +83,13 @@ function GranjaPage() {
     { to: "/calendario-sanitario", label: "Sanitário", icon: Syringe },
     { to: "/manejo", label: "Manejo", icon: BookOpen },
     { to: "/ambiencia", label: "Ambiência", icon: Wind },
+    { to: "/automacoes", label: "Automação", icon: Zap },
     { to: "/analise-aves", label: "IA Aves", icon: Stethoscope },
     { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3 },
     { to: "/historico-lotes", label: "Histórico", icon: History },
     { to: "/entregas-racao", label: "Ração", icon: Wheat },
   ];
+
 
   return (
     <AppShell>

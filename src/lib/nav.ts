@@ -102,7 +102,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/mercado", label: "Mercado Agro", icon: BarChart3, desc: "Cotações e notícias do agronegócio", tags: ["cotacao", "boi", "soja"] },
       { to: "/relatorios", label: "Relatórios", icon: FileText, desc: "PDFs técnicos e fechamento de lote", tags: ["pdf", "impressao"] },
       { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
-      { to: "/automacoes", label: "Automações", icon: Sparkles, desc: "Regras automáticas e gatilhos", tags: ["regra", "gatilho"] },
+      { to: "/automacoes", label: "Automação & AVI Smart", icon: Sparkles, desc: "Motor de regras da granja e integração com o SMAAI-03", tags: ["regra", "gatilho", "smaai", "inobram", "avi smart", "controlador"] },
       { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark, desc: "CNPJ, CEP, CAR, INCRA e SISBOV", tags: ["governo", "cnpj", "car"] },
       { to: "/onedrive", label: "OneDrive + IA", icon: Cloud, desc: "IA lê planilhas e PDFs do OneDrive e atualiza os módulos sozinha", tags: ["onedrive", "importar", "excel", "pdf", "ia"] },
       { to: "/backup", label: "Backup & Dados", icon: Database, desc: "Exportar, importar e limpar dados", tags: ["exportar", "importar"] },
