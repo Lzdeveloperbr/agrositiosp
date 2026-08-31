@@ -83,11 +83,13 @@ function GranjaPage() {
     { to: "/calendario-sanitario", label: "Sanitário", icon: Syringe },
     { to: "/manejo", label: "Manejo", icon: BookOpen },
     { to: "/ambiencia", label: "Ambiência", icon: Wind },
+    { to: "/automacoes", label: "Automação", icon: Zap },
     { to: "/analise-aves", label: "IA Aves", icon: Stethoscope },
     { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3 },
     { to: "/historico-lotes", label: "Histórico", icon: History },
     { to: "/entregas-racao", label: "Ração", icon: Wheat },
   ];
+
 
   return (
     <AppShell>
