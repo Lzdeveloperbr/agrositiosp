@@ -6,6 +6,7 @@ import { Wheat, TrendingDown, Activity, AlertTriangle, Timer, Package, Bird, Cal
 import type { ItemEstoque, Lote } from "@/lib/types";
 import { useLotes } from "@/lib/state";
 import { CURVAS, LINHAGEM_LABEL, type Linhagem } from "@/lib/linhagens";
+import { parseData, isoLocal, diffDias, fmtData } from "@/lib/data";
 
 function fmt(n: number, d = 0) {
   if (!Number.isFinite(n)) return "—";
@@ -32,21 +33,54 @@ function consumoAcumG(linhagem: Linhagem, dia: number): number {
   return 0;
 }
 
-// consumo instantâneo em g/ave/dia (derivada central)
+/** Consumo do DIA de idade `dia` (g/ave) = acumulado(dia) - acumulado(dia-1). */
 function consumoGPorAveDia(linhagem: Linhagem, dia: number): number {
-  const d = Math.max(0.5, dia);
-  return Math.max(0, consumoAcumG(linhagem, d + 0.5) - consumoAcumG(linhagem, d - 0.5));
+  if (dia < 0) return 0;
+  return Math.max(0, consumoAcumG(linhagem, dia + 1) - consumoAcumG(linhagem, dia));
 }
 
+// ===== Perfil intradiário de consumo (24h) =====
+// Aves não comem de forma uniforme: picos após acender a luz e no fim da tarde,
+// consumo baixo no escuro (programa de luz padrão 23h → 18h).
+const PERFIL_HORA = [
+  0.5, 0.4, 0.4, 0.5, 1.0, 2.5, 5.5, 7.0, 7.5, 6.5, 5.5, 5.0,
+  4.5, 4.5, 5.0, 6.0, 7.5, 8.5, 7.5, 5.5, 3.5, 2.0, 1.2, 0.8,
+];
+const PERFIL_TOTAL = PERFIL_HORA.reduce((s, v) => s + v, 0);
+/** Fração (0..1) do consumo do dia já realizada até a hora decimal `h`. */
+function fracaoDia(h: number): number {
+  const hh = Math.max(0, Math.min(24, h));
+  let acc = 0;
+  for (let i = 0; i < 24; i++) {
+    if (hh >= i + 1) acc += PERFIL_HORA[i];
+    else if (hh > i) acc += PERFIL_HORA[i] * (hh - i);
+  }
+  return acc / PERFIL_TOTAL;
+}
+const horaDecimal = (d: Date) => d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600 + d.getMilliseconds() / 3.6e6;
+
 // ===== Kg de ração no estoque =====
+function paraKg(q: number, unidade?: string) {
+  const u = (unidade || "").toLowerCase().trim();
+  if (u === "t" || u === "ton" || u === "tonelada" || u === "toneladas") return q * 1000;
+  if (u === "g") return q * 0.001;
+  if (u === "sc" || u === "saca" || u === "sacas") return q * 40;
+  return q;
+}
 function estoqueKg(itens: ItemEstoque[]): number {
-  return itens
-    .filter((i) => i.categoria === "racao")
-    .reduce((s, i) => {
-      const u = (i.unidade || "").toLowerCase();
-      const fator = u === "t" || u === "ton" || u === "tonelada" ? 1000 : u === "g" ? 0.001 : 1;
-      return s + i.quantidade * fator;
-    }, 0);
+  return itens.filter((i) => i.categoria === "racao").reduce((s, i) => s + paraKg(i.quantidade, i.unidade), 0);
+}
+
+/** Data/hora da última movimentação registrada de ração (âncora do cálculo). */
+function ultimaMovimentacao(itens: ItemEstoque[]): Date | null {
+  let melhor: Date | null = null;
+  itens.filter((i) => i.categoria === "racao").forEach((i) => {
+    (i.movimentacoes || []).forEach((m) => {
+      const d = parseData(m.data);
+      if (d && (!melhor || d.getTime() > melhor.getTime())) melhor = d;
+    });
+  });
+  return melhor;
 }
 
 // ===== Lote ativo com dados derivados =====
@@ -57,38 +91,97 @@ type LoteAtivo = {
   avesVivas: number;
   consumoDiaKg: number;
   consumoGPorAve: number;
-  diasRestantes: number; // até previsão de abate
+  diasRestantes: number;
+  /** aves vivas em uma data ISO passada (desconta só as perdas até lá) */
+  avesEm: (iso: string) => number;
 };
 
 function calcularLote(l: Lote, linhagem: Linhagem, agora: Date): LoteAtivo {
-  const entrada = new Date(l.dataEntrada + "T00:00:00");
-  const idadeDias = Math.max(0, Math.floor((agora.getTime() - entrada.getTime()) / 86400000));
-  const perdas = (l.entries || []).reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
-  const avesVivas = Math.max(0, l.quantidadeInicial - perdas);
+  const idadeDias = Math.max(0, diffDias(l.dataEntrada, agora));
+  const entries = l.entries || [];
+  const perdasTotais = entries.reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
+  const avesVivas = Math.max(0, l.quantidadeInicial - perdasTotais);
+  const avesEm = (iso: string) => {
+    const perdas = entries
+      .filter((e) => isoLocal(e.date) <= iso)
+      .reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
+    return Math.max(0, l.quantidadeInicial - perdas);
+  };
   const gAve = consumoGPorAveDia(linhagem, idadeDias);
-  const consumoDiaKg = (avesVivas * gAve) / 1000;
-  const diasRestantes = Math.max(0, l.previsaoAbateDias - idadeDias);
-  return { lote: l, linhagem, idadeDias, avesVivas, consumoDiaKg, consumoGPorAve: gAve, diasRestantes };
+  return {
+    lote: l,
+    linhagem,
+    idadeDias,
+    avesVivas,
+    consumoDiaKg: (avesVivas * gAve) / 1000,
+    consumoGPorAve: gAve,
+    diasRestantes: Math.max(0, l.previsaoAbateDias - idadeDias),
+    avesEm,
+  };
 }
 
-// Simula autonomia dia-a-dia (consumo cresce com idade, encerra quando lote atinge abate)
-function simularAutonomia(estoqueInicialKg: number, lotes: LoteAtivo[]): { dias: number; suficiente: boolean } {
-  let restante = estoqueInicialKg;
-  let dia = 0;
-  const maxDias = 120;
-  while (restante > 0 && dia < maxDias) {
-    let consumoHoje = 0;
-    lotes.forEach((la) => {
-      const idade = la.idadeDias + dia;
-      if (idade > la.lote.previsaoAbateDias) return; // lote já abatido
-      consumoHoje += (la.avesVivas * consumoGPorAveDia(la.linhagem, idade)) / 1000;
-    });
-    if (consumoHoje <= 0) return { dias: Infinity, suficiente: true };
-    if (restante < consumoHoje) return { dias: dia + restante / consumoHoje, suficiente: dia >= Math.max(...lotes.map(l => l.diasRestantes)) };
-    restante -= consumoHoje;
-    dia += 1;
+/** Consumo (kg) previsto para um dia de calendário específico. */
+function consumoDoDia(lotes: LoteAtivo[], data: Date): number {
+  const iso = isoLocal(data);
+  let total = 0;
+  lotes.forEach((la) => {
+    const idade = diffDias(la.lote.dataEntrada, data);
+    if (idade < 0 || idade > la.lote.previsaoAbateDias) return;
+    const aves = la.avesEm(iso);
+    total += (aves * consumoGPorAveDia(la.linhagem, idade)) / 1000;
+  });
+  return total;
+}
+
+/** Consumo (kg) entre dois instantes, respeitando o perfil intradiário. */
+function consumidoEntre(inicio: Date, fim: Date, lotes: LoteAtivo[]): number {
+  if (fim.getTime() <= inicio.getTime()) return 0;
+  let total = 0;
+  const cursor = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate());
+  const limite = new Date(fim.getFullYear(), fim.getMonth(), fim.getDate());
+  let guarda = 0;
+  while (cursor.getTime() <= limite.getTime() && guarda++ < 200) {
+    const mesmoDiaInicio = isoLocal(cursor) === isoLocal(inicio);
+    const mesmoDiaFim = isoLocal(cursor) === isoLocal(fim);
+    const h0 = mesmoDiaInicio ? horaDecimal(inicio) : 0;
+    const h1 = mesmoDiaFim ? horaDecimal(fim) : 24;
+    const fracao = Math.max(0, fracaoDia(h1) - fracaoDia(h0));
+    total += consumoDoDia(lotes, cursor) * fracao;
+    cursor.setDate(cursor.getDate() + 1);
   }
-  return { dias: dia, suficiente: true };
+  return total;
+}
+
+/** Autonomia em dias a partir de `agora`, com o estoque já descontado. */
+function simularAutonomia(estoqueKgAgora: number, lotes: LoteAtivo[], agora: Date): { dias: number; fim: Date | null } {
+  let restante = estoqueKgAgora;
+  if (restante <= 0) return { dias: 0, fim: agora };
+  const cursor = new Date(agora);
+  for (let d = 0; d < 120; d++) {
+    const dia = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + d);
+    const consumoDia = consumoDoDia(lotes, dia);
+    if (consumoDia <= 0) {
+      if (d === 0) continue;
+      continue;
+    }
+    const h0 = d === 0 ? horaDecimal(agora) : 0;
+    const disponivelNoDia = consumoDia * (1 - fracaoDia(h0));
+    if (restante <= disponivelNoDia) {
+      // resolve a hora exata dentro do dia
+      const alvo = fracaoDia(h0) + restante / consumoDia;
+      let h = h0;
+      for (let step = 0; step < 1440; step++) {
+        h = h0 + ((24 - h0) * step) / 1440;
+        if (fracaoDia(h) >= alvo) break;
+      }
+      const fim = new Date(dia.getFullYear(), dia.getMonth(), dia.getDate());
+      fim.setSeconds(Math.round(h * 3600));
+      return { dias: (fim.getTime() - agora.getTime()) / 86400000, fim };
+    }
+    restante -= disponivelNoDia;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return { dias: Infinity, fim: null };
 }
 
 const LS_KEY = "racao:linhagem:";
@@ -98,11 +191,9 @@ const getLinhagem = (loteId: string): Linhagem =>
 export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
   const [lotes] = useLotes();
   const [now, setNow] = useState(() => new Date());
-  const [tick, setTick] = useState(0); // recomputa autonomia a cada 60s
   const [linhagens, setLinhagens] = useState<Record<string, Linhagem>>({});
 
   useEffect(() => {
-    // hidrata linhagens do localStorage
     const map: Record<string, Linhagem> = {};
     lotes.forEach((l) => { map[l.id] = getLinhagem(l.id); });
     setLinhagens(map);
@@ -110,35 +201,48 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
-    const min = setInterval(() => setTick((t) => t + 1), 60000);
-    return () => { clearInterval(id); clearInterval(min); };
+    return () => clearInterval(id);
   }, []);
+
+  const diaAtual = isoLocal(now);
 
   const lotesAtivos = useMemo(
     () => lotes.filter((l) => !l.encerrado).map((l) => calcularLote(l, linhagens[l.id] || "cobb500", now)),
-    [lotes, linhagens, now.toDateString()] // recomputa idade apenas quando o dia muda
+    // idade só muda quando o dia muda
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lotes, linhagens, diaAtual],
   );
 
   const totalKgBase = useMemo(() => estoqueKg(itens), [itens]);
 
+  // Âncora: instante do último registro real de estoque. O saldo salvo já reflete
+  // tudo até ali, então só estimamos o consumo DEPOIS desse ponto.
+  const ancora = useMemo(() => {
+    const ult = ultimaMovimentacao(itens);
+    const inicioHoje = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (!ult) return inicioHoje;
+    // movimentação é registrada por data (sem hora) → considera início daquele dia
+    const base = new Date(ult.getFullYear(), ult.getMonth(), ult.getDate());
+    // nunca projetar mais de 45 dias para trás
+    const limite = new Date(now.getTime() - 45 * 86400000);
+    return base.getTime() < limite.getTime() ? limite : base;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itens, diaAtual]);
+
+  // Valor "ao vivo" — recalculado a cada segundo (barato)
+  const consumidoDesdeAncora = consumidoEntre(ancora, now, lotesAtivos);
+  const estoqueAgora = Math.max(0, totalKgBase - consumidoDesdeAncora);
+
   const stats = useMemo(() => {
     const abaixoMin = itens.filter((i) => i.categoria === "racao" && i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0)).length;
     const avesTotal = lotesAtivos.reduce((s, la) => s + la.avesVivas, 0);
-    const consumoDiaKg = lotesAtivos.reduce((s, la) => s + la.consumoDiaKg, 0);
-    const consumoSegKg = consumoDiaKg / 86400;
+    const consumoDiaKg = consumoDoDia(lotesAtivos, now);
+    // taxa instantânea real (kg/s) segundo o perfil intradiário
+    const intensidade = (PERFIL_HORA[Math.min(23, now.getHours())] / PERFIL_TOTAL) * 24;
+    const consumoSegKg = (consumoDiaKg / 86400) * intensidade;
 
-    // Autonomia real (simulada) — recalculada a cada minuto
-    const sim = simularAutonomia(totalKgBase, lotesAtivos);
-    const previsaoFim = new Date(now.getTime() + sim.dias * 86400000);
+    const sim = simularAutonomia(estoqueAgora, lotesAtivos, now);
 
-    // Consumo desde a meia-noite (para "peso ao vivo")
-    const meiaNoite = new Date(now);
-    meiaNoite.setHours(0, 0, 0, 0);
-    const segHoje = (now.getTime() - meiaNoite.getTime()) / 1000;
-    const consumidoHojeKg = consumoSegKg * segHoje;
-    const estoqueAgora = Math.max(0, totalKgBase - consumidoHojeKg);
-
-    // Consumo total previsto até o abate
     let totalAteAbate = 0;
     lotesAtivos.forEach((la) => {
       const acumHoje = (consumoAcumG(la.linhagem, la.idadeDias) / 1000) * la.avesVivas;
@@ -147,13 +251,12 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
     });
 
     return {
-      abaixoMin, avesTotal, consumoDiaKg, consumoSegKg, estoqueAgora,
-      consumidoHojeKg, autonomiaDias: sim.dias, suficienteAbate: sim.suficiente,
-      previsaoFim, totalAteAbate, faltaAbate: Math.max(0, totalAteAbate - totalKgBase),
+      abaixoMin, avesTotal, consumoDiaKg, consumoSegKg,
+      autonomiaDias: sim.dias, previsaoFim: sim.fim,
+      totalAteAbate, faltaAbate: Math.max(0, totalAteAbate - estoqueAgora),
     };
-    // tick força recompute a cada 60s
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itens, lotesAtivos, totalKgBase, tick, now.getMinutes()]);
+  }, [itens, lotesAtivos, estoqueAgora, now.getMinutes(), diaAtual]);
 
   const setLinhagemFor = (id: string, v: Linhagem) => {
     localStorage.setItem(LS_KEY + id, v);
@@ -173,37 +276,39 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
 
       <div className="flex items-center gap-2 mb-1">
         <Wheat className="h-6 w-6 text-primary" />
-        <h2 className="font-display font-bold text-xl">Ração em estoque — cálculo preciso</h2>
+        <h2 className="font-display font-bold text-xl">Ração no silo — cálculo ao vivo</h2>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
         {semLote
           ? "Sem lote ativo — cadastre um lote em Granja para o cálculo por ave/idade/linhagem."
-          : `Baseado em ${fmt(stats.avesTotal)} aves vivas · curva ${lotesAtivos.map(l => LINHAGEM_LABEL[l.linhagem]).join(" + ")} · atualizado a cada 1 min.`}
+          : `${fmt(stats.avesTotal)} aves vivas · curva ${lotesAtivos.map(l => LINHAGEM_LABEL[l.linhagem]).join(" + ")} · descontando desde o último registro (${fmtData(ancora)}) com perfil de consumo por hora.`}
       </p>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Metric icon={<Package className="h-4 w-4" />} label="Peso ao vivo (kg)">
-          <span className="tabular-nums">{fmt(stats.estoqueAgora, 3)}</span>
+        <Metric icon={<Package className="h-4 w-4" />} label="Estimado no silo (kg)">
+          <span className="tabular-nums">{fmt(estoqueAgora, 2)}</span>
           <span className="block text-xs text-muted-foreground font-normal mt-0.5">
-            {fmt(stats.estoqueAgora / 1000, 3)} t · base do dia {fmt(totalKgBase)} kg
+            {fmt(estoqueAgora / 1000, 3)} t · registrado {fmt(totalKgBase)} kg − {fmt(consumidoDesdeAncora, 1)} kg estimados
           </span>
         </Metric>
 
         <Metric icon={<TrendingDown className="h-4 w-4" />} label="Consumo / dia">
           <span className="tabular-nums">{fmt(stats.consumoDiaKg, 1)} <small className="text-sm font-normal">kg</small></span>
           <span className="block text-xs text-muted-foreground font-normal mt-0.5">
-            ≈ {fmt(stats.consumoSegKg * 1000, 2)} g/s · hoje {fmt(stats.consumidoHojeKg, 2)} kg
+            agora ≈ {fmt(stats.consumoSegKg * 1000, 2)} g/s ({fmt(stats.consumoSegKg * 3600, 1)} kg/h)
           </span>
         </Metric>
 
         <Metric icon={<Timer className="h-4 w-4" />} label="Autonomia real">
           <span className="tabular-nums">
-            {Number.isFinite(stats.autonomiaDias) ? `${fmt(stats.autonomiaDias, 1)} d` : "—"}
+            {Number.isFinite(stats.autonomiaDias)
+              ? `${Math.floor(stats.autonomiaDias)}d ${Math.round((stats.autonomiaDias % 1) * 24)}h`
+              : "—"}
           </span>
           <span className="block text-xs text-muted-foreground font-normal mt-0.5">
-            {Number.isFinite(stats.autonomiaDias)
+            {stats.previsaoFim
               ? `acaba em ${stats.previsaoFim.toLocaleDateString("pt-BR")} ${stats.previsaoFim.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}`
-              : "sem consumo"}
+              : "sem consumo previsto"}
           </span>
         </Metric>
 
@@ -239,7 +344,7 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
                     <div className="flex items-center gap-2">
                       <Bird className="h-4 w-4 text-primary" />
                       <span className="font-semibold">Lote {la.lote.numero}</span>
-                      <Badge variant="outline" className="text-[10px]">{la.idadeDias}d</Badge>
+                      <Badge variant="outline" className="text-[10px]">D{la.idadeDias}</Badge>
                     </div>
                     <Select value={la.linhagem} onValueChange={(v) => setLinhagemFor(la.lote.id, v as Linhagem)}>
                       <SelectTrigger className="h-7 w-[120px] text-xs"><SelectValue /></SelectTrigger>
