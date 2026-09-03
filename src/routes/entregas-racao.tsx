@@ -105,9 +105,11 @@ function fatorNoDia(cal: Calib, d: number): number {
 }
 const pesoCalibradoG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
   pesoMedioGPorAve(d, lin, sx) * fatorNoDia(cal, d);
-// Consumo escala com o peso metabólico (P^0,75) — padrão zootécnico.
+// A pesagem real calibra a projeção de PESO, mas não pode reescrever o consumo
+// histórico. Aplicar o desvio de peso ao acumulado inteiro superestima a ração
+// já consumida e pode zerar artificialmente o silo.
 const consumoCalibradoAcumG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
-  consumoAcumGPorAve(d, lin, sx) * Math.pow(fatorNoDia(cal, d), 0.75);
+  consumoAcumGPorAve(d, lin, sx);
 const consumoCalibradoDiaG = (d: number, lin: Linhagem, sx: Sexo, cal: Calib) =>
   Math.max(0, consumoCalibradoAcumG(d, lin, sx, cal) - consumoCalibradoAcumG(Math.max(0, d - 1), lin, sx, cal));
 
@@ -602,7 +604,6 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const idade = Math.max(0, Math.round((hoje.getTime() - aloj.getTime()) / 86400000));
     const baixas = (cfg.mortalidadeAcum || 0) + (cfg.eliminadosAcum || 0);
     const avesVivas = Math.max(0, cfg.qtdInicial - baixas);
-    const avesMediasParaConsumo = (cfg.qtdInicial + avesVivas) / 2;
 
     // ---- Calibração pela última pesagem real ----
     const idadePesagem = cfg.pesoMedioRealData
@@ -612,8 +613,30 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const usandoPesoReal = !!cal;
     const diasDesdePesagem = cal ? idade - cal.idadePesagem : null;
 
-    const consumoAcumOntemKg = (consumoCalibradoAcumG(Math.max(0, idade - 1), lin, sx, cal) * avesMediasParaConsumo) / 1000;
-    const consumoHojeKg = (consumoCalibradoDiaG(idade, lin, sx, cal) * avesVivas) / 1000;
+    // Consumo por ave-dia: usa a quantidade viva em cada data, descontando
+    // mortalidade e eliminados no dia correto. Isso evita a distorção de usar
+    // uma média única de aves para todo o lote.
+    const consumoPorDiaKg = (dia: number) => {
+      if (manual || !loteAtivo) {
+        const perdasProporcionais = idade > 0 ? baixas * Math.min(1, dia / idade) : 0;
+        const avesDia = Math.max(0, cfg.qtdInicial - perdasProporcionais);
+        return (consumoCalibradoDiaG(dia, lin, sx, cal) * avesDia) / 1000;
+      }
+      const data = new Date(aloj);
+      data.setDate(data.getDate() + dia);
+      const dataIso = isoLocal(data);
+      const perdasAntes = loteAtivo.entries
+        .filter((e) => (e.date || "") < dataIso)
+        .reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
+      const perdasNoDia = loteAtivo.entries
+        .filter((e) => e.date === dataIso)
+        .reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
+      const avesMediasDia = Math.max(0, cfg.qtdInicial - perdasAntes - perdasNoDia / 2);
+      return (consumoCalibradoDiaG(dia, lin, sx, cal) * avesMediasDia) / 1000;
+    };
+    let consumoAcumOntemKg = 0;
+    for (let d = 0; d < idade; d++) consumoAcumOntemKg += consumoPorDiaKg(d);
+    const consumoHojeKg = consumoPorDiaKg(idade);
     const consumoAcumKg = consumoAcumOntemKg + consumoHojeKg;
     const estoqueMeiaNoiteKg = totalEntregueKg - consumoAcumOntemKg;
     const estoqueKg = totalEntregueKg - consumoAcumKg;
@@ -628,8 +651,10 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
     const caReal = pesoTotalLoteKg > 0 ? racaoConsumidaKg / pesoTotalLoteKg : 0;
     const caTarget = caAlvo(idade, lin, sx);
     const caStatus = classificaCA(caReal, caTarget);
-    const desvioPesoPct = cal && pesoMedioCurvaKg > 0
-      ? ((cfg.pesoMedioRealG! / 1000) - (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000)) / (pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000) * 100
+    const pesoRealKg = cfg.pesoMedioRealG ? cfg.pesoMedioRealG / 1000 : null;
+    const pesoBasePesagemKg = cal ? pesoMedioGPorAve(cal.idadePesagem, lin, sx) / 1000 : null;
+    const desvioPesoPct = cal && pesoRealKg !== null && pesoBasePesagemKg
+      ? ((pesoRealKg - pesoBasePesagemKg) / pesoBasePesagemKg) * 100
       : null;
 
     // Confiança do modelo: cai com o tempo desde a última pesagem
