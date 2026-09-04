@@ -2232,6 +2232,112 @@ export type Database = {
           },
         ]
       }
+      silo_config: {
+        Row: {
+          capacidade_kg: number
+          capacidade_operacional_kg: number | null
+          carga_padrao_kg: number
+          created_at: string
+          erro_balanca_kg: number
+          estoque_minimo_kg: number
+          fazenda_id: string
+          id: string
+          lead_time_horas: number
+          lote_id: string | null
+          margem_seguranca_kg: number
+          perda_pct: number
+          updated_at: string
+        }
+        Insert: {
+          capacidade_kg?: number
+          capacidade_operacional_kg?: number | null
+          carga_padrao_kg?: number
+          created_at?: string
+          erro_balanca_kg?: number
+          estoque_minimo_kg?: number
+          fazenda_id: string
+          id?: string
+          lead_time_horas?: number
+          lote_id?: string | null
+          margem_seguranca_kg?: number
+          perda_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          capacidade_kg?: number
+          capacidade_operacional_kg?: number | null
+          carga_padrao_kg?: number
+          created_at?: string
+          erro_balanca_kg?: number
+          estoque_minimo_kg?: number
+          fazenda_id?: string
+          id?: string
+          lead_time_horas?: number
+          lote_id?: string | null
+          margem_seguranca_kg?: number
+          perda_pct?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "silo_config_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      silo_pesagens: {
+        Row: {
+          autor: string | null
+          created_at: string
+          erro_kg: number | null
+          estimado_kg: number | null
+          estoque_kg: number
+          fazenda_id: string
+          id: string
+          lote_id: string | null
+          medido_em: string
+          metodo: string
+          observacoes: string | null
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          erro_kg?: number | null
+          estimado_kg?: number | null
+          estoque_kg: number
+          fazenda_id: string
+          id?: string
+          lote_id?: string | null
+          medido_em?: string
+          metodo?: string
+          observacoes?: string | null
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          erro_kg?: number | null
+          estimado_kg?: number | null
+          estoque_kg?: number
+          fazenda_id?: string
+          id?: string
+          lote_id?: string | null
+          medido_em?: string
+          metodo?: string
+          observacoes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "silo_pesagens_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tarefas: {
         Row: {
           autor: string | null
