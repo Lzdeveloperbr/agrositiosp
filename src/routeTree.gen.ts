@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SiloRouteImport } from './routes/silo'
 import { Route as SanidadeRouteImport } from './routes/sanidade'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as RacaoRouteImport } from './routes/racao'
@@ -80,6 +81,11 @@ const TarefasRoute = TarefasRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiloRoute = SiloRouteImport.update({
+  id: '/silo',
+  path: '/silo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SanidadeRoute = SanidadeRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sanidade': typeof SanidadeRoute
+  '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -463,6 +470,7 @@ export interface FileRoutesByTo {
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sanidade': typeof SanidadeRoute
+  '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -523,6 +531,7 @@ export interface FileRoutesById {
   '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
   '/sanidade': typeof SanidadeRoute
+  '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/veterinario': typeof VeterinarioRoute
@@ -584,6 +593,7 @@ export interface FileRouteTypes {
     | '/racao'
     | '/relatorios'
     | '/sanidade'
+    | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -643,6 +653,7 @@ export interface FileRouteTypes {
     | '/racao'
     | '/relatorios'
     | '/sanidade'
+    | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -702,6 +713,7 @@ export interface FileRouteTypes {
     | '/racao'
     | '/relatorios'
     | '/sanidade'
+    | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/veterinario'
@@ -762,6 +774,7 @@ export interface RootRouteChildren {
   RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SanidadeRoute: typeof SanidadeRoute
+  SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
   VeterinarioRoute: typeof VeterinarioRoute
@@ -792,6 +805,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/silo': {
+      id: '/silo'
+      path: '/silo'
+      fullPath: '/silo'
+      preLoaderRoute: typeof SiloRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sanidade': {
@@ -1226,6 +1246,7 @@ const rootRouteChildren: RootRouteChildren = {
   RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
   SanidadeRoute: SanidadeRoute,
+  SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
   VeterinarioRoute: VeterinarioRoute,
