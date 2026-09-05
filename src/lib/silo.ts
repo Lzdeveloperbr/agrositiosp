@@ -46,11 +46,9 @@ function interp(tbl: Record<number, number>, x: number): number {
   const keys = Object.keys(tbl).map(Number).sort((a, b) => a - b);
   if (x <= keys[0]) return tbl[keys[0]];
   const last = keys[keys.length - 1];
-  if (x >= last) {
-    const a = keys[keys.length - 2], b = last;
-    const slope = (tbl[b] - tbl[a]) / (b - a);
-    return tbl[b] + slope * (x - b);
-  }
+  // sem extrapolação: acima da última idade tabelada, mantém o último valor
+  if (x >= last) return tbl[last];
+
   for (let i = 0; i < keys.length - 1; i++) {
     const a = keys[i], b = keys[i + 1];
     if (x >= a && x <= b) return tbl[a] + ((tbl[b] - tbl[a]) * (x - a)) / (b - a);
