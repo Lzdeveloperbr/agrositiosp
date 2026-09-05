@@ -531,7 +531,7 @@ function seriePeso(calc: ReturnType<typeof calcularSilo>, lin: Linhagem, sx: Sex
   return out;
 }
 
-function PesagemDialog({ onSave, estimado }: { onSave: (p: { medidoEm: string; kg: number; metodo: string; obs: string }) => Promise<void>; estimado: number }) {
+function PesagemDialog({ onSave, estimado }: { onSave: (p: { medidoEm: string; kg: number; metodo: string; obs: string }) => Promise<unknown>; estimado: number }) {
   const [open, setOpen] = useState(false);
   const agoraLocal = () => {
     const d = new Date();
@@ -591,7 +591,7 @@ function PesagemDialog({ onSave, estimado }: { onSave: (p: { medidoEm: string; k
   );
 }
 
-function ConfigForm({ cfg, onSave }: { cfg: SiloCfg; onSave: (c: SiloCfg) => Promise<void> }) {
+function ConfigForm({ cfg, onSave }: { cfg: SiloCfg; onSave: (c: SiloCfg) => Promise<unknown> }) {
   const [f, setF] = useState<SiloCfg>(cfg);
   useEffect(() => setF(cfg), [cfg]);
   const campo = (label: string, k: keyof SiloCfg, hint?: string) => (
