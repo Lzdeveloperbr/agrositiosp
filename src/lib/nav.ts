@@ -52,6 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/comparativo-lotes", label: "Comparativo de Lotes", icon: BarChart3, desc: "Compare desempenho entre lotes", tags: ["comparar", "grafico"] },
       { to: "/historico-lotes", label: "Histórico & Benchmark", icon: History, desc: "Todos os lotes encerrados e médias", tags: ["historico", "benchmark"] },
       { to: "/entregas-racao", label: "Entregas de Ração", icon: Truck, desc: "Controle de cargas, viagens e consumo", tags: ["racao", "carga", "caminhao"] },
+      { to: "/silo", label: "Silo ao Vivo", icon: Boxes, desc: "Estoque de ração em tempo real, autonomia e pedido", tags: ["silo", "racao", "estoque", "tempo real"] },
     ],
   },
   {
