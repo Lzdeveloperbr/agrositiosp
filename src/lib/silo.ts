@@ -310,7 +310,7 @@ export function calcularSilo(inp: SiloInput) {
 
 
   const consumoGAveDia = (d: number) =>
-    pesosModelo.A * modeloA(d) + pesosModelo.B * modeloB(d) + pesosModelo.C * modeloC(d);
+    pesosModelo.A * modeloA(d) + pesosModelo.B * modeloB(d) + pesosModelo.C * modeloC(d) + pesosModelo.D * modeloD(d);
 
   /** consumo (kg) previsto para um dia de calendário */
   function consumoDoDiaKg(dia: Date): number {
