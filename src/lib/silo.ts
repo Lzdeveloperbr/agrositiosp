@@ -362,11 +362,20 @@ export function calcularSilo(inp: SiloInput) {
     Math.pow(ultAncora ? cfg.erroBalancaKg : Math.max(200, totalEntregueKg * 0.02), 2) +
       Math.pow(consumoDesdeAncora * 0.06 + (horasDesdeAncora / 24) * 40, 2),
   );
-  let confianca = 20;
-  if (ultAncora) confianca = horasDesdeAncora <= 12 ? 95 : horasDesdeAncora <= 48 ? 85 : horasDesdeAncora <= 120 ? 70 : 55;
-  else if (fatorReal) confianca = 60;
-  else if (ultPesagem) confianca = 45;
+  // Confiança sem balança de silo: sustentada pelas pesagens das aves e pelo histórico de entregas
+  let confianca = 25;
+  if (ultAncora) {
+    confianca = horasDesdeAncora <= 12 ? 95 : horasDesdeAncora <= 48 ? 85 : horasDesdeAncora <= 120 ? 70 : 55;
+  } else if (fatorReal) {
+    confianca = 65;
+  } else if (ultPesagem) {
+    // base 55% + 4% por pesagem de ave (máx 6) − penalidade por pesagem antiga
+    const bonus = Math.min(6, pesagensAves.length) * 4;
+    const penal = Math.min(20, Math.max(0, (diasDesdePesagemAve ?? 0) - 3) * 3);
+    confianca = Math.max(35, Math.min(88, 55 + bonus - penal));
+  }
   if (entregas.length === 0) confianca = Math.min(confianca, 30);
+  const modoEstimativa: "balanca" | "peso_ave" | "curva" = ultAncora ? "balanca" : ultPesagem ? "peso_ave" : "curva";
 
   // ----- consumo diário -----
   const consumoHojeKg = consumoDoDiaKg(agora);
