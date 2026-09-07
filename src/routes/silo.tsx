@@ -234,7 +234,7 @@ function SiloPage() {
               <StatCard label="Estoque agora" value={kg(calc.estoqueAtualKg)} hint={`faixa ${kg(calc.faixa.min)} – ${kg(calc.faixa.max)}`} icon={Boxes} tone="primary" />
               <StatCard label="Autonomia" value={`${num(calc.autonomiaDias, 1)} d`} hint={calc.tRuptura ? `acaba ${fmtDataHora(calc.tRuptura)}` : "> 7 dias"} icon={Timer} tone="accent" />
               <StatCard label="Consumo hoje" value={kg(calc.consumoHojeKg)} hint={`agora ${num(calc.consumoHoraAtualKgH, 1)} kg/h · ${num(calc.consumoSegKg * 1000, 1)} g/s`} icon={TrendingUp} tone="muted" />
-              <StatCard label="Confiança" value={`${calc.confianca}%`} hint={calc.ancora ? `pesagem há ${num(calc.horasDesdeAncora, 1)} h` : "sem pesagem física"} icon={ShieldCheck} tone="primary" />
+              <StatCard label="Confiança" value={`${calc.confianca}%`} hint={calc.ancora ? `pesagem há ${num(calc.horasDesdeAncora, 1)} h` : calc.modoEstimativa === "peso_ave" ? `pelo peso das aves (D${calc.ultPesagem?.idade})` : "só curva da linhagem"} icon={ShieldCheck} tone="primary" />
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -351,13 +351,17 @@ function SiloPage() {
 
                 <Card className="p-4">
                   <h3 className="font-semibold text-sm mb-2">Peso de cada modelo agora</h3>
-                  <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                     <Info label="A · consumo real medido" value={`${num(calc.pesosModelo.A * 100, 0)}%`} />
-                    <Info label="B · peso real das aves" value={`${num(calc.pesosModelo.B * 100, 0)}%`} />
+                    <Info label="B · escala metabólica" value={`${num(calc.pesosModelo.B * 100, 0)}%`} />
+                    <Info label="D · ganho de peso × CA" value={`${num(calc.pesosModelo.D * 100, 0)}%`} />
                     <Info label="C · curva da linhagem" value={`${num(calc.pesosModelo.C * 100, 0)}%`} />
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-2">
-                    Quanto mais pesagens físicas do silo e pesagens de aves você registrar, mais o modelo passa a confiar nos dados reais do lote.
+                    Sem balança no silo, o modelo D é o principal: ele converte o ganho de peso real medido em cada dia
+                    (g/ave/dia) em quilos de ração usando a conversão alimentar incremental da linhagem, somando a
+                    manutenção pelo peso metabólico (PV^0,75). Quanto mais pesagens de aves você registrar na granja,
+                    mais preciso fica o estoque.
                   </p>
                 </Card>
               </TabsContent>
@@ -545,12 +549,12 @@ function PesagemDialog({ onSave, estimado }: { onSave: (p: { medidoEm: string; k
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setMedidoEm(agoraLocal()); }}>
       <DialogTrigger asChild>
-        <Button><Scale className="h-4 w-4 mr-2" /> Pesar silo</Button>
+        <Button variant="outline"><Scale className="h-4 w-4 mr-2" /> Pesagem manual (opcional)</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Pesagem física do silo</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Pesagem manual do silo (opcional)</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div className="text-xs text-muted-foreground">Estimativa atual do sistema: <strong>{kg(estimado)}</strong>. A pesagem vira a nova âncora do cálculo.</div>
+          <div className="text-xs text-muted-foreground">Não é obrigatório: sem balança, o sistema estima pelo peso das aves. Se você conseguir medir (régua, sensor, sobra da carga), o valor vira a âncora do cálculo. Estimativa atual: <strong>{kg(estimado)}</strong>.</div>
           <div>
             <Label className="text-xs">Data e hora</Label>
             <Input type="datetime-local" value={medidoEm} onChange={(e) => setMedidoEm(e.target.value)} />

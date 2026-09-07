@@ -230,6 +230,46 @@ export function calcularSilo(inp: SiloInput) {
   const modeloC = (d: number) => refConsumoDiaG(d, lin, sx);
   const modeloB = (d: number) => refConsumoDiaG(d, lin, sx) * Math.pow(fatorPesoNoDia(d), 0.75);
 
+  // ----- MODELO D: consumo derivado do PESO REAL das aves, dia a dia -----
+  // Peso observado (interpolação linear entre as pesagens do lote; fora da série usa a curva ajustada)
+  const pesoObsG = (d: number): number => {
+    if (!pesagensAves.length) return pesoPrevistoG(d);
+    if (d <= pesagensAves[0].idade) {
+      const p0 = pesagensAves[0];
+      const inicial = refPesoG(0, lin, sx);
+      return p0.idade > 0 ? inicial + ((p0.g - inicial) * d) / p0.idade : p0.g;
+    }
+    for (let i = 0; i < pesagensAves.length - 1; i++) {
+      const a = pesagensAves[i], b = pesagensAves[i + 1];
+      if (d >= a.idade && d <= b.idade) return a.g + ((b.g - a.g) * (d - a.idade)) / Math.max(1, b.idade - a.idade);
+    }
+    // após a última pesagem: mantém o desvio observado sobre a curva
+    return pesoPrevistoG(d);
+  };
+  /** ganho de peso (g/ave/dia) medido/estimado no dia d */
+  const gpdNoDia = (d: number) => Math.max(0, pesoObsG(d + 1) - pesoObsG(d));
+  /** conversão alimentar incremental da linhagem no dia d (kg ração / kg ganho) */
+  const caIncremental = (d: number) => {
+    const dg = refPesoG(d + 1, lin, sx) - refPesoG(d, lin, sx);
+    const dc = refConsumoAcumG(d + 1, lin, sx) - refConsumoAcumG(d, lin, sx);
+    if (dg <= 0) return 0;
+    const ca = dc / dg;
+    return ca > 0.8 && ca < 5 ? ca : 0;
+  };
+  /** consumo do dia = ganho real do dia × CA incremental + manutenção metabólica */
+  const modeloD = (d: number) => {
+    const ca = caIncremental(d);
+    if (!ca) return modeloB(d);
+    const ganho = gpdNoDia(d);
+    const crescimento = ganho * ca;
+    // manutenção proporcional ao peso metabólico quando o ganho cai (fim de lote/estresse)
+    const manutencao = 0.09 * Math.pow(pesoObsG(d) / 1000, 0.75) * 1000 * 0.35;
+    const est = crescimento * 0.85 + manutencao;
+    const ref = modeloC(d);
+    // trava de sanidade: nunca sai de 55%..170% da referência da linhagem
+    return Math.max(ref * 0.55, Math.min(ref * 1.7, est));
+  };
+
   // fator real: balanço de massa entre a 1ª e a última pesagem física do silo
   let fatorReal: number | null = null;
   let consumoRealKgPeriodo = 0;
@@ -255,16 +295,22 @@ export function calcularSilo(inp: SiloInput) {
   }
   const modeloA = (d: number) => modeloB(d) * (fatorReal ?? 1);
 
-  // pesos dinâmicos
+  // pesos dinâmicos — sem balança no silo, o peso real das aves manda no cálculo
+  const diasDesdePesagemAve = ultPesagem ? Math.max(0, idade - ultPesagem.idade) : null;
   const pesoA = fatorReal ? Math.min(0.6, 0.2 + Math.min(diasCobertosReal, 14) * 0.03) : 0;
-  const pesoB = ultPesagem ? Math.min(0.5, 0.25 + Math.max(0, 7 - (idade - ultPesagem.idade)) * 0.03) : 0;
-  const somaAB = pesoA + pesoB;
-  const wA = pesoA, wB = pesoB, wC = Math.max(0.1, 1 - somaAB);
-  const norm = wA + wB + wC;
-  const pesosModelo = { A: wA / norm, B: wB / norm, C: wC / norm };
+  const pesoD = ultPesagem
+    ? Math.min(0.55, 0.3 + Math.min(pesagensAves.length, 6) * 0.04 - Math.min(0.2, (diasDesdePesagemAve ?? 0) * 0.03))
+    : 0;
+  const pesoB = ultPesagem ? Math.min(0.4, 0.2 + Math.max(0, 7 - (diasDesdePesagemAve ?? 0)) * 0.025) : 0;
+  const somaABD = pesoA + pesoB + pesoD;
+  const wA = pesoA, wB = pesoB, wD = pesoD, wC = Math.max(0.1, 1 - somaABD);
+  const norm = wA + wB + wC + wD;
+  const pesosModelo = { A: wA / norm, B: wB / norm, C: wC / norm, D: wD / norm };
+
+
 
   const consumoGAveDia = (d: number) =>
-    pesosModelo.A * modeloA(d) + pesosModelo.B * modeloB(d) + pesosModelo.C * modeloC(d);
+    pesosModelo.A * modeloA(d) + pesosModelo.B * modeloB(d) + pesosModelo.C * modeloC(d) + pesosModelo.D * modeloD(d);
 
   /** consumo (kg) previsto para um dia de calendário */
   function consumoDoDiaKg(dia: Date): number {
@@ -316,11 +362,20 @@ export function calcularSilo(inp: SiloInput) {
     Math.pow(ultAncora ? cfg.erroBalancaKg : Math.max(200, totalEntregueKg * 0.02), 2) +
       Math.pow(consumoDesdeAncora * 0.06 + (horasDesdeAncora / 24) * 40, 2),
   );
-  let confianca = 20;
-  if (ultAncora) confianca = horasDesdeAncora <= 12 ? 95 : horasDesdeAncora <= 48 ? 85 : horasDesdeAncora <= 120 ? 70 : 55;
-  else if (fatorReal) confianca = 60;
-  else if (ultPesagem) confianca = 45;
+  // Confiança sem balança de silo: sustentada pelas pesagens das aves e pelo histórico de entregas
+  let confianca = 25;
+  if (ultAncora) {
+    confianca = horasDesdeAncora <= 12 ? 95 : horasDesdeAncora <= 48 ? 85 : horasDesdeAncora <= 120 ? 70 : 55;
+  } else if (fatorReal) {
+    confianca = 65;
+  } else if (ultPesagem) {
+    // base 55% + 4% por pesagem de ave (máx 6) − penalidade por pesagem antiga
+    const bonus = Math.min(6, pesagensAves.length) * 4;
+    const penal = Math.min(20, Math.max(0, (diasDesdePesagemAve ?? 0) - 3) * 3);
+    confianca = Math.max(35, Math.min(88, 55 + bonus - penal));
+  }
   if (entregas.length === 0) confianca = Math.min(confianca, 30);
+  const modoEstimativa: "balanca" | "peso_ave" | "curva" = ultAncora ? "balanca" : ultPesagem ? "peso_ave" : "curva";
 
   // ----- consumo diário -----
   const consumoHojeKg = consumoDoDiaKg(agora);
@@ -431,7 +486,7 @@ export function calcularSilo(inp: SiloInput) {
 
   // ----- anomalias -----
   const anomalias: string[] = [];
-  if (estoqueAtualKg <= 0 && totalEntregueKg > 0) anomalias.push("Estoque estimado zerado — pese o silo para recalibrar.");
+  if (estoqueAtualKg <= 0 && totalEntregueKg > 0) anomalias.push("Estoque estimado zerado — confira as entregas e registre a pesagem das aves de hoje para recalibrar.");
   if (avesVivas > inp.qtdInicial) anomalias.push("Aves vivas maiores que o alojamento — revisar mortalidade.");
   if (mortalidadePct > 8) anomalias.push(`Mortalidade acumulada alta (${mortalidadePct.toFixed(1)}%).`);
   if (ultimoErro && ultimoErro.erroPct !== null && Math.abs(ultimoErro.erroPct) > 10)
@@ -459,14 +514,24 @@ export function calcularSilo(inp: SiloInput) {
     alertas.push({ nivel: "medio", titulo: "🟡 Pedido se aproximando", detalhe: `Estoque mínimo previsto para ${dataPedido.toLocaleString("pt-BR")}.` });
   else alertas.push({ nivel: "ok", titulo: "🟢 Estoque normal", detalhe: `Autonomia de ${autonomiaDias.toFixed(1)} dias.` });
 
-  if (!ultAncora || horasDesdeAncora > 96)
-    alertas.push({ nivel: "info", titulo: "🔵 Nova pesagem necessária", detalhe: ultAncora ? `Última pesagem física há ${(horasDesdeAncora / 24).toFixed(1)} dias.` : "Nenhuma pesagem física registrada — a estimativa está apoiada só no balanço teórico." });
+  if (!ultAncora)
+    alertas.push({
+      nivel: "info",
+      titulo: "🔵 Estimativa pelo peso das aves",
+      detalhe: ultPesagem
+        ? `Sem balança no silo: o cálculo usa a pesagem das aves (${ultPesagem.g} g no D${ultPesagem.idade}), mortalidade, idade e a curva da linhagem. Pese as aves a cada 2–3 dias para manter a precisão.`
+        : "Sem balança no silo e sem pesagem das aves: o cálculo está só na curva da linhagem. Registre o peso médio das aves na granja para calibrar.",
+    });
+  else if (horasDesdeAncora > 96)
+    alertas.push({ nivel: "info", titulo: "🔵 Pesagem do silo antiga", detalhe: `Última pesagem física há ${(horasDesdeAncora / 24).toFixed(1)} dias.` });
+  if (!ultAncora && ultPesagem && (diasDesdePesagemAve ?? 0) > 3)
+    alertas.push({ nivel: "medio", titulo: "⚖️ Pesagem das aves atrasada", detalhe: `Última pesagem há ${diasDesdePesagemAve} dias — a estimativa do silo perde precisão.` });
   if (Math.abs(difConsumoPct) > 10 && idade > 7)
     alertas.push({ nivel: "medio", titulo: "⚠️ Consumo fora do padrão", detalhe: `Acumulado ${classeConsumo}: ${difConsumoPct.toFixed(1)}% vs referência.` });
   if (ultimoErro && ultimoErro.erro !== null && Math.abs(ultimoErro.erro) > cfg.erroBalancaKg * 3)
     alertas.push({ nivel: "medio", titulo: "⚠️ Divergência estimado × físico", detalhe: `${ultimoErro.erro > 0 ? "+" : ""}${ultimoErro.erro.toFixed(0)} kg na última pesagem.` });
   if (confianca < 45)
-    alertas.push({ nivel: "info", titulo: "⚠️ Dados insuficientes", detalhe: "Registre pesagens do silo e pesagens das aves para melhorar a precisão." });
+    alertas.push({ nivel: "info", titulo: "⚠️ Dados insuficientes", detalhe: "Registre o peso médio das aves e as entregas de ração para melhorar a precisão." });
 
   return {
     idade, avesVivas, mortAcum, elimAcum, mortalidadePct, baixasDia7,
@@ -476,7 +541,7 @@ export function calcularSilo(inp: SiloInput) {
     horasDesdeAncora, entradasDesdeAncora, consumoDesdeAncora,
     estoqueAtualKg, estoqueBalancoSimplesKg, sigmaKg,
     faixa: { min: Math.max(0, estoqueAtualKg - 1.28 * sigmaKg), max: estoqueAtualKg + 1.28 * sigmaKg },
-    confianca, pesosModelo, fatorReal, consumoRealKgPeriodo, diasCobertosReal,
+    confianca, modoEstimativa, pesosModelo, fatorReal, diasDesdePesagemAve, pesagensAves, consumoRealKgPeriodo, diasCobertosReal,
     consumoHojeKg, consumoAmanhaKg, consumoHoraAtualKgH, consumoSegKg,
     mm3, mm7, mm14, tendencia,
     projecao, marcos, autonomiaHoras, autonomiaDias, tRuptura,
@@ -484,7 +549,7 @@ export function calcularSilo(inp: SiloInput) {
     consumoAcumKg, consumoAcumRefKg, consumoPorAveG, consumoKgPor1000Dia,
     fcrReal, fcrRef, difConsumoKg, difConsumoPct, classeConsumo,
     pesoTotalVivoKg, historicoErros, ultimoErro, anomalias, alertas,
-    consumoDoDiaKg, integrarConsumo, pesoPrevistoG, consumoGAveDia,
+    consumoDoDiaKg, integrarConsumo, pesoPrevistoG, consumoGAveDia, pesoObsG, gpdNoDia, caIncremental,
   };
 }
 
