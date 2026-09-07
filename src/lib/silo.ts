@@ -486,7 +486,7 @@ export function calcularSilo(inp: SiloInput) {
 
   // ----- anomalias -----
   const anomalias: string[] = [];
-  if (estoqueAtualKg <= 0 && totalEntregueKg > 0) anomalias.push("Estoque estimado zerado — pese o silo para recalibrar.");
+  if (estoqueAtualKg <= 0 && totalEntregueKg > 0) anomalias.push("Estoque estimado zerado — confira as entregas e registre a pesagem das aves de hoje para recalibrar.");
   if (avesVivas > inp.qtdInicial) anomalias.push("Aves vivas maiores que o alojamento — revisar mortalidade.");
   if (mortalidadePct > 8) anomalias.push(`Mortalidade acumulada alta (${mortalidadePct.toFixed(1)}%).`);
   if (ultimoErro && ultimoErro.erroPct !== null && Math.abs(ultimoErro.erroPct) > 10)
@@ -514,14 +514,24 @@ export function calcularSilo(inp: SiloInput) {
     alertas.push({ nivel: "medio", titulo: "🟡 Pedido se aproximando", detalhe: `Estoque mínimo previsto para ${dataPedido.toLocaleString("pt-BR")}.` });
   else alertas.push({ nivel: "ok", titulo: "🟢 Estoque normal", detalhe: `Autonomia de ${autonomiaDias.toFixed(1)} dias.` });
 
-  if (!ultAncora || horasDesdeAncora > 96)
-    alertas.push({ nivel: "info", titulo: "🔵 Nova pesagem necessária", detalhe: ultAncora ? `Última pesagem física há ${(horasDesdeAncora / 24).toFixed(1)} dias.` : "Nenhuma pesagem física registrada — a estimativa está apoiada só no balanço teórico." });
+  if (!ultAncora)
+    alertas.push({
+      nivel: "info",
+      titulo: "🔵 Estimativa pelo peso das aves",
+      detalhe: ultPesagem
+        ? `Sem balança no silo: o cálculo usa a pesagem das aves (${ultPesagem.g} g no D${ultPesagem.idade}), mortalidade, idade e a curva da linhagem. Pese as aves a cada 2–3 dias para manter a precisão.`
+        : "Sem balança no silo e sem pesagem das aves: o cálculo está só na curva da linhagem. Registre o peso médio das aves na granja para calibrar.",
+    });
+  else if (horasDesdeAncora > 96)
+    alertas.push({ nivel: "info", titulo: "🔵 Pesagem do silo antiga", detalhe: `Última pesagem física há ${(horasDesdeAncora / 24).toFixed(1)} dias.` });
+  if (!ultAncora && ultPesagem && (diasDesdePesagemAve ?? 0) > 3)
+    alertas.push({ nivel: "medio", titulo: "⚖️ Pesagem das aves atrasada", detalhe: `Última pesagem há ${diasDesdePesagemAve} dias — a estimativa do silo perde precisão.` });
   if (Math.abs(difConsumoPct) > 10 && idade > 7)
     alertas.push({ nivel: "medio", titulo: "⚠️ Consumo fora do padrão", detalhe: `Acumulado ${classeConsumo}: ${difConsumoPct.toFixed(1)}% vs referência.` });
   if (ultimoErro && ultimoErro.erro !== null && Math.abs(ultimoErro.erro) > cfg.erroBalancaKg * 3)
     alertas.push({ nivel: "medio", titulo: "⚠️ Divergência estimado × físico", detalhe: `${ultimoErro.erro > 0 ? "+" : ""}${ultimoErro.erro.toFixed(0)} kg na última pesagem.` });
   if (confianca < 45)
-    alertas.push({ nivel: "info", titulo: "⚠️ Dados insuficientes", detalhe: "Registre pesagens do silo e pesagens das aves para melhorar a precisão." });
+    alertas.push({ nivel: "info", titulo: "⚠️ Dados insuficientes", detalhe: "Registre o peso médio das aves e as entregas de ração para melhorar a precisão." });
 
   return {
     idade, avesVivas, mortAcum, elimAcum, mortalidadePct, baixasDia7,
@@ -531,7 +541,7 @@ export function calcularSilo(inp: SiloInput) {
     horasDesdeAncora, entradasDesdeAncora, consumoDesdeAncora,
     estoqueAtualKg, estoqueBalancoSimplesKg, sigmaKg,
     faixa: { min: Math.max(0, estoqueAtualKg - 1.28 * sigmaKg), max: estoqueAtualKg + 1.28 * sigmaKg },
-    confianca, pesosModelo, fatorReal, consumoRealKgPeriodo, diasCobertosReal,
+    confianca, modoEstimativa, pesosModelo, fatorReal, diasDesdePesagemAve, pesagensAves, consumoRealKgPeriodo, diasCobertosReal,
     consumoHojeKg, consumoAmanhaKg, consumoHoraAtualKgH, consumoSegKg,
     mm3, mm7, mm14, tendencia,
     projecao, marcos, autonomiaHoras, autonomiaDias, tRuptura,
@@ -539,7 +549,7 @@ export function calcularSilo(inp: SiloInput) {
     consumoAcumKg, consumoAcumRefKg, consumoPorAveG, consumoKgPor1000Dia,
     fcrReal, fcrRef, difConsumoKg, difConsumoPct, classeConsumo,
     pesoTotalVivoKg, historicoErros, ultimoErro, anomalias, alertas,
-    consumoDoDiaKg, integrarConsumo, pesoPrevistoG, consumoGAveDia,
+    consumoDoDiaKg, integrarConsumo, pesoPrevistoG, consumoGAveDia, pesoObsG, gpdNoDia, caIncremental,
   };
 }
 
