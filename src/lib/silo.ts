@@ -230,6 +230,46 @@ export function calcularSilo(inp: SiloInput) {
   const modeloC = (d: number) => refConsumoDiaG(d, lin, sx);
   const modeloB = (d: number) => refConsumoDiaG(d, lin, sx) * Math.pow(fatorPesoNoDia(d), 0.75);
 
+  // ----- MODELO D: consumo derivado do PESO REAL das aves, dia a dia -----
+  // Peso observado (interpolação linear entre as pesagens do lote; fora da série usa a curva ajustada)
+  const pesoObsG = (d: number): number => {
+    if (!pesagensAves.length) return pesoPrevistoG(d);
+    if (d <= pesagensAves[0].idade) {
+      const p0 = pesagensAves[0];
+      const inicial = refPesoG(0, lin, sx);
+      return p0.idade > 0 ? inicial + ((p0.g - inicial) * d) / p0.idade : p0.g;
+    }
+    for (let i = 0; i < pesagensAves.length - 1; i++) {
+      const a = pesagensAves[i], b = pesagensAves[i + 1];
+      if (d >= a.idade && d <= b.idade) return a.g + ((b.g - a.g) * (d - a.idade)) / Math.max(1, b.idade - a.idade);
+    }
+    // após a última pesagem: mantém o desvio observado sobre a curva
+    return pesoPrevistoG(d);
+  };
+  /** ganho de peso (g/ave/dia) medido/estimado no dia d */
+  const gpdNoDia = (d: number) => Math.max(0, pesoObsG(d + 1) - pesoObsG(d));
+  /** conversão alimentar incremental da linhagem no dia d (kg ração / kg ganho) */
+  const caIncremental = (d: number) => {
+    const dg = refPesoG(d + 1, lin, sx) - refPesoG(d, lin, sx);
+    const dc = refConsumoAcumG(d + 1, lin, sx) - refConsumoAcumG(d, lin, sx);
+    if (dg <= 0) return 0;
+    const ca = dc / dg;
+    return ca > 0.8 && ca < 5 ? ca : 0;
+  };
+  /** consumo do dia = ganho real do dia × CA incremental + manutenção metabólica */
+  const modeloD = (d: number) => {
+    const ca = caIncremental(d);
+    if (!ca) return modeloB(d);
+    const ganho = gpdNoDia(d);
+    const crescimento = ganho * ca;
+    // manutenção proporcional ao peso metabólico quando o ganho cai (fim de lote/estresse)
+    const manutencao = 0.09 * Math.pow(pesoObsG(d) / 1000, 0.75) * 1000 * 0.35;
+    const est = crescimento * 0.85 + manutencao;
+    const ref = modeloC(d);
+    // trava de sanidade: nunca sai de 55%..170% da referência da linhagem
+    return Math.max(ref * 0.55, Math.min(ref * 1.7, est));
+  };
+
   // fator real: balanço de massa entre a 1ª e a última pesagem física do silo
   let fatorReal: number | null = null;
   let consumoRealKgPeriodo = 0;
@@ -255,13 +295,19 @@ export function calcularSilo(inp: SiloInput) {
   }
   const modeloA = (d: number) => modeloB(d) * (fatorReal ?? 1);
 
-  // pesos dinâmicos
+  // pesos dinâmicos — sem balança no silo, o peso real das aves manda no cálculo
+  const diasDesdePesagemAve = ultPesagem ? Math.max(0, idade - ultPesagem.idade) : null;
   const pesoA = fatorReal ? Math.min(0.6, 0.2 + Math.min(diasCobertosReal, 14) * 0.03) : 0;
-  const pesoB = ultPesagem ? Math.min(0.5, 0.25 + Math.max(0, 7 - (idade - ultPesagem.idade)) * 0.03) : 0;
-  const somaAB = pesoA + pesoB;
-  const wA = pesoA, wB = pesoB, wC = Math.max(0.1, 1 - somaAB);
-  const norm = wA + wB + wC;
-  const pesosModelo = { A: wA / norm, B: wB / norm, C: wC / norm };
+  const pesoD = ultPesagem
+    ? Math.min(0.55, 0.3 + Math.min(pesagensAves.length, 6) * 0.04 - Math.min(0.2, (diasDesdePesagemAve ?? 0) * 0.03))
+    : 0;
+  const pesoB = ultPesagem ? Math.min(0.4, 0.2 + Math.max(0, 7 - (diasDesdePesagemAve ?? 0)) * 0.025) : 0;
+  const somaABD = pesoA + pesoB + pesoD;
+  const wA = pesoA, wB = pesoB, wD = pesoD, wC = Math.max(0.1, 1 - somaABD);
+  const norm = wA + wB + wC + wD;
+  const pesosModelo = { A: wA / norm, B: wB / norm, C: wC / norm, D: wD / norm };
+
+
 
   const consumoGAveDia = (d: number) =>
     pesosModelo.A * modeloA(d) + pesosModelo.B * modeloB(d) + pesosModelo.C * modeloC(d);
