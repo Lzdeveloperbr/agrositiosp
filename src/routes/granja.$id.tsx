@@ -82,14 +82,16 @@ function LoteDetalhe() {
       return;
     }
     const jaExiste = lote.entries.some((e) => e.date === entry.date);
+    if (jaExiste) {
+      toast.error("Já existe um lançamento nessa data. Exclua o registro antigo antes de substituí-lo.");
+      return;
+    }
     setLotes((prev) => prev.map((l) => l.id === id ? {
       ...l,
-      entries: jaExiste
-        ? l.entries.map((e) => e.date === entry.date ? { ...entry } : e)
-        : [...l.entries, { ...entry }].sort((a, b) => a.date.localeCompare(b.date)),
+      entries: [...l.entries, { ...entry }].sort((a, b) => a.date.localeCompare(b.date)),
     } : l));
     setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, observacoes: "" });
-    toast.success(jaExiste ? "Lançamento do dia atualizado" : "Lançamento registrado");
+    toast.success("Lançamento registrado");
   };
 
   const removerEntry = (idx: number) => {
@@ -141,7 +143,28 @@ function LoteDetalhe() {
           <KPI label="Vivas" value={vivas.toLocaleString("pt-BR")} />
           <KPI label="Mort.+Elim." value={`${((totalMort + totalElim) / lote.quantidadeInicial * 100).toFixed(2)}%`} />
           <KPI label="Peso esperado" value={`${resumo.pesoEsperadoHojeG.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} g`} />
+          <KPI label="Peso medido" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "—"} />
+          <KPI label="Diferença da meta" value={resumo.diferencaPesoPct == null ? "—" : `${resumo.diferencaPesoPct > 0 ? "+" : ""}${resumo.diferencaPesoPct.toFixed(1)}%`} />
+          <KPI label="GPD recente" value={resumo.gpdRecente == null ? "—" : `${resumo.gpdRecente.toFixed(1)} g/d`} />
+          <KPI label="Consumo esperado" value={`${resumo.consumoEsperadoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
         </div>
+
+        {!lote.encerrado && (resumo.diasSemPesar > 3 || resumo.situacao === "critico") && (
+          <Card className="p-4 border-warning/40 bg-warning/10">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm">Ação recomendada para melhorar a precisão</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {resumo.diasSemPesar > 3
+                    ? `A última pesagem tem ${resumo.diasSemPesar} dias. Pese uma amostra hoje para atualizar manejo, projeção de abate e silo.`
+                    : `O peso está ${Math.abs(resumo.diferencaPesoPct ?? 0).toFixed(1)}% abaixo da curva. Revise água, ração, ambiência e uniformidade.`}
+                </p>
+              </div>
+              <Button asChild size="sm"><Link to="/manejo">Abrir manejo</Link></Button>
+              <Button asChild size="sm" variant="outline"><Link to="/silo">Ver silo</Link></Button>
+            </div>
+          </Card>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-4">
           <Card className="p-5 lg:col-span-2" style={{ background: "var(--gradient-surface)" }}>

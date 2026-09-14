@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap } from "lucide-react";
+import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap, Boxes, AlertTriangle } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
@@ -92,6 +92,7 @@ function GranjaPage() {
     { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3 },
     { to: "/historico-lotes", label: "Histórico", icon: History },
     { to: "/entregas-racao", label: "Ração", icon: Wheat },
+    { to: "/silo", label: "Silo ao Vivo", icon: Boxes },
   ];
 
 
@@ -177,6 +178,13 @@ function GranjaPage() {
               const resumo = calcularResumoLote(l);
               const dias = resumo.idade;
               const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
+              const lancouHoje = l.entries.some((e) => e.date === hojeISO());
+              const alertas = [
+                !l.encerrado && !lancouHoje ? "Lançamento diário pendente" : null,
+                !l.encerrado && resumo.diasSemPesar > 3 ? `Pesagem atrasada (${resumo.diasSemPesar} dias)` : null,
+                resumo.situacao === "critico" ? `Peso ${Math.abs(resumo.diferencaPesoPct ?? 0).toFixed(1)}% abaixo da meta` : null,
+                resumo.mortalidadePct > 5 ? `Baixas elevadas (${resumo.mortalidadePct.toFixed(1)}%)` : null,
+              ].filter((item): item is string => Boolean(item));
               return (
                 <Card key={l.id} className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
                   <div className="flex items-start justify-between mb-4">
@@ -206,6 +214,16 @@ function GranjaPage() {
                       </span>
                     </div>
                   </div>
+                  {alertas.length > 0 && (
+                    <div className="mb-4 space-y-1.5 rounded-md border border-warning/40 bg-warning/10 p-2.5">
+                      {alertas.slice(0, 3).map((alerta) => (
+                        <div key={alerta} className="flex items-center gap-2 text-xs text-warning-foreground">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                          <span>{alerta}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-1 mb-4">
                     <div className="flex justify-between text-xs text-muted-foreground"><span>Crescimento</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">

@@ -36,7 +36,7 @@ type DiaProtocolo = {
   luzHoras: number;
   luzLux: number;
   racao: "Pré-inicial" | "Inicial" | "Crescimento" | "Final" | "Retirada";
-  consumoG: number; // g/ave/dia acumulado esperado
+  consumoG: number; // g/ave/dia esperado
   pesoG: number; // peso médio esperado g
   caEsperado: number; // FCR acumulado
   manejo: string[];
@@ -352,18 +352,18 @@ function ManejoPage() {
                   </thead>
                   <tbody>
                     {[
-                      { sem: 1, dias: "1-7",   peso: 205,  ca: 1.00, temp: "32→29°C", racao: "Pré-inicial", foco: "Pintinho · forno · papel · infantil" },
-                      { sem: 2, dias: "8-14",  peso: 555,  ca: 1.23, temp: "29→25°C", racao: "Inicial",     foco: "Liberar galpão · subir nipples" },
-                      { sem: 3, dias: "15-21", peso: 1150, ca: 1.49, temp: "25→22°C", racao: "Crescimento", foco: "Ventilação · uniformidade" },
-                      { sem: 4, dias: "22-28", peso: 1960, ca: 1.77, temp: "22→20°C", racao: "Cresc/Final", foco: "Nebulizar · máx. consumo" },
-                      { sem: 5, dias: "29-35", peso: 2760, ca: 1.98, temp: "20°C",    racao: "Final",       foco: "Pré-apanha · cama seca" },
-                      { sem: 6, dias: "36-42", peso: 3460, ca: 2.18, temp: "20°C",    racao: "Retirada",    foco: "Jejum · embarque" },
+                      { sem: 1, fim: 7, dias: "D0–D7", temp: "32→29°C", racao: "Pré-inicial", foco: "Pintinho · forno · papel · infantil" },
+                      { sem: 2, fim: 14, dias: "D8–D14", temp: "29→25°C", racao: "Inicial", foco: "Liberar galpão · subir nipples" },
+                      { sem: 3, fim: 21, dias: "D15–D21", temp: "25→22°C", racao: "Crescimento", foco: "Ventilação · uniformidade" },
+                      { sem: 4, fim: 28, dias: "D22–D28", temp: "22→20°C", racao: "Cresc/Final", foco: "Nebulizar · máx. consumo" },
+                      { sem: 5, fim: 35, dias: "D29–D35", temp: "20°C", racao: "Final", foco: "Pré-apanha · cama seca" },
+                      { sem: 6, fim: 42, dias: "D36–D42", temp: "20°C", racao: "Retirada", foco: "Jejum · embarque" },
                     ].map((s) => (
                       <tr key={s.sem} className="border-b border-border/50">
                         <td className="py-2 font-bold">{s.sem}ª</td>
                         <td className="py-2">{s.dias}</td>
-                        <td className="py-2 text-right tabular-nums">{s.peso}g</td>
-                        <td className="py-2 text-right tabular-nums">{s.ca.toFixed(2)}</td>
+                        <td className="py-2 text-right tabular-nums">{refPesoG(s.fim, linhagem, "misto").toFixed(0)}g</td>
+                        <td className="py-2 text-right tabular-nums">{refCA(s.fim, linhagem, "misto").toFixed(2)}</td>
                         <td className="py-2 text-right">{s.temp}</td>
                         <td className="py-2 pl-3">{s.racao}</td>
                         <td className="py-2 pl-3 text-muted-foreground">{s.foco}</td>
