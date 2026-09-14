@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes } from "@/lib/state";
-import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints } from "lucide-react";
+import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints, Boxes, Timer, Scale, Truck, Activity, AlertTriangle, RefreshCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect } from "react";
 import { diffDias } from "@/lib/data";
-import { refCA, refConsumoDiaG, refPesoG, type Linhagem } from "@/lib/silo";
+import { calcularSilo, CFG_PADRAO, refCA, refConsumoDiaG, refPesoG, type EntregaSilo, type Linhagem, type SiloCfg } from "@/lib/silo";
 import { calcularResumoLote } from "@/lib/granja";
+import { useFazenda } from "@/lib/cloud/fazenda";
+import { fmtDataHora } from "@/lib/data";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
@@ -21,6 +23,8 @@ export const Route = createFileRoute("/manejo")({
       { name: "description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
       { property: "og:title", content: "Manejo do Frango — AgroSítio" },
       { property: "og:description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ManejoPage,
@@ -171,10 +175,15 @@ function protocoloDoDia(d: number): DiaProtocolo {
 }
 
 function ManejoPage() {
+  const { client, fazendaId } = useFazenda();
   const [lotes] = useLotes();
   const ativos = lotes.filter((l) => !l.encerrado);
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
   const [linhagem, setLinhagem] = useState<Linhagem>("ross_ap95");
+  const [entregas, setEntregas] = useState<EntregaSilo[]>([]);
+  const [cfgSilo, setCfgSilo] = useState<SiloCfg>(CFG_PADRAO);
+  const [agora, setAgora] = useState(() => new Date());
+  const [carregandoSilo, setCarregandoSilo] = useState(false);
   const lote = ativos.find((l) => l.id === loteId);
 
   // idade D0 = 0. Protocolo interno usa dia 1..42, então protoIdx = idadeReal.
@@ -193,6 +202,40 @@ function ManejoPage() {
     if (lote) setDiaSel(Math.min(42, idadeDias(lote.dataEntrada)));
   }, [lote?.id]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setAgora(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!fazendaId || !lote) {
+      setEntregas([]);
+      setCfgSilo(CFG_PADRAO);
+      return;
+    }
+    let cancelado = false;
+    const carregar = async () => {
+      setCarregandoSilo(true);
+      const [ent, conf] = await Promise.all([
+        client.from("entregas_racao").select("id,data,quantidade_kg,lote_id").eq("lote_id", lote.id).order("data", { ascending: true }),
+        client.from("silo_config").select("*").eq("lote_id", lote.id).order("updated_at", { ascending: false }).limit(1),
+      ]);
+      if (cancelado) return;
+      setEntregas(((ent.data as any[]) || []).map((item) => ({ id: item.id, data: item.data, kg: Number(item.quantidade_kg) || 0 })));
+      const c = (conf.data as any[])?.[0];
+      setCfgSilo(c ? {
+        capacidadeKg: Number(c.capacidade_kg), capacidadeOperacionalKg: c.capacidade_operacional_kg ? Number(c.capacidade_operacional_kg) : null,
+        estoqueMinimoKg: Number(c.estoque_minimo_kg), margemSegurancaKg: Number(c.margem_seguranca_kg),
+        cargaPadraoKg: Number(c.carga_padrao_kg), leadTimeHoras: Number(c.lead_time_horas),
+        erroBalancaKg: Number(c.erro_balanca_kg), perdaPct: Number(c.perda_pct),
+      } : CFG_PADRAO);
+      setCarregandoSilo(false);
+    };
+    void carregar();
+    const polling = window.setInterval(carregar, 60_000);
+    return () => { cancelado = true; window.clearInterval(polling); };
+  }, [client, fazendaId, lote?.id]);
+
   // Indicadores estimados do lote, usando a mesma curva do silo.
   const caReal = useMemo(() => {
     if (!lote) return null;
@@ -207,6 +250,21 @@ function ManejoPage() {
       diasSemPesar: resumo.diasSemPesar,
     };
   }, [lote, linhagem]);
+
+  const silo = useMemo(() => lote ? calcularSilo({
+    agora,
+    alojamento: lote.dataEntrada,
+    qtdInicial: lote.quantidadeInicial,
+    previsaoAbateDias: lote.previsaoAbateDias || 42,
+    linhagem,
+    sexo: "misto",
+    entries: lote.entries || [],
+    entregas,
+    pesagens: [],
+    cfg: cfgSilo,
+  }) : null, [agora, cfgSilo, entregas, linhagem, lote]);
+
+  const resumoLote = useMemo(() => lote ? calcularResumoLote(lote, linhagem) : null, [lote, linhagem]);
 
   return (
     <AppShell>
@@ -242,6 +300,69 @@ function ManejoPage() {
             </div>
             {caReal.diasSemPesar > 3 && <p className="text-xs mt-3 opacity-85">Pesagem atrasada há {caReal.diasSemPesar} dias. Registre o peso na granja para recalibrar crescimento e estoque.</p>}
           </Card>
+        )}
+
+        {lote && silo && resumoLote && (
+          <section className="space-y-3" aria-labelledby="operacao-lote">
+            <div className="flex flex-wrap items-end justify-between gap-2 px-1">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">Parâmetros reais do lote</p>
+                <h2 id="operacao-lote" className="font-display text-xl font-bold">Operação de hoje · D{resumoLote.idade}</h2>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <RefreshCw className={`h-3.5 w-3.5 ${carregandoSilo ? "animate-spin" : ""}`} />
+                Atualizado {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <LoteMetric icon={Activity} label="Aves vivas" value={resumoLote.vivas.toLocaleString("pt-BR")} hint={`${resumoLote.baixas.toLocaleString("pt-BR")} baixas · ${resumoLote.mortalidadePct.toFixed(2)}%`} />
+              <LoteMetric icon={Scale} label="Peso atual" value={`${silo.pesoAtualG.toFixed(0)} g`} hint={silo.ultPesagem ? `pesado no D${silo.ultPesagem.idade}` : "estimado pela curva"} />
+              <LoteMetric icon={Utensils} label="Consumo hoje" value={`${silo.consumoHojeKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} hint={`${silo.consumoKgPor1000Dia.toFixed(1)} kg/1.000 aves`} />
+              <LoteMetric icon={Boxes} label="Saldo no silo" value={`${silo.estoqueAtualKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} hint={`faixa ${silo.faixa.min.toFixed(0)}–${silo.faixa.max.toFixed(0)} kg`} />
+            </div>
+
+            <div className="grid md:grid-cols-[1.25fr_1fr] gap-3">
+              <Card className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Autonomia estimada</p>
+                    <p className="text-2xl font-display font-bold mt-0.5">{silo.autonomiaDias.toFixed(1)} dias</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {silo.tRuptura ? `Previsão de término: ${fmtDataHora(silo.tRuptura)}` : "Saldo suficiente para mais de 7 dias"}
+                    </p>
+                  </div>
+                  <Timer className="h-6 w-6 text-primary" />
+                </div>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.max(0, (silo.estoqueAtualKg / Math.max(1, cfgSilo.capacidadeOperacionalKg || cfgSilo.capacidadeKg)) * 100))}%` }} />
+                </div>
+                <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                  <span>{((silo.estoqueAtualKg / Math.max(1, cfgSilo.capacidadeOperacionalKg || cfgSilo.capacidadeKg)) * 100).toFixed(0)}% do silo</span>
+                  <span>Confiança {silo.confianca}%</span>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <div className="flex items-start gap-3">
+                  {silo.pedidoRecomendadoKg > 0 ? <AlertTriangle className="h-5 w-5 text-warning shrink-0" /> : <ShieldCheck className="h-5 w-5 text-success shrink-0" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm">{silo.pedidoRecomendadoKg > 0 ? "Programar próxima carga" : "Abastecimento dentro do planejado"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {silo.pedidoRecomendadoKg > 0
+                        ? `Pedido recomendado: ${silo.pedidoRecomendadoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg.`
+                        : `Consumo de amanhã: ${silo.consumoAmanhaKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg.`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">Cálculo por peso das aves, idade, baixas e entregas deste lote.</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <Button asChild size="sm"><Link to="/silo"><Boxes className="h-4 w-4 mr-1" /> Abrir silo</Link></Button>
+                  <Button asChild size="sm" variant="outline"><Link to="/entregas-racao"><Truck className="h-4 w-4 mr-1" /> Entregas</Link></Button>
+                </div>
+              </Card>
+            </div>
+          </section>
         )}
 
         {/* Seletor de dia */}
@@ -733,6 +854,16 @@ function ManejoPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+function LoteMetric({ icon: Icon, label, value, hint }: { icon: typeof Activity; label: string; value: string; hint: string }) {
+  return (
+    <Card className="p-4 min-w-0">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className="h-4 w-4 text-primary" />{label}</div>
+      <p className="font-display text-xl font-bold tabular-nums mt-2 break-words">{value}</p>
+      <p className="text-[11px] text-muted-foreground mt-1 leading-snug">{hint}</p>
+    </Card>
   );
 }
 
