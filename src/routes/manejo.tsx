@@ -7,10 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes } from "@/lib/state";
-import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints, Boxes, Timer, Scale, Truck, Activity, AlertTriangle, RefreshCw } from "lucide-react";
+import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen, TrendingUp, Waves, Ruler, Sparkles, ShieldCheck, Footprints, Boxes, Timer, Scale, Truck, Activity, AlertTriangle, RefreshCw, CalendarClock, PackageCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect } from "react";
-import { diffDias } from "@/lib/data";
+import { diffDias, parseData } from "@/lib/data";
 import { calcularSilo, CFG_PADRAO, refCA, refConsumoDiaG, refPesoG, type EntregaSilo, type Linhagem, type SiloCfg } from "@/lib/silo";
 import { calcularResumoLote } from "@/lib/granja";
 import { useFazenda } from "@/lib/cloud/fazenda";
@@ -159,6 +159,19 @@ function deveBaterCama(d: number): boolean {
 }
 
 const DIAS_LOTE = Array.from({ length: 43 }, (_, dia) => dia);
+const CFG_LOCAL = (fazendaId: string) => `silo_pref_${fazendaId}`;
+
+const FASES_RACAO = [
+  { nome: "Pré-inicial", inicio: 0, fim: 7 },
+  { nome: "Inicial", inicio: 8, fim: 14 },
+  { nome: "Crescimento", inicio: 15, fim: 25 },
+  { nome: "Final", inicio: 26, fim: 35 },
+  { nome: "Retirada", inicio: 36, fim: 42 },
+] as const;
+
+function faseRacaoParaIdade(idade: number) {
+  return FASES_RACAO.find((fase) => idade >= fase.inicio && idade <= fase.fim) ?? FASES_RACAO[FASES_RACAO.length - 1];
+}
 
 function protocoloDoDia(d: number): DiaProtocolo {
   if (d <= 0) {
@@ -206,6 +219,26 @@ function ManejoPage() {
     const timer = window.setInterval(() => setAgora(new Date()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!fazendaId) return;
+    try {
+      const salvo = localStorage.getItem(CFG_LOCAL(fazendaId));
+      if (!salvo) return;
+      const preferencia = JSON.parse(salvo) as { linhagem?: Linhagem };
+      if (preferencia.linhagem) setLinhagem(preferencia.linhagem);
+    } catch { /* preferência inválida: mantém o padrão */ }
+  }, [fazendaId]);
+
+  useEffect(() => {
+    if (!fazendaId) return;
+    let sexo = "misto";
+    try {
+      const salvo = localStorage.getItem(CFG_LOCAL(fazendaId));
+      if (salvo) sexo = JSON.parse(salvo).sexo || sexo;
+    } catch { /* mantém sexo misto */ }
+    localStorage.setItem(CFG_LOCAL(fazendaId), JSON.stringify({ linhagem, sexo }));
+  }, [fazendaId, linhagem]);
 
   useEffect(() => {
     if (!fazendaId || !lote) {
@@ -266,6 +299,27 @@ function ManejoPage() {
 
   const resumoLote = useMemo(() => lote ? calcularResumoLote(lote, linhagem) : null, [lote, linhagem]);
 
+  const planoFase = useMemo(() => {
+    if (!lote || !silo) return null;
+    const fase = faseRacaoParaIdade(silo.idade);
+    const proxima = FASES_RACAO.find((item) => item.inicio > fase.inicio) ?? null;
+    const alojamento = parseData(lote.dataEntrada);
+    if (!alojamento) return null;
+    const fimFase = new Date(alojamento.getFullYear(), alojamento.getMonth(), alojamento.getDate() + fase.fim + 1);
+    const necessidadeKg = Math.max(0, silo.integrarConsumo(agora, fimFase));
+    const margemKg = silo.estoqueAtualKg - necessidadeKg;
+    const margemSeguraKg = cfgSilo.margemSegurancaKg;
+    const situacao = margemKg < 0 ? "falta" : margemKg < margemSeguraKg ? "atencao" : "seguro";
+    return {
+      fase,
+      proxima,
+      diasRestantes: Math.max(0, fase.fim - silo.idade),
+      necessidadeKg,
+      margemKg,
+      situacao,
+    };
+  }, [agora, cfgSilo.margemSegurancaKg, lote, silo]);
+
   return (
     <AppShell>
       <div className="space-y-6">
@@ -305,7 +359,7 @@ function ManejoPage() {
 
         {/* Indicadores zootécnicos */}
         {lote && caReal && (
-          <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+          <Card className="p-5 bg-primary text-primary-foreground">
             <div className="flex items-center gap-2 mb-2 opacity-90"><TrendingUp className="h-5 w-5" /><span className="font-display font-semibold">Lote {lote.numero} · D{caReal.idade}</span></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div><p className="text-xs opacity-80">Peso {caReal.pesoReal ? "medido" : "projetado"}</p><p className="text-2xl font-display font-bold">{caReal.peso.toFixed(0)}g</p></div>
@@ -336,6 +390,43 @@ function ManejoPage() {
               <LoteMetric icon={Utensils} label="Consumo hoje" value={`${silo.consumoHojeKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} hint={`${silo.consumoKgPor1000Dia.toFixed(1)} kg/1.000 aves`} />
               <LoteMetric icon={Boxes} label="Saldo no silo" value={`${silo.estoqueAtualKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} hint={`faixa ${silo.faixa.min.toFixed(0)}–${silo.faixa.max.toFixed(0)} kg`} />
             </div>
+
+            {planoFase && (
+              <Card className={`overflow-hidden border-l-4 ${planoFase.situacao === "falta" ? "border-l-destructive" : planoFase.situacao === "atencao" ? "border-l-warning" : "border-l-success"}`}>
+                <div className="grid lg:grid-cols-[1.2fr_1fr_1fr]">
+                  <div className="p-4 border-b lg:border-b-0 lg:border-r border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CalendarClock className="h-4 w-4 text-primary" /> Fase atual
+                    </div>
+                    <p className="mt-1 text-xl font-display font-bold">{planoFase.fase.nome} · D{planoFase.fase.inicio}–D{planoFase.fase.fim}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {planoFase.proxima
+                        ? `${planoFase.diasRestantes === 0 ? "Troca amanhã" : `${planoFase.diasRestantes} dia(s) até a troca`} para ${planoFase.proxima.nome}.`
+                        : `${planoFase.diasRestantes} dia(s) até o fim do protocolo.`}
+                    </p>
+                  </div>
+                  <div className="p-4 border-b lg:border-b-0 lg:border-r border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Utensils className="h-4 w-4 text-primary" /> Necessário até o fim da fase
+                    </div>
+                    <p className="mt-1 text-xl font-display font-bold">{planoFase.necessidadeKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Calculado com aves vivas, peso e perdas do lote.</p>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {planoFase.situacao === "seguro" ? <PackageCheck className="h-4 w-4 text-success" /> : <AlertTriangle className={`h-4 w-4 ${planoFase.situacao === "falta" ? "text-destructive" : "text-warning"}`} />}
+                      Saldo ao chegar na troca
+                    </div>
+                    <p className={`mt-1 text-xl font-display font-bold ${planoFase.margemKg < 0 ? "text-destructive" : planoFase.situacao === "atencao" ? "text-warning" : "text-success"}`}>
+                      {planoFase.margemKg >= 0 ? "Sobra " : "Falta "}{Math.abs(planoFase.margemKg).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {planoFase.situacao === "falta" ? "Providencie ração antes da troca de fase." : planoFase.situacao === "atencao" ? "Margem abaixo da segurança configurada." : "Margem segura para concluir esta fase."}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             <div className="grid md:grid-cols-[1.25fr_1fr] gap-3">
               <Card className="p-4">
@@ -398,10 +489,14 @@ function ManejoPage() {
               const isTroca = p.manejo.some((m) => m.includes("TROCA") || m.includes("INICIAR ração"));
               const isCama = deveBaterCama(d);
               return (
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
                   key={d}
                   onClick={() => setDiaSel(d)}
-                  className={`aspect-square rounded-md text-xs font-semibold tabular-nums border transition ${
+                  aria-label={`Dia ${d}${lote && d === Math.min(42, idadeReal) ? ", hoje" : ""}`}
+                  className={`aspect-square size-auto min-h-9 rounded-md text-xs font-semibold tabular-nums border transition ${
                     diaSel === d ? "bg-primary text-primary-foreground border-primary" :
                     lote && d === Math.min(42, idadeReal) ? "ring-2 ring-primary/60 bg-primary/10 border-primary/40" :
                     isPesagem ? "bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30" :
@@ -411,7 +506,7 @@ function ManejoPage() {
                   }`}
                 >
                   {d}
-                </button>
+                </Button>
               );
             })}
           </div>
