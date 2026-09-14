@@ -128,7 +128,7 @@ function GranjaPage() {
           <Card className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg grid place-items-center" style={{ background: "var(--gradient-primary)" }}>
+                 <div className="h-8 w-8 rounded-md grid place-items-center bg-primary">
                   <Activity className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div>
@@ -153,8 +153,8 @@ function GranjaPage() {
             {atalhos.map((a) => {
               const Icon = a.icon;
               return (
-                <Link key={a.to} to={a.to} className="group flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-card/60 border border-border hover:border-primary/50 hover:bg-card transition-all">
-                  <div className="h-9 w-9 rounded-lg grid place-items-center bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Link key={a.to} to={a.to} className="group flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg operational-surface hover:border-primary/50 transition-all">
+                   <div className="h-9 w-9 rounded-md grid place-items-center bg-primary/10 group-hover:bg-primary/20 transition-colors">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
                   <span className="text-[11px] font-medium text-center leading-tight">{a.label}</span>
@@ -259,7 +259,7 @@ function Mini({ label, value }: { label: string; value: string }) {
 function KpiTile({ icon: Icon, label, value, sub, tone }: { icon: any; label: string; value: string; sub?: string; tone?: "ok" | "warn" | "bad" }) {
   const toneColor = tone === "ok" ? "text-success" : tone === "warn" ? "text-warning" : tone === "bad" ? "text-destructive" : "text-primary";
   return (
-    <div className="relative overflow-hidden rounded-xl bg-card/70 border border-border p-3.5">
+     <div className="relative overflow-hidden rounded-lg operational-surface p-3.5">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{label}</span>
         <Icon className={`h-3.5 w-3.5 ${toneColor}`} />
