@@ -288,6 +288,21 @@ function ManejoPage() {
           </div>}
         </header>
 
+        {ativos.length === 0 && (
+          <Card className="p-5 border-dashed">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="h-10 w-10 rounded-md bg-primary/10 grid place-items-center">
+                <Activity className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="font-semibold">Nenhum lote ativo</h2>
+                <p className="text-sm text-muted-foreground">Crie ou reabra um lote para mostrar aves vivas, peso, consumo e saldo do silo nesta tela.</p>
+              </div>
+              <Button asChild><Link to="/granja/">Abrir granja <ArrowRight className="h-4 w-4 ml-1" /></Link></Button>
+            </div>
+          </Card>
+        )}
+
         {/* Indicadores zootécnicos */}
         {lote && caReal && (
           <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
@@ -369,7 +384,12 @@ function ManejoPage() {
         <Card className="p-4" style={{ background: "var(--gradient-surface)" }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold">Selecionar dia do lote</h2>
-            <Badge variant="outline">D{diaDisplay} / D42</Badge>
+            <div className="flex items-center gap-2">
+              {lote && diaDisplay !== Math.min(42, idadeReal) && (
+                <Button size="sm" variant="ghost" onClick={() => setDiaSel(Math.min(42, idadeReal))}>Ir para hoje</Button>
+              )}
+              <Badge variant="outline">D{diaDisplay} / D42</Badge>
+            </div>
           </div>
           <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-14 gap-1.5">
             {DIAS_LOTE.map((d) => {
@@ -383,6 +403,7 @@ function ManejoPage() {
                   onClick={() => setDiaSel(d)}
                   className={`aspect-square rounded-md text-xs font-semibold tabular-nums border transition ${
                     diaSel === d ? "bg-primary text-primary-foreground border-primary" :
+                    lote && d === Math.min(42, idadeReal) ? "ring-2 ring-primary/60 bg-primary/10 border-primary/40" :
                     isPesagem ? "bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30" :
                     isTroca ? "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30" :
                     isCama ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25" :
