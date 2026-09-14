@@ -18,10 +18,10 @@ function NavLinkRow({ item, active, onClick, compact }: { item: NavItem; active:
       to={item.to}
       onClick={onClick}
       className={cn(
-        "relative flex items-center gap-3 pl-3 pr-3 rounded-lg text-sm font-medium transition-all",
+        "relative flex items-center gap-3 pl-3 pr-3 rounded-md text-sm font-medium transition-all",
         compact ? "py-2" : "py-2.5",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm border border-primary/15"
           : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/40",
       )}
     >
@@ -171,15 +171,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <ChatNotifier />
       <CommandPalette open={palette} onOpenChange={setPalette} />
 
-      <aside className="hidden md:flex md:w-64 flex-col bg-sidebar/95 backdrop-blur-xl border-r border-sidebar-border sticky top-0 h-screen">
+      <aside className="hidden md:flex md:w-64 flex-col bg-sidebar border-r border-sidebar-border sticky top-0 h-screen">
         <div className="p-4 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition" style={{ background: "var(--gradient-primary)" }} />
               <img src={logoUrl} alt="AgroSítio" width={40} height={40} className="h-10 w-10 object-contain relative" />
             </div>
             <div className="min-w-0">
-              <div className="font-display text-lg font-bold leading-tight tracking-tight">
+               <div className="font-display text-lg font-extrabold leading-tight">
                 Agro<span className="text-gradient">Sítio</span>
               </div>
               <div className="text-[11px] text-muted-foreground truncate">{fazendaNome ?? "Granja & Gado"}</div>
@@ -201,7 +200,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full grid place-items-center text-[11px] font-bold shrink-0" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
+               <div className="h-8 w-8 rounded-full grid place-items-center text-[11px] font-bold shrink-0 bg-primary text-primary-foreground">
                 {(operador || "?").slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -214,7 +213,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-border bg-sidebar/85 backdrop-blur-xl sticky top-0 z-30">
+      <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-sidebar-border bg-sidebar/95 backdrop-blur-xl sticky top-0 z-30">
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
           <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
@@ -247,7 +246,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 min-w-0 pb-28 md:pb-0">
         <div className="px-3 py-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
 
-        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-2xl bg-sidebar/90 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
+        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-lg bg-sidebar/95 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
           {MOBILE_BOTTOM.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;

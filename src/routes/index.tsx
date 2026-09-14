@@ -89,19 +89,18 @@ function Dashboard() {
 
   return (
     <AppShell>
-      <div className="space-y-8 md:space-y-12">
+      <div className="space-y-7 md:space-y-10">
         <header
-          className="reveal grain relative overflow-hidden rounded-3xl border border-border/60 px-6 py-8 md:px-10 md:py-12"
+          className="reveal grain relative overflow-hidden rounded-lg border border-primary/15 px-5 py-7 md:px-8 md:py-9"
           style={{ background: "var(--gradient-hero)", boxShadow: "var(--shadow-elevated)" }}
         >
-          <div className="absolute -top-24 -right-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent pointer-events-none" />
           <div className="relative flex flex-col gap-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div className="min-w-0">
               <p className="eyebrow capitalize min-h-[16px]">
                 {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
               </p>
-              <h1 className="mt-3 text-[clamp(1.75rem,6vw,3.25rem)] font-display font-bold leading-[1.05] tracking-[-0.04em] truncate">
+              <h1 className="mt-3 text-[clamp(1.75rem,6vw,3rem)] font-display font-bold leading-[1.08] truncate">
                 {saudacao}, <span className="text-gradient">{nomeOperador}</span> {emoji}
               </h1>
               <p className="mt-3 max-w-xl text-sm md:text-base leading-relaxed text-muted-foreground truncate">
@@ -131,7 +130,7 @@ function Dashboard() {
                 key={a.to}
                 to={a.to}
                 style={{ "--reveal-delay": `${120 + i * 40}ms` } as React.CSSProperties}
-                className="reveal card-elevated lift sheen group flex flex-col items-center justify-center gap-2 py-4 px-1.5 text-center"
+                className="reveal operational-surface lift sheen group flex flex-col items-center justify-center gap-2 py-4 px-1.5 text-center rounded-lg"
               >
                 <a.icon className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
                 <span className="text-[10px] leading-tight tracking-tight text-muted-foreground line-clamp-2 transition-colors group-hover:text-foreground">{a.label}</span>
@@ -261,7 +260,7 @@ function Dashboard() {
 function Alert({ icon: Icon, title, desc, to }: any) {
   return (
     <Card className="reveal lift p-4 border-accent/40 bg-accent/10 flex items-center gap-3">
-      <div className="h-9 w-9 shrink-0 rounded-xl bg-accent/15 text-accent grid place-items-center">
+       <div className="h-9 w-9 shrink-0 rounded-md bg-accent/15 text-accent grid place-items-center">
         <Icon className="h-4.5 w-4.5" />
       </div>
       <div className="flex-1 min-w-0">
@@ -278,7 +277,7 @@ function Step({ icon: Icon, text, to }: { icon: any; text: string; to: string })
     <li>
       <Link
         to={to}
-        className="group flex items-center gap-3 p-3 rounded-xl border border-transparent transition-all duration-300 hover:border-border hover:bg-muted/60"
+         className="group flex items-center gap-3 p-3 rounded-md border border-transparent transition-all duration-300 hover:border-border hover:bg-muted/60"
       >
         <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
           <Icon className="h-4 w-4" />
