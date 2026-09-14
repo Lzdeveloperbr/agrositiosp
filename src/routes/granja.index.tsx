@@ -13,6 +13,8 @@ import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
+import { calcularResumoLote } from "@/lib/granja";
+import { refPesoG } from "@/lib/silo";
 
 export const Route = createFileRoute("/granja/")({
   head: () => ({
@@ -56,22 +58,24 @@ function GranjaPage() {
 
   const ativos = lotes.filter((l) => !l.encerrado);
   const kpis = useMemo(() => {
-    let totalAves = 0, vivas = 0, mortas = 0, somaPeso = 0, comPeso = 0, diasSoma = 0;
+    let totalAves = 0, vivas = 0, baixas = 0, somaPesoPonderado = 0, avesComPeso = 0, diasSoma = 0;
     for (const l of ativos) {
-      const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
+      const resumo = calcularResumoLote(l);
       totalAves += l.quantidadeInicial;
-      mortas += mort;
-      vivas += l.quantidadeInicial - mort;
-      const ult = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
-      if (ult) { somaPeso += ult; comPeso++; }
-      diasSoma += Math.max(0, diffDias(l.dataEntrada));
+      baixas += resumo.baixas;
+      vivas += resumo.vivas;
+      if (resumo.ultimaPesagem) {
+        somaPesoPonderado += resumo.ultimaPesagem.pesoG * resumo.vivas;
+        avesComPeso += resumo.vivas;
+      }
+      diasSoma += resumo.idade;
     }
     return {
       ativos: ativos.length,
       vivas,
       totalAves,
-      mortalidade: totalAves ? (mortas / totalAves) * 100 : 0,
-      pesoMedio: comPeso ? somaPeso / comPeso : 0,
+      mortalidade: totalAves ? (baixas / totalAves) * 100 : 0,
+      pesoMedio: avesComPeso ? somaPesoPonderado / avesComPeso : 0,
       idadeMedia: ativos.length ? diasSoma / ativos.length : 0,
     };
   }, [ativos]);
@@ -170,10 +174,8 @@ function GranjaPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {lotes.map((l) => {
-              const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
-              const vivas = l.quantidadeInicial - mort;
-              const ultPeso = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
-              const dias = diffDias(l.dataEntrada);
+              const resumo = calcularResumoLote(l);
+              const dias = resumo.idade;
               const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
               return (
                 <Card key={l.id} className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
@@ -188,9 +190,21 @@ function GranjaPage() {
                     <Button size="icon" variant="ghost" onClick={() => remover(l.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-4">
-                    <Mini label="Vivas" value={vivas.toLocaleString("pt-BR")} />
-                    <Mini label="Mort." value={`${((mort / l.quantidadeInicial) * 100).toFixed(1)}%`} />
-                    <Mini label="Peso" value={ultPeso ? `${ultPeso}g` : "—"} />
+                    <Mini label="Vivas" value={resumo.vivas.toLocaleString("pt-BR")} />
+                    <Mini label="Baixas" value={`${resumo.mortalidadePct.toFixed(1)}%`} />
+                    <Mini label="Peso" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG}g` : `${refPesoG(dias, "ross_ap95", "misto").toFixed(0)}g est.`} />
+                  </div>
+                  <div className="mb-4 rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">Meta Ross AP D{dias}</span>
+                      <span className="font-semibold tabular-nums">{resumo.pesoEsperadoHojeG.toFixed(0)} g</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <span className="text-muted-foreground">Situação</span>
+                      <span className={resumo.situacao === "critico" ? "text-destructive font-semibold" : resumo.situacao === "atencao" ? "text-warning font-semibold" : "text-success font-semibold"}>
+                        {resumo.diferencaPesoPct === null ? "Pesar para calibrar" : `${resumo.diferencaPesoPct > 0 ? "+" : ""}${resumo.diferencaPesoPct.toFixed(1)}% da meta`}
+                      </span>
+                    </div>
                   </div>
                   <div className="space-y-1 mb-4">
                     <div className="flex justify-between text-xs text-muted-foreground"><span>Crescimento</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>

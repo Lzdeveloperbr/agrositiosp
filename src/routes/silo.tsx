@@ -96,14 +96,15 @@ function SiloPage() {
       const [ent, pes, conf] = await Promise.all([
         client.from("entregas_racao").select("id,data,quantidade_kg,lote_id").order("data", { ascending: true }),
         client.from("silo_pesagens").select("*").order("medido_em", { ascending: true }),
-        client.from("silo_config").select("*").limit(1),
+        client.from("silo_config").select("*").order("updated_at", { ascending: false }),
       ]);
       if (cancel) return;
       const rows = (ent.data as any[]) || [];
-      const doLote = loteAtivo ? rows.filter((r) => r.lote_id === loteAtivo.id || !r.lote_id) : rows;
+      const doLote = loteAtivo ? rows.filter((r) => r.lote_id === loteAtivo.id) : [];
       setEntregas(doLote.map((r) => ({ id: r.id, data: r.data, kg: Number(r.quantidade_kg) || 0 })));
       setPesagens(((pes.data as any[]) || []).filter((p) => !loteAtivo || !p.lote_id || p.lote_id === loteAtivo.id));
-      const c = (conf.data as any[])?.[0];
+      const configs = (conf.data as any[]) || [];
+      const c = loteAtivo ? configs.find((item) => item.lote_id === loteAtivo.id) : undefined;
       if (c) {
         setCfgId(c.id);
         setCfg({
@@ -112,6 +113,9 @@ function SiloPage() {
           cargaPadraoKg: Number(c.carga_padrao_kg), leadTimeHoras: Number(c.lead_time_horas),
           erroBalancaKg: Number(c.erro_balanca_kg), perdaPct: Number(c.perda_pct),
         });
+      } else {
+        setCfgId(null);
+        setCfg(CFG_PADRAO);
       }
       setLoading(false);
     })();
