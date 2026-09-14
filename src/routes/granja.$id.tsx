@@ -13,7 +13,9 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { FechamentoLoteCard } from "@/components/FechamentoLoteCard";
 import { toast } from "sonner";
-import { diffDias, fmtData, hojeISO } from "@/lib/data";
+import { addDias, diffDias, fmtData, hojeISO, parseData } from "@/lib/data";
+import { calcularResumoLote } from "@/lib/granja";
+import { refPesoG } from "@/lib/silo";
 
 export const Route = createFileRoute("/granja/$id")({
   head: () => ({
@@ -34,7 +36,7 @@ function LoteDetalhe() {
   const [lotes, setLotes] = useLotes();
   const [estoque] = useEstoque();
   const lote = lotes.find((l) => l.id === id);
-  const estoqueRacaoKg = estoque.filter((i) => i.categoria === "racao").reduce((s, i) => s + (i.quantidade || 0), 0);
+  const estoqueRacaoKg = estoque.filter((i) => i.categoria === "racao" && i.loteId === id).reduce((s, i) => s + (i.quantidade || 0), 0);
 
   const [entry, setEntry] = useState({
     date: hojeISO(),
@@ -53,17 +55,41 @@ function LoteDetalhe() {
     );
   }
 
-  const totalMort = lote.entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
-  const totalElim = lote.entries.reduce((s, e) => s + (e.eliminados || 0), 0);
-  const vivas = lote.quantidadeInicial - totalMort - totalElim;
+  const resumo = calcularResumoLote(lote);
+  const totalMort = resumo.mortalidade;
+  const totalElim = resumo.eliminados;
+  const vivas = resumo.vivas;
   // Idade começa em D0 (dia do alojamento)
   const dias = Math.max(0, diffDias(lote.dataEntrada));
-  const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
+  const ultPeso = resumo.ultimaPesagem?.pesoG ?? 0;
   const pesoTotalKg = (vivas * ultPeso) / 1000;
-  const previsao = new Date(new Date(lote.dataEntrada).getTime() + lote.previsaoAbateDias * 86400000);
+  const previsao = addDias(lote.dataEntrada, lote.previsaoAbateDias);
 
   const adicionar = () => {
-    setLotes((prev) => prev.map((l) => l.id === id ? { ...l, entries: [...l.entries, { ...entry }] } : l));
+    const data = parseData(entry.date);
+    const entrada = parseData(lote.dataEntrada);
+    const hoje = parseData(hojeISO());
+    if (!data || !entrada || !hoje || data < entrada || data > hoje) {
+      toast.error("A data deve ficar entre o alojamento e hoje");
+      return;
+    }
+    if (entry.mortalidade < 0 || entry.eliminados < 0 || entry.mortalidade + entry.eliminados > vivas) {
+      toast.error("Confira a quantidade de mortalidade e eliminados");
+      return;
+    }
+    if (entry.pesoMedioG !== undefined && (entry.pesoMedioG < 20 || entry.pesoMedioG > 6000)) {
+      toast.error("Informe um peso médio entre 20 g e 6.000 g");
+      return;
+    }
+    const jaExiste = lote.entries.some((e) => e.date === entry.date);
+    if (jaExiste) {
+      toast.error("Já existe um lançamento nessa data. Exclua o registro antigo antes de substituí-lo.");
+      return;
+    }
+    setLotes((prev) => prev.map((l) => l.id === id ? {
+      ...l,
+      entries: [...l.entries, { ...entry }].sort((a, b) => a.date.localeCompare(b.date)),
+    } : l));
     setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, observacoes: "" });
     toast.success("Lançamento registrado");
   };
@@ -85,7 +111,10 @@ function LoteDetalhe() {
 
   const chartData = [...lote.entries]
     .sort((a, b) => a.date.localeCompare(b.date))
-    .map((e, i) => ({ dia: `D${i + 1}`, peso: e.pesoMedioG ?? null, mort: e.mortalidade }));
+    .map((e) => {
+      const idade = Math.max(0, diffDias(lote.dataEntrada, e.date));
+      return { dia: `D${idade}`, peso: e.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), mort: e.mortalidade };
+    });
 
   return (
     <AppShell>
@@ -99,7 +128,7 @@ function LoteDetalhe() {
                 {lote.encerrado ? <Badge variant="secondary">Encerrado</Badge> : <Badge>Ativo</Badge>}
               </div>
               <p className="text-muted-foreground mt-1">Entrada {fmtData(lote.dataEntrada)} · D{dias} · {lote.integradora}</p>
-              <p className="text-xs text-muted-foreground">Previsão de abate: {previsao.toLocaleDateString("pt-BR")}</p>
+              <p className="text-xs text-muted-foreground">Previsão de abate: {fmtData(previsao)}</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => gerarRelatorioLote(lote)}><FileText className="h-4 w-4 mr-1" /> PDF</Button>
@@ -113,8 +142,29 @@ function LoteDetalhe() {
           <KPI label="Inicial" value={lote.quantidadeInicial.toLocaleString("pt-BR")} />
           <KPI label="Vivas" value={vivas.toLocaleString("pt-BR")} />
           <KPI label="Mort.+Elim." value={`${((totalMort + totalElim) / lote.quantidadeInicial * 100).toFixed(2)}%`} />
-          <KPI label="Peso vivo" value={`${pesoTotalKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
+          <KPI label="Peso esperado" value={`${resumo.pesoEsperadoHojeG.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} g`} />
+          <KPI label="Peso medido" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "—"} />
+          <KPI label="Diferença da meta" value={resumo.diferencaPesoPct == null ? "—" : `${resumo.diferencaPesoPct > 0 ? "+" : ""}${resumo.diferencaPesoPct.toFixed(1)}%`} />
+          <KPI label="GPD recente" value={resumo.gpdRecente == null ? "—" : `${resumo.gpdRecente.toFixed(1)} g/d`} />
+          <KPI label="Consumo esperado" value={`${resumo.consumoEsperadoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
         </div>
+
+        {!lote.encerrado && (resumo.diasSemPesar > 3 || resumo.situacao === "critico") && (
+          <Card className="p-4 border-warning/40 bg-warning/10">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm">Ação recomendada para melhorar a precisão</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {resumo.diasSemPesar > 3
+                    ? `A última pesagem tem ${resumo.diasSemPesar} dias. Pese uma amostra hoje para atualizar manejo, projeção de abate e silo.`
+                    : `O peso está ${Math.abs(resumo.diferencaPesoPct ?? 0).toFixed(1)}% abaixo da curva. Revise água, ração, ambiência e uniformidade.`}
+                </p>
+              </div>
+              <Button asChild size="sm"><Link to="/manejo">Abrir manejo</Link></Button>
+              <Button asChild size="sm" variant="outline"><Link to="/silo">Ver silo</Link></Button>
+            </div>
+          </Card>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-4">
           <Card className="p-5 lg:col-span-2" style={{ background: "var(--gradient-surface)" }}>
@@ -128,6 +178,7 @@ function LoteDetalhe() {
                   <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="peso" stroke="var(--primary)" strokeWidth={2.5} name="Peso (g)" />
+                  <Line type="monotone" dataKey="esperado" stroke="var(--muted-foreground)" strokeDasharray="5 5" strokeWidth={2} name="Esperado (g)" />
                   <Line type="monotone" dataKey="mort" stroke="var(--destructive)" strokeWidth={2} name="Mortalidade" />
                 </LineChart>
               </ResponsiveContainer>

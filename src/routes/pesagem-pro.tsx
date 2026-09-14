@@ -19,9 +19,21 @@ import {
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { CURVAS, metaPeso, type Linhagem, LINHAGEM_LABEL } from "@/lib/linhagens";
 import { toast } from "sonner";
-import { fmtData, hojeISO } from "@/lib/data";
+import { diffDias, fmtData, hojeISO, isoLocal, parseData } from "@/lib/data";
 
-export const Route = createFileRoute("/pesagem-pro")({ component: PesagemPro });
+export const Route = createFileRoute("/pesagem-pro")({
+  head: () => ({
+    meta: [
+      { title: "Pesagem de Frangos — AgroSítio" },
+      { name: "description", content: "Pesagem profissional de frangos com peso esperado, uniformidade, GPD e comparação por linhagem." },
+      { property: "og:title", content: "Pesagem de Frangos — AgroSítio" },
+      { property: "og:description", content: "Acompanhe peso, uniformidade e ganho diário do lote." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: PesagemPro,
+});
 
 // ===== Tipos =====
 type Sexo = "macho" | "femea" | "misto";
@@ -74,10 +86,9 @@ function useStore(scope: string) {
 // ===== Utils =====
 const uid = () => Math.random().toString(36).slice(2, 10);
 const daysBetween = (iso: string, ref: Date = new Date()) => {
-  const d = new Date(iso); d.setHours(0,0,0,0); const r = new Date(ref); r.setHours(0,0,0,0);
-  return Math.max(0, Math.round((r.getTime() - d.getTime()) / 86400000));
+  return Math.max(0, diffDias(iso, ref));
 };
-const fmtDate = (iso: string) => new Date(iso).toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+const fmtDate = (iso: string) => parseData(iso)?.toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) ?? "—";
 const fmtDay = (iso: string) => fmtData(iso);
 const mean = (xs: number[]) => xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : 0;
 const std = (xs: number[]) => {
@@ -379,7 +390,10 @@ function LotesPanel({ lotes, loteAtivoId, onAdd, onDel, onSelect }: {
 // ===== Nova Pesagem =====
 function NovaPesagem({ lote, onSave }: { lote: LotePesagem; onSave: (p: Pesagem) => void }) {
   const idadeAuto = daysBetween(lote.dataAlojamento);
-  const [data, setData] = useState(new Date().toISOString().slice(0,16));
+  const [data, setData] = useState(() => {
+    const agora = new Date();
+    return `${isoLocal(agora)}T${String(agora.getHours()).padStart(2, "0")}:${String(agora.getMinutes()).padStart(2, "0")}`;
+  });
   const [idadeDias, setIdadeDias] = useState(idadeAuto);
   const [operador, setOperador] = useState("");
   const [obs, setObs] = useState("");

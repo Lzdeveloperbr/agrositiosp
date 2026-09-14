@@ -11,6 +11,8 @@ import { Thermometer, Droplets, Lightbulb, Utensils, Flame, ArrowRight, BookOpen
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEffect } from "react";
 import { diffDias } from "@/lib/data";
+import { refCA, refConsumoDiaG, refPesoG, type Linhagem } from "@/lib/silo";
+import { calcularResumoLote } from "@/lib/granja";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
@@ -34,7 +36,7 @@ type DiaProtocolo = {
   luzHoras: number;
   luzLux: number;
   racao: "Pré-inicial" | "Inicial" | "Crescimento" | "Final" | "Retirada";
-  consumoG: number; // g/ave/dia acumulado esperado
+  consumoG: number; // g/ave/dia esperado
   pesoG: number; // peso médio esperado g
   caEsperado: number; // FCR acumulado
   manejo: string[];
@@ -152,29 +154,59 @@ function deveBaterCama(d: number): boolean {
 
 }
 
+const DIAS_LOTE = Array.from({ length: 43 }, (_, dia) => dia);
+
+function protocoloDoDia(d: number): DiaProtocolo {
+  if (d <= 0) {
+    return {
+      ...PROTOCOLO[0], dia: 0, pesoG: 43, consumoG: 0, caEsperado: 0,
+      manejo: [
+        "Receber pintinhos com galpão e cama pré-aquecidos",
+        "Conferir temperatura de cloaca e distribuição das aves após o alojamento",
+        "Garantir acesso imediato à água e ração sobre papel",
+      ],
+    };
+  }
+  return PROTOCOLO[Math.min(PROTOCOLO.length - 1, d - 1)];
+}
+
 function ManejoPage() {
   const [lotes] = useLotes();
   const ativos = lotes.filter((l) => !l.encerrado);
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
+  const [linhagem, setLinhagem] = useState<Linhagem>("ross_ap95");
   const lote = ativos.find((l) => l.id === loteId);
 
   // idade D0 = 0. Protocolo interno usa dia 1..42, então protoIdx = idadeReal.
   const idadeReal = useMemo(() => (lote ? idadeDias(lote.dataEntrada) : 0), [lote]);
-  const [diaSel, setDiaSel] = useState<number>(idadeReal); // dia exibido (0..41)
-  const protoIdx = Math.max(0, Math.min(41, diaSel));
-  const dia = PROTOCOLO[protoIdx];
-  const diaDisplay = diaSel;
+  const [diaSel, setDiaSel] = useState<number>(Math.min(42, idadeReal));
+  const diaDisplay = Math.max(0, Math.min(42, diaSel));
+  const dia = protocoloDoDia(diaDisplay);
   const agua = aguaParaIdade(diaDisplay);
 
-  // CA real do lote (se houver dados)
+  useEffect(() => {
+    if (!ativos.length) return;
+    if (!loteId || !ativos.some((item) => item.id === loteId)) setLoteId(ativos[0].id);
+  }, [ativos, loteId]);
+
+  useEffect(() => {
+    if (lote) setDiaSel(Math.min(42, idadeDias(lote.dataEntrada)));
+  }, [lote?.id]);
+
+  // Indicadores estimados do lote, usando a mesma curva do silo.
   const caReal = useMemo(() => {
     if (!lote) return null;
-    const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
-    if (!ultPeso) return null;
-    const id = idadeDias(lote.dataEntrada);
-    const consAcum = PROTOCOLO.slice(0, id + 1).reduce((s, p) => s + p.consumoG, 0);
-    return { peso: ultPeso, ca: consAcum / ultPeso, idade: id };
-  }, [lote]);
+    const resumo = calcularResumoLote(lote, linhagem);
+    return {
+      peso: resumo.ultimaPesagem?.pesoG ?? resumo.pesoProjetadoHojeG,
+      pesoReal: !!resumo.ultimaPesagem,
+      meta: resumo.pesoEsperadoHojeG,
+      diferenca: resumo.diferencaPesoPct,
+      ca: resumo.caEsperada,
+      idade: resumo.idade,
+      diasSemPesar: resumo.diasSemPesar,
+    };
+  }, [lote, linhagem]);
 
   return (
     <AppShell>
@@ -186,23 +218,29 @@ function ManejoPage() {
             </h1>
             <p className="text-muted-foreground mt-1">Protocolo profissional dia a dia · D0 = alojamento · padrão Cobb/Ross</p>
           </div>
-          {ativos.length > 0 && (
-            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(idadeDias(l.dataEntrada)); }}>
+          {ativos.length > 0 && <div className="flex flex-wrap gap-2">
+            <Select value={linhagem} onValueChange={(v) => setLinhagem(v as Linhagem)}>
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="ross_ap95">Ross 308 AP</SelectItem><SelectItem value="ross308">Ross 308</SelectItem><SelectItem value="cobb500">Cobb 500</SelectItem></SelectContent>
+            </Select>
+            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(Math.min(42, idadeDias(l.dataEntrada))); }}>
               <SelectTrigger className="w-56"><SelectValue placeholder="Selecionar lote" /></SelectTrigger>
               <SelectContent>{ativos.map((l) => <SelectItem key={l.id} value={l.id}>Lote {l.numero} · D{idadeDias(l.dataEntrada)}</SelectItem>)}</SelectContent>
             </Select>
-          )}
+          </div>}
         </header>
 
-        {/* CA real */}
+        {/* Indicadores zootécnicos */}
         {lote && caReal && (
           <Card className="p-5" style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}>
             <div className="flex items-center gap-2 mb-2 opacity-90"><TrendingUp className="h-5 w-5" /><span className="font-display font-semibold">Lote {lote.numero} · D{caReal.idade}</span></div>
-            <div className="grid grid-cols-3 gap-4">
-              <div><p className="text-xs opacity-80">Peso real</p><p className="text-2xl font-display font-bold">{caReal.peso}g</p></div>
-              <div><p className="text-xs opacity-80">CA real (estim.)</p><p className="text-2xl font-display font-bold">{caReal.ca.toFixed(2)}</p></div>
-              <div><p className="text-xs opacity-80">CA esperado</p><p className="text-2xl font-display font-bold">{PROTOCOLO[caReal.idade]?.caEsperado.toFixed(2)}</p></div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div><p className="text-xs opacity-80">Peso {caReal.pesoReal ? "medido" : "projetado"}</p><p className="text-2xl font-display font-bold">{caReal.peso.toFixed(0)}g</p></div>
+              <div><p className="text-xs opacity-80">Peso esperado</p><p className="text-2xl font-display font-bold">{caReal.meta.toFixed(0)}g</p></div>
+              <div><p className="text-xs opacity-80">Diferença da meta</p><p className="text-2xl font-display font-bold">{caReal.diferenca == null ? "—" : `${caReal.diferenca > 0 ? "+" : ""}${caReal.diferenca.toFixed(1)}%`}</p></div>
+              <div><p className="text-xs opacity-80">CA de referência</p><p className="text-2xl font-display font-bold">{caReal.ca.toFixed(2)}</p></div>
             </div>
+            {caReal.diasSemPesar > 3 && <p className="text-xs mt-3 opacity-85">Pesagem atrasada há {caReal.diasSemPesar} dias. Registre o peso na granja para recalibrar crescimento e estoque.</p>}
           </Card>
         )}
 
@@ -210,17 +248,17 @@ function ManejoPage() {
         <Card className="p-4" style={{ background: "var(--gradient-surface)" }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold">Selecionar dia do lote</h2>
-            <Badge variant="outline">D{diaDisplay} / D41</Badge>
+            <Badge variant="outline">D{diaDisplay} / D42</Badge>
           </div>
           <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-14 gap-1.5">
-            {PROTOCOLO.map((p, idx) => {
-              const d = idx; // 0..41
+            {DIAS_LOTE.map((d) => {
+              const p = protocoloDoDia(d);
               const isPesagem = d > 0 && d % 7 === 0;
               const isTroca = p.manejo.some((m) => m.includes("TROCA") || m.includes("INICIAR ração"));
               const isCama = deveBaterCama(d);
               return (
                 <button
-                  key={p.dia}
+                  key={d}
                   onClick={() => setDiaSel(d)}
                   className={`aspect-square rounded-md text-xs font-semibold tabular-nums border transition ${
                     diaSel === d ? "bg-primary text-primary-foreground border-primary" :
@@ -247,7 +285,7 @@ function ManejoPage() {
           <ParamCard icon={<Thermometer className="h-5 w-5" />} label="Temp. ambiente" value={`${dia.tempAr[0]}–${dia.tempAr[1]}°C`} hint={`Cama: ${dia.tempCama[0]}–${dia.tempCama[1]}°C`} />
           <ParamCard icon={<Droplets className="h-5 w-5" />} label="Umidade" value={`${dia.umidade[0]}–${dia.umidade[1]}%`} hint="Relativa do ar" />
           <ParamCard icon={<Lightbulb className="h-5 w-5" />} label="Luz" value={`${luzParaIdade(diaDisplay).horasLuz}h · ${luzParaIdade(diaDisplay).pctBrilho}%`} hint={`${luzParaIdade(diaDisplay).lux} lux · acende ${luzParaIdade(diaDisplay).acende} / apaga ${luzParaIdade(diaDisplay).apaga}`} />
-          <ParamCard icon={<Utensils className="h-5 w-5" />} label="Ração" value={dia.racao} hint={`${dia.consumoG}g/ave · meta ${dia.pesoG}g`} />
+          <ParamCard icon={<Utensils className="h-5 w-5" />} label="Ração" value={dia.racao} hint={`${refConsumoDiaG(diaDisplay, linhagem, "misto").toFixed(0)}g/ave/dia · peso ${refPesoG(diaDisplay, linhagem, "misto").toFixed(0)}g`} />
         </div>
 
         {/* Água & altura dos equipamentos do dia */}
@@ -314,18 +352,18 @@ function ManejoPage() {
                   </thead>
                   <tbody>
                     {[
-                      { sem: 1, dias: "1-7",   peso: 205,  ca: 1.00, temp: "32→29°C", racao: "Pré-inicial", foco: "Pintinho · forno · papel · infantil" },
-                      { sem: 2, dias: "8-14",  peso: 555,  ca: 1.23, temp: "29→25°C", racao: "Inicial",     foco: "Liberar galpão · subir nipples" },
-                      { sem: 3, dias: "15-21", peso: 1150, ca: 1.49, temp: "25→22°C", racao: "Crescimento", foco: "Ventilação · uniformidade" },
-                      { sem: 4, dias: "22-28", peso: 1960, ca: 1.77, temp: "22→20°C", racao: "Cresc/Final", foco: "Nebulizar · máx. consumo" },
-                      { sem: 5, dias: "29-35", peso: 2760, ca: 1.98, temp: "20°C",    racao: "Final",       foco: "Pré-apanha · cama seca" },
-                      { sem: 6, dias: "36-42", peso: 3460, ca: 2.18, temp: "20°C",    racao: "Retirada",    foco: "Jejum · embarque" },
+                      { sem: 1, fim: 7, dias: "D0–D7", temp: "32→29°C", racao: "Pré-inicial", foco: "Pintinho · forno · papel · infantil" },
+                      { sem: 2, fim: 14, dias: "D8–D14", temp: "29→25°C", racao: "Inicial", foco: "Liberar galpão · subir nipples" },
+                      { sem: 3, fim: 21, dias: "D15–D21", temp: "25→22°C", racao: "Crescimento", foco: "Ventilação · uniformidade" },
+                      { sem: 4, fim: 28, dias: "D22–D28", temp: "22→20°C", racao: "Cresc/Final", foco: "Nebulizar · máx. consumo" },
+                      { sem: 5, fim: 35, dias: "D29–D35", temp: "20°C", racao: "Final", foco: "Pré-apanha · cama seca" },
+                      { sem: 6, fim: 42, dias: "D36–D42", temp: "20°C", racao: "Retirada", foco: "Jejum · embarque" },
                     ].map((s) => (
                       <tr key={s.sem} className="border-b border-border/50">
                         <td className="py-2 font-bold">{s.sem}ª</td>
                         <td className="py-2">{s.dias}</td>
-                        <td className="py-2 text-right tabular-nums">{s.peso}g</td>
-                        <td className="py-2 text-right tabular-nums">{s.ca.toFixed(2)}</td>
+                        <td className="py-2 text-right tabular-nums">{refPesoG(s.fim, linhagem, "misto").toFixed(0)}g</td>
+                        <td className="py-2 text-right tabular-nums">{refCA(s.fim, linhagem, "misto").toFixed(2)}</td>
                         <td className="py-2 text-right">{s.temp}</td>
                         <td className="py-2 pl-3">{s.racao}</td>
                         <td className="py-2 pl-3 text-muted-foreground">{s.foco}</td>

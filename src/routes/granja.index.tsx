@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap } from "lucide-react";
+import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap, Boxes, AlertTriangle } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
+import { calcularResumoLote } from "@/lib/granja";
+import { refPesoG } from "@/lib/silo";
 
 export const Route = createFileRoute("/granja/")({
   head: () => ({
@@ -56,22 +58,24 @@ function GranjaPage() {
 
   const ativos = lotes.filter((l) => !l.encerrado);
   const kpis = useMemo(() => {
-    let totalAves = 0, vivas = 0, mortas = 0, somaPeso = 0, comPeso = 0, diasSoma = 0;
+    let totalAves = 0, vivas = 0, baixas = 0, somaPesoPonderado = 0, avesComPeso = 0, diasSoma = 0;
     for (const l of ativos) {
-      const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
+      const resumo = calcularResumoLote(l);
       totalAves += l.quantidadeInicial;
-      mortas += mort;
-      vivas += l.quantidadeInicial - mort;
-      const ult = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
-      if (ult) { somaPeso += ult; comPeso++; }
-      diasSoma += Math.max(0, diffDias(l.dataEntrada));
+      baixas += resumo.baixas;
+      vivas += resumo.vivas;
+      if (resumo.ultimaPesagem) {
+        somaPesoPonderado += resumo.ultimaPesagem.pesoG * resumo.vivas;
+        avesComPeso += resumo.vivas;
+      }
+      diasSoma += resumo.idade;
     }
     return {
       ativos: ativos.length,
       vivas,
       totalAves,
-      mortalidade: totalAves ? (mortas / totalAves) * 100 : 0,
-      pesoMedio: comPeso ? somaPeso / comPeso : 0,
+      mortalidade: totalAves ? (baixas / totalAves) * 100 : 0,
+      pesoMedio: avesComPeso ? somaPesoPonderado / avesComPeso : 0,
       idadeMedia: ativos.length ? diasSoma / ativos.length : 0,
     };
   }, [ativos]);
@@ -88,6 +92,7 @@ function GranjaPage() {
     { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3 },
     { to: "/historico-lotes", label: "Histórico", icon: History },
     { to: "/entregas-racao", label: "Ração", icon: Wheat },
+    { to: "/silo", label: "Silo ao Vivo", icon: Boxes },
   ];
 
 
@@ -170,11 +175,16 @@ function GranjaPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {lotes.map((l) => {
-              const mort = l.entries.reduce((s, e) => s + e.mortalidade, 0);
-              const vivas = l.quantidadeInicial - mort;
-              const ultPeso = [...l.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? 0;
-              const dias = diffDias(l.dataEntrada);
+              const resumo = calcularResumoLote(l);
+              const dias = resumo.idade;
               const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
+              const lancouHoje = l.entries.some((e) => e.date === hojeISO());
+              const alertas = [
+                !l.encerrado && !lancouHoje ? "Lançamento diário pendente" : null,
+                !l.encerrado && resumo.diasSemPesar > 3 ? `Pesagem atrasada (${resumo.diasSemPesar} dias)` : null,
+                resumo.situacao === "critico" ? `Peso ${Math.abs(resumo.diferencaPesoPct ?? 0).toFixed(1)}% abaixo da meta` : null,
+                resumo.mortalidadePct > 5 ? `Baixas elevadas (${resumo.mortalidadePct.toFixed(1)}%)` : null,
+              ].filter((item): item is string => Boolean(item));
               return (
                 <Card key={l.id} className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
                   <div className="flex items-start justify-between mb-4">
@@ -188,10 +198,32 @@ function GranjaPage() {
                     <Button size="icon" variant="ghost" onClick={() => remover(l.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-4">
-                    <Mini label="Vivas" value={vivas.toLocaleString("pt-BR")} />
-                    <Mini label="Mort." value={`${((mort / l.quantidadeInicial) * 100).toFixed(1)}%`} />
-                    <Mini label="Peso" value={ultPeso ? `${ultPeso}g` : "—"} />
+                    <Mini label="Vivas" value={resumo.vivas.toLocaleString("pt-BR")} />
+                    <Mini label="Baixas" value={`${resumo.mortalidadePct.toFixed(1)}%`} />
+                    <Mini label="Peso" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG}g` : `${refPesoG(dias, "ross_ap95", "misto").toFixed(0)}g est.`} />
                   </div>
+                  <div className="mb-4 rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">Meta Ross AP D{dias}</span>
+                      <span className="font-semibold tabular-nums">{resumo.pesoEsperadoHojeG.toFixed(0)} g</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <span className="text-muted-foreground">Situação</span>
+                      <span className={resumo.situacao === "critico" ? "text-destructive font-semibold" : resumo.situacao === "atencao" ? "text-warning font-semibold" : "text-success font-semibold"}>
+                        {resumo.diferencaPesoPct === null ? "Pesar para calibrar" : `${resumo.diferencaPesoPct > 0 ? "+" : ""}${resumo.diferencaPesoPct.toFixed(1)}% da meta`}
+                      </span>
+                    </div>
+                  </div>
+                  {alertas.length > 0 && (
+                    <div className="mb-4 space-y-1.5 rounded-md border border-warning/40 bg-warning/10 p-2.5">
+                      {alertas.slice(0, 3).map((alerta) => (
+                        <div key={alerta} className="flex items-center gap-2 text-xs text-warning-foreground">
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                          <span>{alerta}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-1 mb-4">
                     <div className="flex justify-between text-xs text-muted-foreground"><span>Crescimento</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
