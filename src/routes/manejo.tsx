@@ -298,7 +298,7 @@ function ManejoPage() {
                 <h2 className="font-semibold">Nenhum lote ativo</h2>
                 <p className="text-sm text-muted-foreground">Crie ou reabra um lote para mostrar aves vivas, peso, consumo e saldo do silo nesta tela.</p>
               </div>
-              <Button asChild><Link to="/granja/">Abrir granja <ArrowRight className="h-4 w-4 ml-1" /></Link></Button>
+              <Button asChild><Link to="/granja">Abrir granja <ArrowRight className="h-4 w-4 ml-1" /></Link></Button>
             </div>
           </Card>
         )}
