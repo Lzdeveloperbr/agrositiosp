@@ -1,5 +1,6 @@
 import type { Lote } from "./types";
 import { CURVAS, type Linhagem } from "./linhagens";
+import { diffDias } from "./data";
 
 function interp(curva: { dia: number; peso: number; consumoAcum: number; ca: number }[], dia: number, key: "peso" | "consumoAcum" | "ca"): number {
   if (dia <= curva[0].dia) return curva[0][key];
@@ -58,9 +59,8 @@ const DEFAULTS: Required<CustosLote> = {
 export function fechamentoLote(lote: Lote, linhagem: Linhagem = "cobb500", custos: CustosLote = {}): FechamentoLote {
   const c = { ...DEFAULTS, ...custos };
   const curva = CURVAS[linhagem];
-  const entrada = new Date(lote.dataEntrada);
   const previsao = lote.previsaoAbateDias || 42;
-  const idade = Math.max(0, Math.floor((Date.now() - entrada.getTime()) / 86400000));
+  const idade = Math.max(0, diffDias(lote.dataEntrada));
   const diasRef = lote.encerrado ? Math.min(idade, previsao) : idade;
 
   const entries = [...lote.entries].sort((a, b) => a.date.localeCompare(b.date));
