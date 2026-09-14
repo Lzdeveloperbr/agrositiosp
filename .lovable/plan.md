@@ -1,47 +1,22 @@
-## Atualização Premium AgroSítio SP
+# Evolução integrada da granja
 
-Vou preservar **100% dos dados e funcionalidades existentes**. Nada será apagado, nem o banco alterado de forma destrutiva. Apenas melhorias visuais e novos módulos serão adicionados sobre o que já existe.
+## Objetivo
+Tornar manejo, peso esperado e estoque de ração uma operação única: o lote ativo alimenta todos os cálculos, sem duplicidade de dados e com referências coerentes por idade e linhagem.
 
-O escopo enviado é gigantesco (equivalente a várias semanas de desenvolvimento). Para entregar com qualidade premium — e não uma versão superficial de tudo — proponho dividir em **fases**. Cada fase fica completa, testada e funcional antes da próxima.
+## O que será melhorado
+- **Painel da granja:** corrigir aves vivas e mortalidade para considerar também eliminados; mostrar peso esperado, diferença do peso real, GPD e situação do lote.
+- **Lançamento diário:** ordenar os registros por data, impedir lançamentos incoerentes e usar a data real para definir o dia do lote nos gráficos.
+- **Manejo:** corrigir definitivamente D0–D42, alinhar peso e consumo às mesmas curvas técnicas usadas pelo silo, selecionar automaticamente o lote ativo e substituir a falsa “CA real” por um indicador claramente estimado.
+- **Peso esperado:** centralizar a curva por linhagem e sexo, comparar real × esperado e projetar peso de abate com base nas pesagens recentes.
+- **Estoque ao vivo:** usar somente entregas do lote correto, aves vivas por dia, mortalidade, eliminados, peso medido, ganho diário e conversão incremental; manter a balança do silo apenas como calibração opcional.
+- **Automação:** criar alertas práticos para pesagem atrasada, peso fora da curva, mortalidade elevada, estoque baixo e prazo de novo pedido, com atalhos para a ação correta.
 
----
+## Validação
+- Conferir cálculos compartilhados e datas em D0, D7, D14, D28 e D42.
+- Testar o fluxo no celular: abrir lote, lançar mortalidade/peso e confirmar atualização de manejo, peso esperado e silo.
+- Validar compilação, erros da tela e ausência de dados misturados entre lotes.
 
-### Fase 1 — Identidade visual premium + Dashboard
-- Nova paleta (verde #16A34A / #166534, bege #F8F7F2, etc.) aplicada via tokens em `src/styles.css` (sem quebrar dark mode atual).
-- Cards modernos, sombras suaves, skeleton loading, transições.
-- **Dashboard novo na home (`/`)**: saudação personalizada + data + clima + KPIs (lotes, aves, mortalidade, ração, água, gastos, receita, lucro) puxando dos dados já existentes no Supabase.
-- Menu lateral/inferior refinado, sem remover itens atuais.
-
-### Fase 2 — Inteligência de mercado (Cotações + Notícias + Clima 7 dias)
-- Nova rota `/mercado` com:
-  - **Cotações regionais** (Boi Gordo, Bezerro, Milho, Soja, Café, Frango Vivo, Dólar, etc.) com variação diária/semanal e mini-gráficos.
-  - **Alertas de preço** configuráveis (nova tabela `alertas_mercado`).
-  - **Feed de notícias agro** por categoria, com favoritar/filtrar.
-- Clima rural expandido para 7 dias com alertas.
-- ⚠️ **Requer fontes de dados externas.** Preciso definir com você antes de implementar (ver perguntas abaixo).
-
-### Fase 3 — Gráficos profissionais + Financeiro Premium + Relatórios PDF
-- Gráficos (mortalidade, consumo, gastos, lucro) com filtros 7/30/90/365 dias.
-- Fluxo de caixa, receitas/despesas categorizadas, dashboard financeiro.
-- PDFs corporativos (diário, semanal, mensal, por lote, financeiro, estoque).
-
-### Fase 4 — Assistente Agro IA + Extras
-- Chat IA (Lovable AI Gateway, sem custo de chave) que lê os indicadores do sítio e responde dúvidas, detecta anomalias, gera insights.
-- Pesquisa global, central de notificações, histórico/auditoria.
-
----
-
-### Perguntas antes de começar (Fase 2 depende disso):
-
-1. **Cotações agro em tempo real** — não existe API pública gratuita confiável de cotações regionais SP. Opções:
-   - (a) Você fornece uma chave de API paga (ex.: Cepea/Scot Consultoria/AgriPoint).
-   - (b) Eu faço web scraping diário do site público do **Cepea/Esalq-USP** (gratuito, mas valores nacionais, não por município).
-   - (c) Cadastro manual: você/operador insere cotações da praça local diariamente.
-
-2. **Notícias agro** — usar RSS gratuito (Canal Rural, Globo Rural, Notícias Agrícolas) agregado, ou você prefere uma fonte específica?
-
-3. **Mapa de preços por município** — depende da fonte de cotações acima. Posso fazer ele em Fase 2 se a fonte permitir, ou marcar como "futuro".
-
-4. **Posso começar pela Fase 1 agora** (visual + dashboard, 100% sem dependências externas), enquanto você responde as perguntas acima para a Fase 2?
-
-Me confirme as respostas e eu sigo imediatamente com a Fase 1.
+## Detalhes técnicos
+- Reaproveitar um único motor zootécnico para curvas de peso/consumo e evitar números diferentes entre telas.
+- Preservar todos os dados atuais; nenhuma migração destrutiva será feita.
+- Manter o modelo sem balança física como padrão, com confiança calculada pela frequência e qualidade dos registros do lote.
