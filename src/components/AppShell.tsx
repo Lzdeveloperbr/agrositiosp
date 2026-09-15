@@ -244,9 +244,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="flex-1 min-w-0 pb-28 md:pb-0">
-        <div className="px-3 py-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
+        <div className="px-3 py-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
 
-        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-3 left-3 right-3 z-40 grid grid-cols-5 rounded-lg bg-sidebar/95 backdrop-blur-xl border border-sidebar-border shadow-2xl overflow-hidden">
+        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-2 left-2 right-2 z-40 grid grid-cols-5 rounded-lg bg-sidebar/95 backdrop-blur-xl border border-primary/15 shadow-2xl overflow-hidden">
           {MOBILE_BOTTOM.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;
@@ -255,11 +255,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={it.to}
                 to={it.to}
                 className={cn(
-                  "relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
+                  "relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-primary" />}
+                {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-10 rounded-b bg-primary" />}
                 <Icon className="h-5 w-5" />
                 {it.short ?? it.label}
               </Link>
@@ -268,11 +268,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link
             to="/modulos"
             className={cn(
-              "relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors",
+              "relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors",
               isActive("/modulos") ? "text-primary" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {isActive("/modulos") && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-b bg-primary" />}
+            {isActive("/modulos") && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-10 rounded-b bg-primary" />}
             <Grid3X3 className="h-5 w-5" />
             Módulos
           </Link>
