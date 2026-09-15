@@ -30,6 +30,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Painel do sítio com clima ao vivo, IA agrícola, alertas, lembretes e indicadores de granja, gado e plantios." },
       { property: "og:title", content: "AgroSítio — Painel de Gestão Rural" },
       { property: "og:description", content: "Painel do sítio com clima ao vivo, IA agrícola, alertas, lembretes e indicadores de granja, gado e plantios." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Dashboard,
