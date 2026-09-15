@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLotes, useAnimais, useTarefas, useEstoque, useFinanceiro, usePlantios } from "@/lib/state";
-import { Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing, TrendingUp, TrendingDown } from "lucide-react";
+import { Beef, Zap, AlertTriangle, ArrowRight, Calendar, BookOpen, ListChecks, PackageX, Wallet, Sprout, BellRing, TrendingUp, TrendingDown, Sun, Moon, Sunrise, FileText } from "lucide-react";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
@@ -79,7 +79,7 @@ function Dashboard() {
 
   const hora = today?.getHours() ?? 12;
   const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
-  const emoji = hora < 12 ? "🌅" : hora < 18 ? "☀️" : "🌙";
+  const PeriodIcon = hora < 12 ? Sunrise : hora < 18 ? Sun : Moon;
   const nomeOperador = operador?.split(" ")[0] || "granjeiro";
 
   const totalMort = ativo?.entries.reduce((s, e) => s + e.mortalidade, 0) ?? 0;
@@ -97,11 +97,12 @@ function Dashboard() {
           <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent pointer-events-none" />
           <div className="relative flex flex-col gap-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <p className="eyebrow capitalize min-h-[16px]">
+              <p className="eyebrow min-h-[16px]">
                 {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}
               </p>
-              <h1 className="mt-3 text-[clamp(1.75rem,6vw,3rem)] font-display font-bold leading-[1.08] truncate">
-                {saudacao}, <span className="text-gradient">{nomeOperador}</span> {emoji}
+              <h1 className="mt-3 flex items-center gap-2 text-[clamp(1.75rem,6vw,3rem)] font-display font-bold leading-[1.08]">
+                <span className="min-w-0 truncate">{saudacao}, <span className="text-gradient">{nomeOperador}</span></span>
+                <PeriodIcon className="h-6 w-6 md:h-8 md:w-8 shrink-0 text-primary" strokeWidth={1.7} />
               </h1>
               <p className="mt-3 max-w-xl text-sm md:text-base leading-relaxed text-muted-foreground truncate">
                 {fazendaNome ? `${fazendaNome} · Resumo de hoje no sítio` : "Resumo de hoje no sítio"}
@@ -109,9 +110,9 @@ function Dashboard() {
             </div>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:shrink-0">
               <InstallAppButton />
-              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/lembretes">Lembretes</Link></Button>
-              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/diario">+ Diário</Link></Button>
-              <Button asChild size="sm" className="w-full sm:w-auto"><Link to="/relatorios">Relatórios</Link></Button>
+              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/lembretes"><BellRing className="h-4 w-4" />Lembretes</Link></Button>
+              <Button asChild variant="outline" size="sm" className="w-full sm:w-auto"><Link to="/diario"><BookOpen className="h-4 w-4" />Diário</Link></Button>
+              <Button asChild size="sm" className="w-full sm:w-auto"><Link to="/relatorios"><FileText className="h-4 w-4" />Relatórios</Link></Button>
             </div>
           </div>
         </header>
@@ -137,6 +138,17 @@ function Dashboard() {
               </Link>
             ))}
           </div>
+        </section>
+
+        <section aria-label="Lote atual" className="reveal" style={{ "--reveal-delay": "160ms" } as React.CSSProperties}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="eyebrow">Operação avícola</h2>
+            <Link to="/manejo" className="group text-xs font-medium text-primary inline-flex items-center gap-1.5">
+              Abrir manejo
+              <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </div>
+          <PainelLoteAtivo />
         </section>
 
 
@@ -203,9 +215,6 @@ function Dashboard() {
         <NotificationsManager />
 
         <AlertasInteligentes />
-
-        <PainelLoteAtivo />
-
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="Cabeças de gado" value={ativosGado.length.toLocaleString("pt-BR")} hint={`${animais.length} no histórico`} icon={Beef} tone="accent" />

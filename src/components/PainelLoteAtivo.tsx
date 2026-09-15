@@ -48,18 +48,20 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
 
   if (!ativo) {
     return (
-      <Card className="p-6 md:p-8 border-dashed" style={{ background: "var(--gradient-surface)" }}>
-        <div className="flex flex-col items-center text-center gap-3 py-6">
-          <div className="h-14 w-14 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
+      <Card className="overflow-hidden border-primary/15 operational-surface">
+        <div className="h-1 bg-primary/70" />
+        <div className="flex flex-col items-center text-center gap-3 px-5 py-7 md:py-9">
+          <div className="h-12 w-12 rounded-md border border-primary/25 bg-primary/10 text-primary flex items-center justify-center">
             <Bird className="h-7 w-7" />
           </div>
           <div>
-            <h3 className="font-display font-semibold text-lg">Nenhum lote ativo</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Cadastre seu lote de frangos para liberar o painel automático com curva de peso, mortalidade vs meta, previsão de ração e sugestões diárias.
+            <p className="eyebrow mb-1.5">Pronto para começar</p>
+            <h3 className="font-display font-bold text-lg">Nenhum lote ativo</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground max-w-md mt-1">
+              Cadastre o lote para acompanhar peso, mortalidade, ração e manejo diário em um só lugar.
             </p>
           </div>
-          <Button asChild><Link to="/granja">Cadastrar lote</Link></Button>
+          <Button asChild><Link to="/granja">Cadastrar primeiro lote <ArrowRight className="h-4 w-4" /></Link></Button>
         </div>
       </Card>
     );
