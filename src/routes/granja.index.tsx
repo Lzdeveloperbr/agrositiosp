@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLotes } from "@/lib/state";
 import { uid } from "@/lib/storage";
-import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap, Boxes, AlertTriangle } from "lucide-react";
+import { Bird, Plus, FileText, Trash2, ArrowRight, Scale, Trophy, ClipboardCheck, Syringe, BarChart3, BookOpen, Wind, History, Stethoscope, Activity, Target, Droplets, Wheat, Zap, Boxes, AlertTriangle, CheckCircle2, Clock3, Gauge, CalendarDays } from "lucide-react";
 import { gerarRelatorioLote } from "@/lib/pdf";
 import { toast } from "sonner";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
@@ -41,9 +42,13 @@ function GranjaPage() {
   });
 
   const criar = () => {
-    if (!form.numero) { toast.error("Informe o número do lote"); return; }
+    if (!form.numero.trim()) { toast.error("Informe o número do lote"); return; }
+    if (form.dataEntrada > hojeISO()) { toast.error("A entrada do lote não pode estar no futuro"); return; }
+    if (!Number.isFinite(form.quantidadeInicial) || form.quantidadeInicial <= 0) { toast.error("Informe uma quantidade de aves válida"); return; }
+    if (form.previsaoAbateDias < 28 || form.previsaoAbateDias > 60) { toast.error("A previsão de abate deve ficar entre 28 e 60 dias"); return; }
+    if (form.percentualLucro < 0 || form.percentualLucro > 100) { toast.error("O percentual deve ficar entre 0% e 100%"); return; }
     setLotes((prev) => [
-      { id: uid(), ...form, entries: [] },
+      { id: uid(), ...form, numero: form.numero.trim(), entries: [] },
       ...prev,
     ]);
     setOpen(false);
@@ -57,6 +62,8 @@ function GranjaPage() {
   };
 
   const ativos = lotes.filter((l) => !l.encerrado);
+  const lotePrincipal = ativos[0] ?? null;
+  const resumoPrincipal = useMemo(() => lotePrincipal ? calcularResumoLote(lotePrincipal) : null, [lotePrincipal]);
   const kpis = useMemo(() => {
     let totalAves = 0, vivas = 0, baixas = 0, somaPesoPonderado = 0, avesComPeso = 0, diasSoma = 0;
     for (const l of ativos) {
@@ -79,6 +86,19 @@ function GranjaPage() {
       idadeMedia: ativos.length ? diasSoma / ativos.length : 0,
     };
   }, [ativos]);
+
+  const operacaoHoje = useMemo(() => {
+    if (!lotePrincipal || !resumoPrincipal) return null;
+    const lancouHoje = lotePrincipal.entries.some((entry) => entry.date === hojeISO());
+    const fase = resumoPrincipal.idade <= 7 ? "Pré-inicial" : resumoPrincipal.idade <= 14 ? "Inicial" : resumoPrincipal.idade <= 25 ? "Crescimento" : resumoPrincipal.idade <= 35 ? "Final" : "Retirada";
+    const diasParaAbate = Math.max(0, lotePrincipal.previsaoAbateDias - resumoPrincipal.idade);
+    const tarefas = [
+      !lancouHoje ? { label: "Fazer lançamento diário", detalhe: "Mortalidade, eliminados e observações", to: `/granja/${lotePrincipal.id}`, tone: "warn" as const } : null,
+      resumoPrincipal.diasSemPesar > 3 ? { label: "Atualizar pesagem", detalhe: `Última medição há ${resumoPrincipal.diasSemPesar} dias`, to: "/pesagem-pro", tone: resumoPrincipal.diasSemPesar > 7 ? "bad" as const : "warn" as const } : null,
+      resumoPrincipal.situacao === "critico" || resumoPrincipal.situacao === "atencao" ? { label: "Revisar desempenho", detalhe: `Peso ${Math.abs(resumoPrincipal.diferencaPesoPct ?? 0).toFixed(1)}% abaixo da meta`, to: "/manejo", tone: resumoPrincipal.situacao === "critico" ? "bad" as const : "warn" as const } : null,
+    ].filter((item): item is NonNullable<typeof item> => Boolean(item));
+    return { fase, diasParaAbate, lancouHoje, tarefas };
+  }, [lotePrincipal, resumoPrincipal]);
 
   const atalhos = [
     { to: "/pesagem-pro", label: "Pesagem Pro", icon: Scale },
@@ -123,6 +143,67 @@ function GranjaPage() {
             </DialogContent>
           </Dialog>
         </header>
+
+        {lotePrincipal && resumoPrincipal && operacaoHoje && (
+          <section aria-labelledby="operacao-hoje" className="overflow-hidden rounded-lg border border-primary/25 operational-surface">
+            <div className="flex flex-col gap-4 border-b border-border/70 p-4 md:flex-row md:items-center md:justify-between md:p-5">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+                  <Gauge className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="eyebrow">Operação de hoje</p>
+                  <h2 id="operacao-hoje" className="font-display text-xl font-bold">Lote {lotePrincipal.numero} · D{resumoPrincipal.idade}</h2>
+                  <p className="text-xs text-muted-foreground">{operacaoHoje.fase} · {operacaoHoje.diasParaAbate} dias para o abate previsto</p>
+                </div>
+              </div>
+              <Button asChild className="w-full md:w-auto">
+                <Link to="/granja/$id" params={{ id: lotePrincipal.id }}>Lançar dados de hoje <ArrowRight className="h-4 w-4" /></Link>
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 divide-x divide-y divide-border/60 md:grid-cols-4 md:divide-y-0">
+              <OperationalMetric label="Aves vivas" value={resumoPrincipal.vivas.toLocaleString("pt-BR")} detail={`${resumoPrincipal.baixas.toLocaleString("pt-BR")} baixas`} />
+              <OperationalMetric label="Peso atual" value={resumoPrincipal.ultimaPesagem ? `${resumoPrincipal.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "Sem pesagem"} detail={`Meta ${resumoPrincipal.pesoEsperadoHojeG.toFixed(0)} g`} tone={resumoPrincipal.situacao === "critico" ? "bad" : resumoPrincipal.situacao === "atencao" ? "warn" : "ok"} />
+              <OperationalMetric label="Mortalidade" value={`${resumoPrincipal.mortalidadePct.toFixed(2)}%`} detail={`${resumoPrincipal.mortalidade} mortes · ${resumoPrincipal.eliminados} eliminados`} tone={resumoPrincipal.mortalidadePct > 5 ? "bad" : resumoPrincipal.mortalidadePct > 3 ? "warn" : "ok"} />
+              <OperationalMetric label="Projeção abate" value={`${(resumoPrincipal.pesoProjetadoAbateG / 1000).toFixed(2)} kg`} detail={`em D${lotePrincipal.previsaoAbateDias}`} />
+            </div>
+
+            <div className="grid gap-0 border-t border-border/70 md:grid-cols-[1.3fr_1fr]">
+              <div className="p-4 md:p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Prioridades</h3>
+                  <Badge variant={operacaoHoje.tarefas.length ? "outline" : "secondary"}>{operacaoHoje.tarefas.length ? `${operacaoHoje.tarefas.length} pendente${operacaoHoje.tarefas.length > 1 ? "s" : ""}` : "Em dia"}</Badge>
+                </div>
+                {operacaoHoje.tarefas.length ? (
+                  <div className="space-y-2">
+                    {operacaoHoje.tarefas.map((tarefa) => (
+                      <Link key={tarefa.label} to={tarefa.to} className="flex min-h-14 items-center gap-3 rounded-md border border-border/70 bg-secondary/25 px-3 py-2.5 transition-colors hover:border-primary/45 hover:bg-secondary/45">
+                        <AlertTriangle className={`h-4 w-4 shrink-0 ${tarefa.tone === "bad" ? "text-destructive" : "text-warning"}`} />
+                        <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{tarefa.label}</span><span className="block truncate text-xs text-muted-foreground">{tarefa.detalhe}</span></span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex min-h-16 items-center gap-3 rounded-md border border-success/30 bg-success/10 px-3">
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                    <div><p className="text-sm font-semibold">Rotina em dia</p><p className="text-xs text-muted-foreground">Lançamento e pesagem estão atualizados.</p></div>
+                  </div>
+                )}
+              </div>
+              <div className="border-t border-border/70 p-4 md:border-l md:border-t-0 md:p-5">
+                <h3 className="mb-3 text-sm font-semibold">Acesso rápido</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <QuickAction to="/manejo" icon={BookOpen} label="Manejo" />
+                  <QuickAction to="/silo" icon={Boxes} label="Silo ao vivo" />
+                  <QuickAction to="/pesagem-pro" icon={Scale} label="Pesagem" />
+                  <QuickAction to="/sanidade" icon={Syringe} label="Sanidade" />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {ativos.length > 0 && (
           <Card className="p-5" style={{ background: "var(--gradient-surface)", boxShadow: "var(--shadow-card)" }}>
@@ -177,8 +258,9 @@ function GranjaPage() {
             {lotes.map((l) => {
               const resumo = calcularResumoLote(l);
               const dias = resumo.idade;
-              const progresso = Math.min(100, (dias / l.previsaoAbateDias) * 100);
+              const progresso = Math.min(100, (dias / Math.max(1, l.previsaoAbateDias)) * 100);
               const lancouHoje = l.entries.some((e) => e.date === hojeISO());
+              const ultimaAtualizacao = [...l.entries].sort((a, b) => b.date.localeCompare(a.date))[0]?.date;
               const alertas = [
                 !l.encerrado && !lancouHoje ? "Lançamento diário pendente" : null,
                 !l.encerrado && resumo.diasSemPesar > 3 ? `Pesagem atrasada (${resumo.diasSemPesar} dias)` : null,
@@ -195,7 +277,7 @@ function GranjaPage() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">Entrada: {fmtData(l.dataEntrada)} · {dias}d</p>
                     </div>
-                    <Button size="icon" variant="ghost" onClick={() => remover(l.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" aria-label={`Remover lote ${l.numero}`} title="Remover lote" onClick={() => remover(l.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <Mini label="Vivas" value={resumo.vivas.toLocaleString("pt-BR")} />
@@ -225,10 +307,9 @@ function GranjaPage() {
                     </div>
                   )}
                   <div className="space-y-1 mb-4">
-                    <div className="flex justify-between text-xs text-muted-foreground"><span>Crescimento</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full" style={{ width: `${progresso}%`, background: "var(--gradient-primary)" }} />
-                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground"><span>Ciclo produtivo</span><span>{dias}/{l.previsaoAbateDias} dias</span></div>
+                    <Progress value={progresso} />
+                    <div className="flex items-center gap-1.5 pt-1 text-[11px] text-muted-foreground"><Clock3 className="h-3 w-3" />{ultimaAtualizacao ? `Atualizado em ${fmtData(ultimaAtualizacao)}` : "Ainda sem lançamento diário"}</div>
                   </div>
                   <div className="flex gap-2">
                     <Button asChild size="sm" className="flex-1"><Link to="/granja/$id" params={{ id: l.id }}>Abrir <ArrowRight className="h-3 w-3 ml-1" /></Link></Button>
@@ -267,5 +348,25 @@ function KpiTile({ icon: Icon, label, value, sub, tone }: { icon: any; label: st
       <div className="font-display font-bold text-2xl tabular-nums leading-none">{value}</div>
       {sub && <div className={`text-[10px] mt-1 ${toneColor}`}>{sub}</div>}
     </div>
+  );
+}
+
+function OperationalMetric({ label, value, detail, tone }: { label: string; value: string; detail: string; tone?: "ok" | "warn" | "bad" }) {
+  const toneColor = tone === "bad" ? "text-destructive" : tone === "warn" ? "text-warning" : tone === "ok" ? "text-success" : "text-primary";
+  return (
+    <div className="min-w-0 p-3.5 md:p-4">
+      <p className="text-[10px] font-semibold uppercase text-muted-foreground">{label}</p>
+      <p className={`mt-1 truncate font-display text-xl font-bold tabular-nums ${toneColor}`}>{value}</p>
+      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{detail}</p>
+    </div>
+  );
+}
+
+function QuickAction({ to, icon: Icon, label }: { to: string; icon: typeof CalendarDays; label: string }) {
+  return (
+    <Link to={to} className="flex min-h-12 items-center gap-2 rounded-md border border-border/70 bg-secondary/25 px-3 text-xs font-semibold transition-colors hover:border-primary/45 hover:text-primary">
+      <Icon className="h-4 w-4 text-primary" />
+      <span>{label}</span>
+    </Link>
   );
 }
