@@ -67,6 +67,7 @@ import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GadoIndexRouteImport } from './routes/gado.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as GadoIdRouteImport } from './routes/gado.$id'
+import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
 const VeterinarioRoute = VeterinarioRouteImport.update({
   id: '/veterinario',
@@ -358,6 +359,11 @@ const GadoIdRoute = GadoIdRouteImport.update({
   path: '/gado/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWhatsappRoute = ApiPublicWhatsappRouteImport.update({
+  id: '/api/public/whatsapp',
+  path: '/api/public/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -418,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
+  '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -478,6 +485,7 @@ export interface FileRoutesByTo {
   '/granja/$id': typeof GranjaIdRoute
   '/gado': typeof GadoIndexRoute
   '/granja': typeof GranjaIndexRoute
+  '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -539,6 +547,7 @@ export interface FileRoutesById {
   '/granja/$id': typeof GranjaIdRoute
   '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
+  '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -601,6 +610,7 @@ export interface FileRouteTypes {
     | '/granja/$id'
     | '/gado/'
     | '/granja/'
+    | '/api/public/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -661,6 +671,7 @@ export interface FileRouteTypes {
     | '/granja/$id'
     | '/gado'
     | '/granja'
+    | '/api/public/whatsapp'
   id:
     | '__root__'
     | '/'
@@ -721,6 +732,7 @@ export interface FileRouteTypes {
     | '/granja/$id'
     | '/gado/'
     | '/granja/'
+    | '/api/public/whatsapp'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -782,6 +794,7 @@ export interface RootRouteChildren {
   GranjaIdRoute: typeof GranjaIdRoute
   GadoIndexRoute: typeof GadoIndexRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
+  ApiPublicWhatsappRoute: typeof ApiPublicWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1192,6 +1205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GadoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/whatsapp': {
+      id: '/api/public/whatsapp'
+      path: '/api/public/whatsapp'
+      fullPath: '/api/public/whatsapp'
+      preLoaderRoute: typeof ApiPublicWhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1254,6 +1274,7 @@ const rootRouteChildren: RootRouteChildren = {
   GranjaIdRoute: GranjaIdRoute,
   GadoIndexRoute: GadoIndexRoute,
   GranjaIndexRoute: GranjaIndexRoute,
+  ApiPublicWhatsappRoute: ApiPublicWhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
