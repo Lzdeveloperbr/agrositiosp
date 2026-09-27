@@ -1416,6 +1416,81 @@ export type Database = {
           },
         ]
       }
+      lote_medicoes: {
+        Row: {
+          atualizado_em: string
+          autor: string | null
+          cama: string | null
+          consumo_agua_l: number | null
+          consumo_racao_kg: number | null
+          data: string
+          fazenda_id: string
+          horas_luz: number | null
+          id: string
+          iluminacao_lux: number | null
+          lote_id: string
+          observacoes: string | null
+          registrado_em: string
+          temperatura_c: number | null
+          umidade_pct: number | null
+          uniformidade_pct: number | null
+          ventilacao: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          autor?: string | null
+          cama?: string | null
+          consumo_agua_l?: number | null
+          consumo_racao_kg?: number | null
+          data: string
+          fazenda_id: string
+          horas_luz?: number | null
+          id?: string
+          iluminacao_lux?: number | null
+          lote_id: string
+          observacoes?: string | null
+          registrado_em?: string
+          temperatura_c?: number | null
+          umidade_pct?: number | null
+          uniformidade_pct?: number | null
+          ventilacao?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          autor?: string | null
+          cama?: string | null
+          consumo_agua_l?: number | null
+          consumo_racao_kg?: number | null
+          data?: string
+          fazenda_id?: string
+          horas_luz?: number | null
+          id?: string
+          iluminacao_lux?: number | null
+          lote_id?: string
+          observacoes?: string | null
+          registrado_em?: string
+          temperatura_c?: number | null
+          umidade_pct?: number | null
+          uniformidade_pct?: number | null
+          ventilacao?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lote_medicoes_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lote_medicoes_lote_id_fkey"
+            columns: ["lote_id"]
+            isOneToOne: false
+            referencedRelation: "lotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lotes: {
         Row: {
           aplicacoes: Json
@@ -1425,13 +1500,16 @@ export type Database = {
           encerrado: boolean
           entries: Json
           fazenda_id: string
+          galpao: string | null
           id: string
           integradora: string | null
+          linhagem: string | null
           numero: string
           percentual_lucro: number
           preco_kg_vivo: number | null
           previsao_abate_dias: number
           quantidade_inicial: number
+          sexo: string | null
           updated_at: string
         }
         Insert: {
@@ -1442,13 +1520,16 @@ export type Database = {
           encerrado?: boolean
           entries?: Json
           fazenda_id: string
+          galpao?: string | null
           id?: string
           integradora?: string | null
+          linhagem?: string | null
           numero: string
           percentual_lucro?: number
           preco_kg_vivo?: number | null
           previsao_abate_dias?: number
           quantidade_inicial: number
+          sexo?: string | null
           updated_at?: string
         }
         Update: {
@@ -1459,13 +1540,16 @@ export type Database = {
           encerrado?: boolean
           entries?: Json
           fazenda_id?: string
+          galpao?: string | null
           id?: string
           integradora?: string | null
+          linhagem?: string | null
           numero?: string
           percentual_lucro?: number
           preco_kg_vivo?: number | null
           previsao_abate_dias?: number
           quantidade_inicial?: number
+          sexo?: string | null
           updated_at?: string
         }
         Relationships: [
