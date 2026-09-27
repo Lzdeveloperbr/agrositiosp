@@ -133,9 +133,9 @@ export function calcularSilo(inp: SiloInput) {
   const aloj = parseData(inp.alojamento) ?? agora;
   const idade = Math.max(0, diffDias(aloj, agora));
 
-  const entries = [...(inp.entries || [])].filter((e) => e.date).sort((a, b) => a.date.localeCompare(b.date));
-  const entregas = [...(inp.entregas || [])].filter((e) => Number(e.kg) > 0).sort((a, b) => a.data.localeCompare(b.data));
-  const pesagens = [...(inp.pesagens || [])].sort((a, b) => a.medidoEm.localeCompare(b.medidoEm));
+  const entries = [...(inp.entries || [])].filter((e) => e.date && parseData(e.date) && e.date <= isoLocal(agora)).sort((a, b) => a.date.localeCompare(b.date));
+  const entregas = [...(inp.entregas || [])].filter((e) => Number(e.kg) > 0 && parseData(e.data) && e.data <= isoLocal(agora)).sort((a, b) => a.data.localeCompare(b.data));
+  const pesagens = [...(inp.pesagens || [])].filter((p) => parseData(p.medidoEm) && Number(p.kg) >= 0 && (parseData(p.medidoEm)?.getTime() ?? Infinity) <= agora.getTime()).sort((a, b) => a.medidoEm.localeCompare(b.medidoEm));
 
   // ----- aves -----
   const perdasAte = (iso: string) =>
@@ -159,13 +159,13 @@ export function calcularSilo(inp: SiloInput) {
   // ----- pesagens das aves (peso médio real) -----
   const pesagensAves = entries
     .filter((e) => Number(e.pesoMedioG) > 0)
-    .map((e) => ({ iso: e.date, idade: Math.max(0, diffDias(aloj, parseData(e.date)!)), g: Number(e.pesoMedioG) }))
+     .map((e) => ({ iso: e.date, idade: Math.max(0, diffDias(aloj, e.date)), g: Number(e.pesoMedioG) }))
     .sort((a, b) => a.idade - b.idade);
   const ultPesagem = pesagensAves[pesagensAves.length - 1] || null;
 
   const gpdEntre = (a: typeof pesagensAves[number], b: typeof pesagensAves[number]) =>
     b.idade > a.idade ? (b.g - a.g) / (b.idade - a.idade) : 0;
-  const gpdRecente = pesagensAves.length >= 2 ? gpdEntre(pesagensAves[pesagensAves.length - 2], ultPesagem!) : null;
+  const gpdRecente = pesagensAves.length >= 2 && ultPesagem ? gpdEntre(pesagensAves[pesagensAves.length - 2], ultPesagem) : null;
   const gpdMedio = ultPesagem && ultPesagem.idade > 0 ? (ultPesagem.g - refPesoG(0, lin, sx)) / ultPesagem.idade : null;
   const janelaGpd = (dias: number) => {
     if (!ultPesagem) return null;
@@ -191,7 +191,7 @@ export function calcularSilo(inp: SiloInput) {
   const dataHoraEntrega = (e: EntregaSilo) => {
     const d = parseData(e.data) ?? agora;
     const [h, m] = (e.hora || "08:00").split(":").map(Number);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h || 8, m || 0, 0, 0);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number.isFinite(h) ? h : 8, Number.isFinite(m) ? m : 0, 0, 0);
   };
   const totalEntregueKg = entregas.reduce((s, e) => s + Number(e.kg), 0);
   const entregasEntre = (t0: Date, t1: Date) =>
@@ -276,7 +276,7 @@ export function calcularSilo(inp: SiloInput) {
   let diasCobertosReal = 0;
   if (pesagens.length >= 2) {
     const p0 = pesagens[0], p1 = pesagens[pesagens.length - 1];
-    const t0 = parseData(p0.medidoEm)!, t1 = parseData(p1.medidoEm)!;
+    const t0 = parseData(p0.medidoEm) ?? agora, t1 = parseData(p1.medidoEm) ?? agora;
     const entradas = entregasEntre(t0, t1);
     const consumoReal = p0.kg + entradas - p1.kg;
     const dias = (t1.getTime() - t0.getTime()) / 86400000;
@@ -345,7 +345,7 @@ export function calcularSilo(inp: SiloInput) {
 
   // ----- âncora: última pesagem física, senão balanço desde o alojamento -----
   const ultAncora = pesagens[pesagens.length - 1] || null;
-  const ancoraData = ultAncora ? parseData(ultAncora.medidoEm)! : new Date(aloj.getFullYear(), aloj.getMonth(), aloj.getDate());
+  const ancoraData = ultAncora ? (parseData(ultAncora.medidoEm) ?? aloj) : new Date(aloj.getFullYear(), aloj.getMonth(), aloj.getDate());
   const ancoraKg = ultAncora ? Number(ultAncora.kg) : 0;
   const horasDesdeAncora = Math.max(0, (agora.getTime() - ancoraData.getTime()) / 3600000);
 
@@ -449,12 +449,15 @@ export function calcularSilo(inp: SiloInput) {
   const dataPedido = limiares.find((l) => l.pct === -1)?.quando ?? null;
 
   // ----- zootecnia -----
-  const consumoAcumKg = Math.min(totalEntregueKg || Infinity, integrarConsumo(new Date(aloj.getFullYear(), aloj.getMonth(), aloj.getDate()), agora));
+  // Consumo não é limitado às entregas: o silo pode começar o lote com ração já existente.
+  const consumoAcumKg = integrarConsumo(new Date(aloj.getFullYear(), aloj.getMonth(), aloj.getDate()), agora);
   const consumoAcumRefKg = (refConsumoAcumG(idade, lin, sx) * avesVivas) / 1000;
   const consumoPorAveG = avesVivas > 0 ? (consumoAcumKg * 1000) / avesVivas : 0;
   const consumoKgPor1000Dia = avesVivas > 0 ? (consumoHojeKg / avesVivas) * 1000 : 0;
   const pesoTotalVivoKg = (pesoAtualG / 1000) * avesVivas;
-  const fcrReal = pesoTotalVivoKg > 0 ? consumoAcumKg / pesoTotalVivoKg : 0;
+  // Conversão estimada: ração estimada / ganho de biomassa das aves vivas; não é CA física medida.
+  const ganhoBiomassaKg = Math.max(0, (pesoAtualG - refPesoG(0, lin, sx)) * avesVivas / 1000);
+  const fcrReal = ganhoBiomassaKg > 0 ? consumoAcumKg / ganhoBiomassaKg : 0;
   const fcrRef = refCA(idade, lin, sx);
   const difConsumoKg = consumoAcumKg - consumoAcumRefKg;
   const difConsumoPct = consumoAcumRefKg > 0 ? (difConsumoKg / consumoAcumRefKg) * 100 : 0;
@@ -477,7 +480,7 @@ export function calcularSilo(inp: SiloInput) {
   const historicoErros = pesagens.map((p, i) => {
     if (i === 0) return { medidoEm: p.medidoEm, real: Number(p.kg), estimado: null as number | null, erro: null as number | null, erroPct: null as number | null };
     const ant = pesagens[i - 1];
-    const t0 = parseData(ant.medidoEm)!, t1 = parseData(p.medidoEm)!;
+    const t0 = parseData(ant.medidoEm) ?? agora, t1 = parseData(p.medidoEm) ?? agora;
     const est = Number(ant.kg) + entregasEntre(t0, t1) - integrarConsumo(t0, t1);
     const erro = Number(p.kg) - est;
     return { medidoEm: p.medidoEm, real: Number(p.kg), estimado: est, erro, erroPct: p.kg ? (erro / Number(p.kg)) * 100 : null };
@@ -490,7 +493,7 @@ export function calcularSilo(inp: SiloInput) {
   if (avesVivas > inp.qtdInicial) anomalias.push("Aves vivas maiores que o alojamento — revisar mortalidade.");
   if (mortalidadePct > 8) anomalias.push(`Mortalidade acumulada alta (${mortalidadePct.toFixed(1)}%).`);
   if (ultimoErro && ultimoErro.erroPct !== null && Math.abs(ultimoErro.erroPct) > 10)
-    anomalias.push(`Divergência de ${ultimoErro.erro!.toFixed(0)} kg entre estimativa e pesagem física.`);
+    anomalias.push(`Divergência de ${Number(ultimoErro.erro).toFixed(0)} kg entre estimativa e pesagem física.`);
   if (consumoPorAveG > refConsumoAcumG(idade, lin, sx) * 1.4 && idade > 5)
     anomalias.push("Consumo por ave muito acima da referência — verificar desperdício ou vazamento.");
   if (estoqueAtualKg > (cfg.capacidadeOperacionalKg || cfg.capacidadeKg) * 1.02)
