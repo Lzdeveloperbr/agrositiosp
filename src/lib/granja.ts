@@ -40,7 +40,9 @@ export function calcularResumoLote(
     ? (ultimaPesagem.pesoG - penultimaPesagem.pesoG) / (ultimaPesagem.idade - penultimaPesagem.idade)
     : null;
   const idadeAbate = Math.max(idade, lote.previsaoAbateDias || 42);
-  const pesoProjetadoAbateG = refPesoG(idadeAbate, linhagem, sexo) * fatorValido;
+  const pesoProjetadoAbateG = ultimaPesagem
+    ? refPesoG(idadeAbate, linhagem, sexo) * (1 + (fatorValido - 1) * Math.exp(-Math.max(0, idadeAbate - ultimaPesagem.idade) / 21))
+    : refPesoG(idadeAbate, linhagem, sexo);
   const consumoEsperadoKg = (refConsumoAcumG(idade, linhagem, sexo) * vivas) / 1000;
   const caEsperada = refCA(idade, linhagem, sexo);
 

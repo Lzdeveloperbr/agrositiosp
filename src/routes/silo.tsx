@@ -102,7 +102,7 @@ function SiloPage() {
       const rows = (ent.data as any[]) || [];
       const doLote = loteAtivo ? rows.filter((r) => r.lote_id === loteAtivo.id) : [];
       setEntregas(doLote.map((r) => ({ id: r.id, data: r.data, kg: Number(r.quantidade_kg) || 0 })));
-      setPesagens(((pes.data as any[]) || []).filter((p) => !loteAtivo || !p.lote_id || p.lote_id === loteAtivo.id));
+      setPesagens(((pes.data as any[]) || []).filter((p) => loteAtivo && p.lote_id === loteAtivo.id));
       const configs = (conf.data as any[]) || [];
       const c = loteAtivo ? configs.find((item) => item.lote_id === loteAtivo.id) : undefined;
       if (c) {
