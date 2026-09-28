@@ -128,7 +128,7 @@ function SiloPage() {
       agora,
       alojamento: loteAtivo.dataEntrada,
       qtdInicial: loteAtivo.quantidadeInicial,
-      previsaoAbateDias: loteAtivo.previsaoAbateDias || 45,
+       previsaoAbateDias: loteAtivo.previsaoAbateDias || 42,
       linhagem, sexo,
       entries: (loteAtivo.entries || []).map((e) => ({ date: e.date, mortalidade: e.mortalidade, eliminados: e.eliminados, pesoMedioG: e.pesoMedioG })),
       entregas,
@@ -245,7 +245,7 @@ function SiloPage() {
               <StatCard label="Aves vivas" value={calc.avesVivas.toLocaleString("pt-BR")} hint={`mortalidade ${num(calc.mortalidadePct, 2)}%`} icon={Drumstick} tone="muted" />
               <StatCard label="Peso médio" value={`${num(calc.pesoAtualG, 0)} g`} hint={calc.ultPesagem ? `pesado D${calc.ultPesagem.idade}` : "estimado pela curva"} icon={Scale} tone="accent" />
               <StatCard label="GPD" value={`${num(calc.gpd7 ?? calc.gpdRecente ?? 0, 0)} g/dia`} hint={`3d ${num(calc.gpd3 ?? 0, 0)} · médio ${num(calc.gpdMedio ?? 0, 0)}`} icon={Activity} tone="muted" />
-              <StatCard label="Conversão (CA)" value={num(calc.fcrReal, 3)} hint={`referência ${num(calc.fcrRef, 3)}`} icon={Target} tone="primary" />
+              <StatCard label="CA estimada" value={num(calc.fcrReal, 3)} hint={`não medida · referência ${num(calc.fcrRef, 3)}`} icon={Target} tone="primary" />
             </div>
 
             {/* ===== Alertas ===== */}
