@@ -1,11 +1,10 @@
 /**
  * Integração para um bot Baileys existente.
- * Defina no Termux:
- *   export AGROSITIO_API_KEY='a-mesma-chave-salva-no-AgroSitio'
- *   export AGROSITIO_FAZENDA_CODIGO='SEU-CODIGO'
+ * Defina no Termux: AGROSITIO_API_URL, AGROSITIO_API_KEY,
+ * AGROSITIO_FAZENDA_CODIGO e GROQ_API_KEY (somente no Termux).
  */
 
-const API_URL = "https://agrositiosp.lovable.app/api/public/whatsapp";
+const API_URL = process.env.AGROSITIO_API_URL || "https://agrositiosp.lovable.app/api/public/whatsapp";
 
 async function chamarAgroSitio(payload) {
   const apiKey = process.env.AGROSITIO_API_KEY;
@@ -24,6 +23,29 @@ async function chamarAgroSitio(payload) {
   const result = await response.json();
   if (!response.ok || !result.ok) throw new Error(result.message || `Erro ${response.status}`);
   return result;
+}
+
+// Restrinja cada remetente à fazenda previamente associada a ele no SEU bot.
+// Não aceite um código de fazenda enviado pelo próprio contato como autorização.
+export async function analisarPerguntaDoLote(pergunta, numeroLote) {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) throw new Error("Configure GROQ_API_KEY apenas no Termux.");
+  const resposta = await chamarAgroSitio({ acao: "dados_lote", numero_lote: numeroLote });
+  const analise = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: "Você é um assistente técnico de avicultura. Use apenas os dados recebidos. Diferencie valores medidos de estimados. Se faltar informação, informe exatamente qual dado falta. Não invente medições nem diagnósticos." },
+        { role: "user", content: JSON.stringify({ pergunta, dados: resposta.data }) },
+      ],
+    }),
+  });
+  if (!analise.ok) throw new Error(`Falha na análise (${analise.status}).`);
+  const conteudo = await analise.json();
+  return conteudo.choices?.[0]?.message?.content || "Não foi possível gerar a análise.";
 }
 
 export async function responderComDadosDaGranja(sock, mensagem) {

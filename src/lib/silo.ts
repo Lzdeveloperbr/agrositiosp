@@ -159,7 +159,7 @@ export function calcularSilo(inp: SiloInput) {
   // ----- pesagens das aves (peso médio real) -----
   const pesagensAves = entries
     .filter((e) => Number(e.pesoMedioG) > 0)
-     .map((e) => ({ iso: e.date, idade: Math.max(0, diffDias(aloj, e.date)), g: Number(e.pesoMedioG) }))
+    .map((e) => ({ iso: e.date, idade: Math.max(0, diffDias(aloj, e.date)), g: Number(e.pesoMedioG) }))
     .sort((a, b) => a.idade - b.idade);
   const ultPesagem = pesagensAves[pesagensAves.length - 1] || null;
 

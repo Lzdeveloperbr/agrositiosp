@@ -1,6 +1,7 @@
 // ===== Granja =====
 export type DailyEntry = {
   date: string;
+  registradoEm?: string;
   mortalidade: number;
   eliminados?: number;
   pesoMedioG?: number;

@@ -80,7 +80,7 @@ function mapLote(row: LoteRow): Lote {
 function breed(row: LoteRow): Linhagem { return row.linhagem === "cobb500" || row.linhagem === "ross308" ? row.linhagem : "ross_ap95"; }
 function sex(row: LoteRow): Sexo { return row.sexo === "macho" || row.sexo === "femea" ? row.sexo : "misto"; }
 function summary(row: LoteRow) {
-  const s = calcularResumoLote(mapLote(row), breed(row), sex(row));
+  const s = calcularResumoLote(mapLote(row), breed(row), sex(row), new Date(`${today()}T12:00:00`));
   const alertas: string[] = [];
   if (s.diasSemPesar >= 7) alertas.push(`Pesagem atrasada há ${s.diasSemPesar} dias.`);
   if (s.diferencaPesoPct != null && s.diferencaPesoPct <= -7) alertas.push(`Peso ${Math.abs(s.diferencaPesoPct).toFixed(1)}% abaixo da meta.`);
@@ -97,9 +97,10 @@ async function context(client: FarmClient, row: LoteRow, limit = 30) {
   for (const result of [measurements, deliveries, weighings, config]) if (result.error) throw result.error;
   const c = config.data?.[0];
   const cfg = c ? { capacidadeKg: Number(c.capacidade_kg), capacidadeOperacionalKg: c.capacidade_operacional_kg, estoqueMinimoKg: Number(c.estoque_minimo_kg), margemSegurancaKg: Number(c.margem_seguranca_kg), cargaPadraoKg: Number(c.carga_padrao_kg), leadTimeHoras: Number(c.lead_time_horas), erroBalancaKg: Number(c.erro_balanca_kg), perdaPct: Number(c.perda_pct) } : CFG_PADRAO;
-  const silo = calcularSilo({ agora: new Date(), alojamento: row.data_entrada, qtdInicial: row.quantidade_inicial, previsaoAbateDias: row.previsao_abate_dias, linhagem: breed(row), sexo: sex(row), entries: mapLote(row).entries, entregas: (deliveries.data ?? []).map(d => ({ id: d.id, data: d.data, hora: new Intl.DateTimeFormat("en-GB", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(d.created_at)), kg: Number(d.quantidade_kg) })), pesagens: (weighings.data ?? []).map(p => ({ id: p.id, medidoEm: p.medido_em, kg: Number(p.estoque_kg) })), cfg });
+  // A entrega possui apenas data; created_at indica quando o registro foi salvo, não a chegada do caminhão.
+  const silo = calcularSilo({ agora: new Date(), alojamento: row.data_entrada, qtdInicial: row.quantidade_inicial, previsaoAbateDias: row.previsao_abate_dias, linhagem: breed(row), sexo: sex(row), entries: mapLote(row).entries, entregas: (deliveries.data ?? []).map(d => ({ id: d.id, data: d.data, kg: Number(d.quantidade_kg) })), pesagens: (weighings.data ?? []).map(p => ({ id: p.id, medidoEm: p.medido_em, kg: Number(p.estoque_kg) })), cfg });
   const med = measurements.data ?? [];
-  const registros = (Array.isArray(row.entries) ? row.entries as DailyEntry[] : []).filter(e => e.date <= today()).map(e => ({ data: e.date, mortalidade: e.mortalidade, eliminados: e.eliminados ?? 0, peso_medio_g: e.pesoMedioG ?? null, observacoes: e.observacoes ?? null }));
+  const registros = (Array.isArray(row.entries) ? row.entries as DailyEntry[] : []).filter(e => e.date <= today()).map(e => ({ data: e.date, registrado_em: e.registradoEm ?? null, mortalidade: e.mortalidade, eliminados: e.eliminados ?? 0, peso_medio_g: e.pesoMedioG ?? null, observacoes: e.observacoes ?? null }));
   return { resumo: summary(row), historico: { diarios: registros.sort((a,b) => b.data.localeCompare(a.data)).slice(0, limit), medicoes: med }, racao: { entregas: (deliveries.data ?? []).map(d => ({ data: d.data, quantidade_kg: Number(d.quantidade_kg), tipo: d.tipo_racao, galpao: d.galpao })), total_entregue_kg: silo.totalEntregueKg, saldo_silo_estimado_kg: Math.round(silo.estoqueAtualKg), consumo_estimado_hoje_kg: Math.round(silo.consumoHojeKg), consumo_estimado_acumulado_kg: Math.round(silo.consumoAcumKg), confianca_pct: silo.confianca, modo: silo.modoEstimativa, conversao_estimada: silo.fcrReal || null }, ultimas_medicoes: med[0] ?? null, dados_ausentes: [row.galpao ? null : "galpão", row.linhagem ? null : "linhagem", registros.some(e => e.peso_medio_g != null) ? null : "pesagem de peso médio", med.some(e => e.consumo_agua_l != null) ? null : "consumo de água medido", med.some(e => e.consumo_racao_kg != null) ? null : "consumo de ração medido", med.some(e => e.temperatura_c != null) ? null : "temperatura do galpão", med.some(e => e.umidade_pct != null) ? null : "umidade do galpão", med.some(e => e.ventilacao != null) ? null : "ventilação", med.some(e => e.cama != null) ? null : "estado da cama", med.some(e => e.iluminacao_lux != null) ? null : "iluminação medida", med.some(e => e.uniformidade_pct != null) ? null : "uniformidade medida"].filter(Boolean) };
 }
 
@@ -141,7 +142,7 @@ export const Route = createFileRoute("/api/public/whatsapp")({
           return json({ ok: true, data, message: "Dados do lote atualizados." });
         }
         if (!validDate(body.data) || body.data < row.data_entrada || body.data > today()) return json({ ok: false, message: "A data deve existir e estar entre o alojamento e hoje (horário de São Paulo)." }, 400);
-        if (body.acao === "registrar_dados" && Object.keys(fields).every(k => body[k as keyof typeof body] === undefined) && body.mortalidade === undefined && body.eliminados === undefined && body.peso_medio_g === undefined) return json({ ok: false, message: "Informe ao menos um dado para registrar." }, 400);
+        if (body.acao === "registrar_dados" && Object.keys(fields).every(k => !(k in body)) && body.mortalidade === undefined && body.eliminados === undefined && body.peso_medio_g === undefined) return json({ ok: false, message: "Informe ao menos um dado para registrar." }, 400);
         // Nunca substitui silenciosamente os campos não mencionados, inclusive mortalidade.
         const entries = Array.isArray(row.entries) ? row.entries as DailyEntry[] : [];
         const prev = entries.find(e => e.date === body.data);
@@ -150,7 +151,7 @@ export const Route = createFileRoute("/api/public/whatsapp")({
         const changedEntry = body.acao === "lancar_dia" || body.mortalidade !== undefined || body.eliminados !== undefined || body.peso_medio_g !== undefined || body.observacoes !== undefined;
         let updated = row;
         if (changedEntry && JSON.stringify(next) !== JSON.stringify(prev)) {
-          const nextEntries = [...entries.filter(e => e.date !== body.data), next].sort((a,b) => a.date.localeCompare(b.date));
+          const nextEntries = [...entries.filter(e => e.date !== body.data), { ...next, registradoEm: new Date().toISOString() }].sort((a,b) => a.date.localeCompare(b.date));
           const total = nextEntries.reduce((sum,e) => sum + Number(e.mortalidade || 0) + Number(e.eliminados || 0), 0);
           if (total > row.quantidade_inicial) return json({ ok: false, message: "Baixas ultrapassam as aves alojadas." }, 400);
           const { data, error } = await client.from("lotes").update({ entries: nextEntries as unknown as Json, autor: body.autor, updated_at: new Date().toISOString() }).eq("id", row.id).eq("updated_at", row.updated_at).select("*").maybeSingle();
@@ -168,7 +169,7 @@ export const Route = createFileRoute("/api/public/whatsapp")({
           if (readError) throw readError;
           const hasChange = !existing || Object.entries(measurePatch).some(([k,v]) => existing[k as keyof typeof existing] !== v);
           if (hasChange) {
-            const { error } = await client.from("lote_medicoes").upsert({ fazenda_id: row.fazenda_id, lote_id: row.id, data: body.data, ...measurePatch, autor: body.autor, atualizado_em: new Date().toISOString() }, { onConflict: "lote_id,data" });
+            const { error } = await client.from("lote_medicoes").upsert({ ...(existing ?? {}), fazenda_id: row.fazenda_id, lote_id: row.id, data: body.data, ...measurePatch, autor: body.autor, atualizado_em: new Date().toISOString() }, { onConflict: "lote_id,data" });
             if (error) throw error;
           }
         }
