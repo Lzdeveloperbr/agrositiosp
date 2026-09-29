@@ -1,4 +1,4 @@
-import { diffDias, parseData } from "@/lib/data";
+import { diffDias, isoLocal, parseData } from "@/lib/data";
 import { refCA, refConsumoAcumG, refPesoG, type Linhagem, type Sexo } from "@/lib/silo";
 import type { Lote } from "@/lib/types";
 import { criarProjecaoPeso } from "@/lib/projecaoPeso";
@@ -11,7 +11,7 @@ export function calcularResumoLote(
   sexo: Sexo = "misto",
   hoje = new Date(),
 ) {
-  const entries = [...(lote.entries || [])].filter((e) => e.date && e.date >= lote.dataEntrada && e.date <= hoje.toLocaleDateString("en-CA")).sort((a, b) => a.date.localeCompare(b.date));
+  const entries = [...(lote.entries || [])].filter((e) => e.date && e.date >= lote.dataEntrada && e.date <= isoLocal(hoje)).sort((a, b) => a.date.localeCompare(b.date));
   const idade = Math.max(0, diffDias(lote.dataEntrada, hoje));
   const mortalidade = entries.reduce((s, e) => s + Math.max(0, Number(e.mortalidade) || 0), 0);
   const eliminados = entries.reduce((s, e) => s + Math.max(0, Number(e.eliminados) || 0), 0);

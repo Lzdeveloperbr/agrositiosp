@@ -109,12 +109,12 @@ function LoteDetalhe() {
     navigate({ to: "/granja" });
   };
 
-  const chartData = [...lote.entries]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((e) => {
-      const idade = Math.max(0, diffDias(lote.dataEntrada, e.date));
-      return { dia: `D${idade}`, peso: e.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), mort: e.mortalidade };
-    });
+  const ultimaIdade = Math.max(dias + 7, lote.previsaoAbateDias || 42);
+  const chartData = Array.from({ length: Math.min(57, ultimaIdade + 1) }, (_, idade) => {
+    const data = hojeISO(addDias(lote.dataEntrada, idade));
+    const registro = lote.entries.find((e) => e.date === data);
+    return { dia: `D${idade}`, peso: registro?.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), projetado: Math.round(resumo.projetarPesoG(idade)), mort: registro?.mortalidade ?? null };
+  });
 
   return (
     <AppShell>
