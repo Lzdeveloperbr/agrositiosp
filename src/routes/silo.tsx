@@ -526,7 +526,7 @@ function serieConsumo(calc: ReturnType<typeof calcularSilo>, lin: Linhagem, sx: 
 
 function seriePeso(calc: ReturnType<typeof calcularSilo>, lin: Linhagem, sx: Sexo, abate: number) {
   const reais = new Map<number, number>();
-  if (calc.ultPesagem) reais.set(calc.ultPesagem.idade, calc.ultPesagem.g);
+   for (const pesagem of calc.pesagensAves) reais.set(pesagem.idade, pesagem.g);
   const out: { idade: number; real: number | null; projecao: number; referencia: number }[] = [];
   for (let d = 0; d <= abate; d++) {
     out.push({

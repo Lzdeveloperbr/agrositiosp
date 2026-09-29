@@ -24,6 +24,8 @@ export const Route = createFileRoute("/granja/$id")({
       { name: "description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
       { property: "og:title", content: "Detalhes do Lote — AgroSítio" },
       { property: "og:description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: LoteDetalhe,
@@ -109,12 +111,12 @@ function LoteDetalhe() {
     navigate({ to: "/granja" });
   };
 
-  const chartData = [...lote.entries]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((e) => {
-      const idade = Math.max(0, diffDias(lote.dataEntrada, e.date));
-      return { dia: `D${idade}`, peso: e.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), mort: e.mortalidade };
-    });
+  const ultimaIdade = Math.max(dias + 7, lote.previsaoAbateDias || 42);
+  const chartData = Array.from({ length: Math.min(57, ultimaIdade + 1) }, (_, idade) => {
+    const data = addDias(lote.dataEntrada, idade);
+    const registro = lote.entries.find((e) => e.date === data);
+    return { dia: `D${idade}`, peso: registro?.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), projetado: Math.round(resumo.projetarPesoG(idade)), mort: registro?.mortalidade ?? null };
+  });
 
   return (
     <AppShell>
@@ -149,6 +151,22 @@ function LoteDetalhe() {
           <KPI label="Consumo esperado" value={`${resumo.consumoEsperadoKg.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} kg`} />
         </div>
 
+        <section aria-label="Previsão de peso dos próximos dias" className="space-y-2">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-display font-semibold text-lg">Peso previsto · próximos dias</h2>
+            <p className="text-xs text-muted-foreground">{resumo.ultimaPesagem ? `Atualizado pela pesagem de ${fmtData(resumo.ultimaPesagem.data)}` : "Padrão da linhagem até registrar uma pesagem"}</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[1, 3, 7].map((avanco) => (
+              <div key={avanco} className="border border-border p-3 rounded-md min-w-0">
+                <p className="text-xs text-muted-foreground">D{dias + avanco} · +{avanco} {avanco === 1 ? "dia" : "dias"}</p>
+                <p className="font-display font-bold text-lg tabular-nums">{Math.round(resumo.projetarPesoG(dias + avanco)).toLocaleString("pt-BR")} g</p>
+                <p className="text-xs text-muted-foreground">Padrão {Math.round(refPesoG(dias + avanco, "ross_ap95", "misto")).toLocaleString("pt-BR")} g</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {!lote.encerrado && (resumo.diasSemPesar > 3 || resumo.situacao === "critico") && (
           <Card className="p-4 border-warning/40 bg-warning/10">
             <div className="flex flex-wrap items-center gap-3">
@@ -178,6 +196,7 @@ function LoteDetalhe() {
                   <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="peso" stroke="var(--primary)" strokeWidth={2.5} name="Peso (g)" />
+                  <Line type="monotone" dataKey="projetado" stroke="var(--primary)" strokeDasharray="4 4" strokeWidth={2} dot={false} name="Previsto (g)" />
                   <Line type="monotone" dataKey="esperado" stroke="var(--muted-foreground)" strokeDasharray="5 5" strokeWidth={2} name="Esperado (g)" />
                   <Line type="monotone" dataKey="mort" stroke="var(--destructive)" strokeWidth={2} name="Mortalidade" />
                 </LineChart>

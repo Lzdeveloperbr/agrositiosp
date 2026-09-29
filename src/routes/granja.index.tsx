@@ -24,6 +24,8 @@ export const Route = createFileRoute("/granja/")({
       { name: "description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
       { property: "og:title", content: "Granja de Frango — AgroSítio" },
       { property: "og:description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: GranjaPage,
@@ -164,7 +166,7 @@ function GranjaPage() {
 
             <div className="grid grid-cols-2 divide-x divide-y divide-border/60 md:grid-cols-4 md:divide-y-0">
               <OperationalMetric label="Aves vivas" value={resumoPrincipal.vivas.toLocaleString("pt-BR")} detail={`${resumoPrincipal.baixas.toLocaleString("pt-BR")} baixas`} />
-              <OperationalMetric label="Peso atual" value={resumoPrincipal.ultimaPesagem ? `${resumoPrincipal.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "Sem pesagem"} detail={`Meta ${resumoPrincipal.pesoEsperadoHojeG.toFixed(0)} g`} tone={resumoPrincipal.situacao === "critico" ? "bad" : resumoPrincipal.situacao === "atencao" ? "warn" : "ok"} />
+              <OperationalMetric label="Peso atual" value={resumoPrincipal.ultimaPesagem ? `${Math.round(resumoPrincipal.pesoProjetadoHojeG).toLocaleString("pt-BR")} g est.` : "Sem pesagem"} detail={`Padrão ${resumoPrincipal.pesoEsperadoHojeG.toFixed(0)} g · pesagem ${resumoPrincipal.ultimaPesagem ? fmtData(resumoPrincipal.ultimaPesagem.data) : "pendente"}`} tone={resumoPrincipal.situacao === "critico" ? "bad" : resumoPrincipal.situacao === "atencao" ? "warn" : "ok"} />
               <OperationalMetric label="Mortalidade" value={`${resumoPrincipal.mortalidadePct.toFixed(2)}%`} detail={`${resumoPrincipal.mortalidade} mortes · ${resumoPrincipal.eliminados} eliminados`} tone={resumoPrincipal.mortalidadePct > 5 ? "bad" : resumoPrincipal.mortalidadePct > 3 ? "warn" : "ok"} />
               <OperationalMetric label="Projeção abate" value={`${(resumoPrincipal.pesoProjetadoAbateG / 1000).toFixed(2)} kg`} detail={`em D${lotePrincipal.previsaoAbateDias}`} />
             </div>
@@ -282,7 +284,7 @@ function GranjaPage() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <Mini label="Vivas" value={resumo.vivas.toLocaleString("pt-BR")} />
                     <Mini label="Baixas" value={`${resumo.mortalidadePct.toFixed(1)}%`} />
-                    <Mini label="Peso" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG}g` : `${refPesoG(dias, "ross_ap95", "misto").toFixed(0)}g est.`} />
+                     <Mini label="Peso" value={resumo.ultimaPesagem ? `${Math.round(resumo.pesoProjetadoHojeG)}g est.` : `${refPesoG(dias, "ross_ap95", "misto").toFixed(0)}g est.`} />
                   </div>
                   <div className="mb-4 rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs">
                     <div className="flex items-center justify-between gap-2">
