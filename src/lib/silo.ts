@@ -10,6 +10,7 @@
 // bayesiana simples pela última pesagem física do silo.
 // ============================================================================
 import { diffDias, isoLocal, parseData } from "@/lib/data";
+import { criarProjecaoPeso } from "@/lib/projecaoPeso";
 
 // ---------- Curvas de referência (g/ave) ----------
 export type Linhagem = "cobb500" | "ross308" | "ross_ap95";
@@ -176,15 +177,8 @@ export function calcularSilo(inp: SiloInput) {
   const gpd3 = janelaGpd(3);
   const gpd7 = janelaGpd(7);
 
-  // fator de peso (real / curva) com amortecimento para o futuro
-  const fatorPesoBase = ultPesagem ? ultPesagem.g / Math.max(1, refPesoG(ultPesagem.idade, lin, sx)) : 1;
-  const fatorPesoValido = Number.isFinite(fatorPesoBase) && fatorPesoBase > 0.4 && fatorPesoBase < 2.2 ? fatorPesoBase : 1;
-  const fatorPesoNoDia = (d: number) => {
-    if (!ultPesagem) return 1;
-    const dt = Math.max(0, d - ultPesagem.idade);
-    return 1 + (fatorPesoValido - 1) * Math.exp(-dt / 28);
-  };
-  const pesoPrevistoG = (d: number) => refPesoG(d, lin, sx) * fatorPesoNoDia(d);
+  const pesoPrevistoG = criarProjecaoPeso(pesagensAves.map((p) => ({ idade: p.idade, pesoG: p.g })), (d) => refPesoG(d, lin, sx));
+  const fatorPesoNoDia = (d: number) => pesoPrevistoG(d) / Math.max(1, refPesoG(d, lin, sx));
   const pesoAtualG = ultPesagem && ultPesagem.idade === idade ? ultPesagem.g : pesoPrevistoG(idade);
 
   // ----- entregas -----
