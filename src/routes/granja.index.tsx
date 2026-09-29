@@ -164,7 +164,7 @@ function GranjaPage() {
 
             <div className="grid grid-cols-2 divide-x divide-y divide-border/60 md:grid-cols-4 md:divide-y-0">
               <OperationalMetric label="Aves vivas" value={resumoPrincipal.vivas.toLocaleString("pt-BR")} detail={`${resumoPrincipal.baixas.toLocaleString("pt-BR")} baixas`} />
-              <OperationalMetric label="Peso atual" value={resumoPrincipal.ultimaPesagem ? `${resumoPrincipal.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "Sem pesagem"} detail={`Meta ${resumoPrincipal.pesoEsperadoHojeG.toFixed(0)} g`} tone={resumoPrincipal.situacao === "critico" ? "bad" : resumoPrincipal.situacao === "atencao" ? "warn" : "ok"} />
+              <OperationalMetric label="Peso atual" value={resumoPrincipal.ultimaPesagem ? `${Math.round(resumoPrincipal.pesoProjetadoHojeG).toLocaleString("pt-BR")} g est.` : "Sem pesagem"} detail={`Padrão ${resumoPrincipal.pesoEsperadoHojeG.toFixed(0)} g · pesagem ${resumoPrincipal.ultimaPesagem ? fmtData(resumoPrincipal.ultimaPesagem.data) : "pendente"}`} tone={resumoPrincipal.situacao === "critico" ? "bad" : resumoPrincipal.situacao === "atencao" ? "warn" : "ok"} />
               <OperationalMetric label="Mortalidade" value={`${resumoPrincipal.mortalidadePct.toFixed(2)}%`} detail={`${resumoPrincipal.mortalidade} mortes · ${resumoPrincipal.eliminados} eliminados`} tone={resumoPrincipal.mortalidadePct > 5 ? "bad" : resumoPrincipal.mortalidadePct > 3 ? "warn" : "ok"} />
               <OperationalMetric label="Projeção abate" value={`${(resumoPrincipal.pesoProjetadoAbateG / 1000).toFixed(2)} kg`} detail={`em D${lotePrincipal.previsaoAbateDias}`} />
             </div>

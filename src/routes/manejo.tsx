@@ -274,8 +274,8 @@ function ManejoPage() {
     if (!lote) return null;
     const resumo = calcularResumoLote(lote, linhagem);
     return {
-      peso: resumo.ultimaPesagem?.pesoG ?? resumo.pesoProjetadoHojeG,
-      pesoReal: !!resumo.ultimaPesagem,
+      peso: resumo.pesoProjetadoHojeG,
+      pesoReal: resumo.ultimaPesagem?.idade === resumo.idade,
       meta: resumo.pesoEsperadoHojeG,
       diferenca: resumo.diferencaPesoPct,
       ca: resumo.caEsperada,
@@ -363,7 +363,7 @@ function ManejoPage() {
             <div className="flex items-center gap-2 mb-2 opacity-90"><TrendingUp className="h-5 w-5" /><span className="font-display font-semibold">Lote {lote.numero} · D{caReal.idade}</span></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div><p className="text-xs opacity-80">Peso {caReal.pesoReal ? "medido" : "projetado"}</p><p className="text-2xl font-display font-bold">{caReal.peso.toFixed(0)}g</p></div>
-              <div><p className="text-xs opacity-80">Peso esperado</p><p className="text-2xl font-display font-bold">{caReal.meta.toFixed(0)}g</p></div>
+               <div><p className="text-xs opacity-80">Padrão da linhagem</p><p className="text-2xl font-display font-bold">{caReal.meta.toFixed(0)}g</p></div>
               <div><p className="text-xs opacity-80">Diferença da meta</p><p className="text-2xl font-display font-bold">{caReal.diferenca == null ? "—" : `${caReal.diferenca > 0 ? "+" : ""}${caReal.diferenca.toFixed(1)}%`}</p></div>
               <div><p className="text-xs opacity-80">CA de referência</p><p className="text-2xl font-display font-bold">{caReal.ca.toFixed(2)}</p></div>
             </div>
