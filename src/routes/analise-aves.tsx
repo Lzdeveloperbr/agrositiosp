@@ -20,7 +20,7 @@ import { hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/analise-aves")({
   head: () => ({
     meta: [
-      { title: "Análise IA das Aves — AgroSítio" },
+      { title: "Análise IA das Aves — Aviário Pro" },
       { name: "description", content: "Envie fotos do lote e receba laudo veterinário e extensionista detalhado gerado por IA, com plano de ação e PDF." },
     ],
   }),

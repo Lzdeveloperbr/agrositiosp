@@ -18,9 +18,9 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/estoque")({
   head: () => ({
     meta: [
-      { title: "Estoque — AgroSítio" },
+      { title: "Estoque — Aviário Pro" },
       { name: "description", content: "Controle de ração, vacinas, medicamentos e insumos com alerta de mínimo." },
-      { property: "og:title", content: "Estoque — AgroSítio" },
+      { property: "og:title", content: "Estoque — Aviário Pro" },
       { property: "og:description", content: "Controle de ração, vacinas, medicamentos e insumos com alerta de mínimo." },
     ],
   }),

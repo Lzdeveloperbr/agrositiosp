@@ -19,9 +19,9 @@ import { fmtData } from "@/lib/data";
 export const Route = createFileRoute("/tarefas")({
   head: () => ({
     meta: [
-      { title: "Tarefas — AgroSítio" },
+      { title: "Tarefas — Aviário Pro" },
       { name: "description", content: "Lista de tarefas da fazenda com prioridade, categoria e vencimento." },
-      { property: "og:title", content: "Tarefas — AgroSítio" },
+      { property: "og:title", content: "Tarefas — Aviário Pro" },
       { property: "og:description", content: "Lista de tarefas da fazenda com prioridade, categoria e vencimento." },
     ],
   }),

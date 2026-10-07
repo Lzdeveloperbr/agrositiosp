@@ -17,9 +17,9 @@ import { useLembretes, type Lembrete, pedirPermissaoNotificacao, lembretesDoDia,
 export const Route = createFileRoute("/lembretes")({
   head: () => ({
     meta: [
-      { title: "Lembretes Mensais — AgroSítio" },
+      { title: "Lembretes Mensais — Aviário Pro" },
       { name: "description", content: "Contas e tarefas recorrentes (energia, internet, leituras) com notificação no dia." },
-      { property: "og:title", content: "Lembretes Mensais — AgroSítio" },
+      { property: "og:title", content: "Lembretes Mensais — Aviário Pro" },
       { property: "og:description", content: "Contas e tarefas recorrentes (energia, internet, leituras) com notificação no dia." },
     ],
   }),
@@ -67,7 +67,7 @@ function LembretesPage() {
   const ativarNotif = async () => {
     const r = await pedirPermissaoNotificacao();
     if (r === "granted") {
-      dispararNotificacao("AgroSítio", "Notificações ativadas com sucesso!");
+      dispararNotificacao("Aviário Pro", "Notificações ativadas com sucesso!");
       toast.success("Notificações ativadas");
     } else {
       toast.error("Permissão negada — ative nas configurações do navegador");

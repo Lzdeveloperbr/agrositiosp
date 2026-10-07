@@ -9,54 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VeterinarioRouteImport } from './routes/veterinario'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiloRouteImport } from './routes/silo'
-import { Route as SanidadeRouteImport } from './routes/sanidade'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
-import { Route as RacaoRouteImport } from './routes/racao'
-import { Route as QuizRouteImport } from './routes/quiz'
-import { Route as PropriedadeRouteImport } from './routes/propriedade'
-import { Route as PrioridadesRouteImport } from './routes/prioridades'
-import { Route as PlantiosRouteImport } from './routes/plantios'
-import { Route as PlanilhasRouteImport } from './routes/planilhas'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
-import { Route as OrcamentoRouteImport } from './routes/orcamento'
-import { Route as OnedriveRouteImport } from './routes/onedrive'
-import { Route as MonitoramentoRouteImport } from './routes/monitoramento'
 import { Route as ModulosRouteImport } from './routes/modulos'
-import { Route as ModoCampoRouteImport } from './routes/modo-campo'
-import { Route as MercadoRouteImport } from './routes/mercado'
-import { Route as MedirAreaRouteImport } from './routes/medir-area'
-import { Route as MaquinasRouteImport } from './routes/maquinas'
 import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as LembretesRouteImport } from './routes/lembretes'
-import { Route as LeiteRouteImport } from './routes/leite'
-import { Route as IntegracoesGovRouteImport } from './routes/integracoes-gov'
 import { Route as IndicadoresRouteImport } from './routes/indicadores'
 import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
-import { Route as GuiaCultivoRouteImport } from './routes/guia-cultivo'
-import { Route as GadoProRouteImport } from './routes/gado-pro'
-import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as FinanceiroLoteRouteImport } from './routes/financeiro-lote'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
 import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
 import { Route as EstoqueRouteImport } from './routes/estoque'
-import { Route as EquipeRouteImport } from './routes/equipe'
 import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
-import { Route as EngordaRouteImport } from './routes/engorda'
-import { Route as EnergiaRouteImport } from './routes/energia'
 import { Route as DiarioRouteImport } from './routes/diario'
 import { Route as CustosRouteImport } from './routes/custos'
-import { Route as ComprasRouteImport } from './routes/compras'
 import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
-import { Route as ChuvasRouteImport } from './routes/chuvas'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
-import { Route as CalculadoraAgroRouteImport } from './routes/calculadora-agro'
 import { Route as BackupRouteImport } from './routes/backup'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
@@ -64,16 +38,9 @@ import { Route as AmbienciaRouteImport } from './routes/ambiencia'
 import { Route as AgroIaRouteImport } from './routes/agro-ia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
-import { Route as GadoIndexRouteImport } from './routes/gado.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
-import { Route as GadoIdRouteImport } from './routes/gado.$id'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
-const VeterinarioRoute = VeterinarioRouteImport.update({
-  id: '/veterinario',
-  path: '/veterinario',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -89,44 +56,9 @@ const SiloRoute = SiloRouteImport.update({
   path: '/silo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SanidadeRoute = SanidadeRouteImport.update({
-  id: '/sanidade',
-  path: '/sanidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RacaoRoute = RacaoRouteImport.update({
-  id: '/racao',
-  path: '/racao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuizRoute = QuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PropriedadeRoute = PropriedadeRouteImport.update({
-  id: '/propriedade',
-  path: '/propriedade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrioridadesRoute = PrioridadesRouteImport.update({
-  id: '/prioridades',
-  path: '/prioridades',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlantiosRoute = PlantiosRouteImport.update({
-  id: '/plantios',
-  path: '/plantios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanilhasRoute = PlanilhasRouteImport.update({
-  id: '/planilhas',
-  path: '/planilhas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PesagemProRoute = PesagemProRouteImport.update({
@@ -134,44 +66,9 @@ const PesagemProRoute = PesagemProRouteImport.update({
   path: '/pesagem-pro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrcamentoRoute = OrcamentoRouteImport.update({
-  id: '/orcamento',
-  path: '/orcamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnedriveRoute = OnedriveRouteImport.update({
-  id: '/onedrive',
-  path: '/onedrive',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MonitoramentoRoute = MonitoramentoRouteImport.update({
-  id: '/monitoramento',
-  path: '/monitoramento',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ModulosRoute = ModulosRouteImport.update({
   id: '/modulos',
   path: '/modulos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModoCampoRoute = ModoCampoRouteImport.update({
-  id: '/modo-campo',
-  path: '/modo-campo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MercadoRoute = MercadoRouteImport.update({
-  id: '/mercado',
-  path: '/mercado',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MedirAreaRoute = MedirAreaRouteImport.update({
-  id: '/medir-area',
-  path: '/medir-area',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaquinasRoute = MaquinasRouteImport.update({
-  id: '/maquinas',
-  path: '/maquinas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManejoRoute = ManejoRouteImport.update({
@@ -184,16 +81,6 @@ const LembretesRoute = LembretesRouteImport.update({
   path: '/lembretes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LeiteRoute = LeiteRouteImport.update({
-  id: '/leite',
-  path: '/leite',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegracoesGovRoute = IntegracoesGovRouteImport.update({
-  id: '/integracoes-gov',
-  path: '/integracoes-gov',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndicadoresRoute = IndicadoresRouteImport.update({
   id: '/indicadores',
   path: '/indicadores',
@@ -202,21 +89,6 @@ const IndicadoresRoute = IndicadoresRouteImport.update({
 const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
   id: '/historico-lotes',
   path: '/historico-lotes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GuiaCultivoRoute = GuiaCultivoRouteImport.update({
-  id: '/guia-cultivo',
-  path: '/guia-cultivo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GadoProRoute = GadoProRouteImport.update({
-  id: '/gado-pro',
-  path: '/gado-pro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FornecedoresRoute = FornecedoresRouteImport.update({
-  id: '/fornecedores',
-  path: '/fornecedores',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinanceiroLoteRoute = FinanceiroLoteRouteImport.update({
@@ -244,24 +116,9 @@ const EstoqueRoute = EstoqueRouteImport.update({
   path: '/estoque',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EquipeRoute = EquipeRouteImport.update({
-  id: '/equipe',
-  path: '/equipe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EntregasRacaoRoute = EntregasRacaoRouteImport.update({
   id: '/entregas-racao',
   path: '/entregas-racao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EngordaRoute = EngordaRouteImport.update({
-  id: '/engorda',
-  path: '/engorda',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnergiaRoute = EnergiaRouteImport.update({
-  id: '/energia',
-  path: '/energia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiarioRoute = DiarioRouteImport.update({
@@ -274,19 +131,9 @@ const CustosRoute = CustosRouteImport.update({
   path: '/custos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ComprasRoute = ComprasRouteImport.update({
-  id: '/compras',
-  path: '/compras',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ComparativoLotesRoute = ComparativoLotesRouteImport.update({
   id: '/comparativo-lotes',
   path: '/comparativo-lotes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChuvasRoute = ChuvasRouteImport.update({
-  id: '/chuvas',
-  path: '/chuvas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
@@ -302,11 +149,6 @@ const ChatRoute = ChatRouteImport.update({
 const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
   id: '/calendario-sanitario',
   path: '/calendario-sanitario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CalculadoraAgroRoute = CalculadoraAgroRouteImport.update({
-  id: '/calculadora-agro',
-  path: '/calculadora-agro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BackupRoute = BackupRouteImport.update({
@@ -344,19 +186,9 @@ const GranjaIndexRoute = GranjaIndexRouteImport.update({
   path: '/granja/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GadoIndexRoute = GadoIndexRouteImport.update({
-  id: '/gado/',
-  path: '/gado/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GranjaIdRoute = GranjaIdRouteImport.update({
   id: '/granja/$id',
   path: '/granja/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GadoIdRoute = GadoIdRouteImport.update({
-  id: '/gado/$id',
-  path: '/gado/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWhatsappRoute = ApiPublicWhatsappRouteImport.update({
@@ -372,57 +204,29 @@ export interface FileRoutesByFullPath {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
-  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
-  '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
-  '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
-  '/energia': typeof EnergiaRoute
-  '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
-  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/financeiro-lote': typeof FinanceiroLoteRoute
-  '/fornecedores': typeof FornecedoresRoute
-  '/gado-pro': typeof GadoProRoute
-  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/indicadores': typeof IndicadoresRoute
-  '/integracoes-gov': typeof IntegracoesGovRoute
-  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
-  '/maquinas': typeof MaquinasRoute
-  '/medir-area': typeof MedirAreaRoute
-  '/mercado': typeof MercadoRoute
-  '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
-  '/monitoramento': typeof MonitoramentoRoute
-  '/onedrive': typeof OnedriveRoute
-  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
-  '/planilhas': typeof PlanilhasRoute
-  '/plantios': typeof PlantiosRoute
-  '/prioridades': typeof PrioridadesRoute
-  '/propriedade': typeof PropriedadeRoute
-  '/quiz': typeof QuizRoute
-  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
-  '/sanidade': typeof SanidadeRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
-  '/veterinario': typeof VeterinarioRoute
-  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
-  '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
@@ -433,57 +237,29 @@ export interface FileRoutesByTo {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
-  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
-  '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
-  '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
-  '/energia': typeof EnergiaRoute
-  '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
-  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/financeiro-lote': typeof FinanceiroLoteRoute
-  '/fornecedores': typeof FornecedoresRoute
-  '/gado-pro': typeof GadoProRoute
-  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/indicadores': typeof IndicadoresRoute
-  '/integracoes-gov': typeof IntegracoesGovRoute
-  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
-  '/maquinas': typeof MaquinasRoute
-  '/medir-area': typeof MedirAreaRoute
-  '/mercado': typeof MercadoRoute
-  '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
-  '/monitoramento': typeof MonitoramentoRoute
-  '/onedrive': typeof OnedriveRoute
-  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
-  '/planilhas': typeof PlanilhasRoute
-  '/plantios': typeof PlantiosRoute
-  '/prioridades': typeof PrioridadesRoute
-  '/propriedade': typeof PropriedadeRoute
-  '/quiz': typeof QuizRoute
-  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
-  '/sanidade': typeof SanidadeRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
-  '/veterinario': typeof VeterinarioRoute
-  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
-  '/gado': typeof GadoIndexRoute
   '/granja': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
@@ -495,57 +271,29 @@ export interface FileRoutesById {
   '/analise-aves': typeof AnaliseAvesRoute
   '/automacoes': typeof AutomacoesRoute
   '/backup': typeof BackupRoute
-  '/calculadora-agro': typeof CalculadoraAgroRoute
   '/calendario-sanitario': typeof CalendarioSanitarioRoute
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
-  '/chuvas': typeof ChuvasRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
-  '/compras': typeof ComprasRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
-  '/energia': typeof EnergiaRoute
-  '/engorda': typeof EngordaRoute
   '/entregas-racao': typeof EntregasRacaoRoute
-  '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRoute
   '/excelencia-lote': typeof ExcelenciaLoteRoute
   '/ficha-lote': typeof FichaLoteRoute
   '/financeiro': typeof FinanceiroRoute
   '/financeiro-lote': typeof FinanceiroLoteRoute
-  '/fornecedores': typeof FornecedoresRoute
-  '/gado-pro': typeof GadoProRoute
-  '/guia-cultivo': typeof GuiaCultivoRoute
   '/historico-lotes': typeof HistoricoLotesRoute
   '/indicadores': typeof IndicadoresRoute
-  '/integracoes-gov': typeof IntegracoesGovRoute
-  '/leite': typeof LeiteRoute
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
-  '/maquinas': typeof MaquinasRoute
-  '/medir-area': typeof MedirAreaRoute
-  '/mercado': typeof MercadoRoute
-  '/modo-campo': typeof ModoCampoRoute
   '/modulos': typeof ModulosRoute
-  '/monitoramento': typeof MonitoramentoRoute
-  '/onedrive': typeof OnedriveRoute
-  '/orcamento': typeof OrcamentoRoute
   '/pesagem-pro': typeof PesagemProRoute
-  '/planilhas': typeof PlanilhasRoute
-  '/plantios': typeof PlantiosRoute
-  '/prioridades': typeof PrioridadesRoute
-  '/propriedade': typeof PropriedadeRoute
-  '/quiz': typeof QuizRoute
-  '/racao': typeof RacaoRoute
   '/relatorios': typeof RelatoriosRoute
-  '/sanidade': typeof SanidadeRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
-  '/veterinario': typeof VeterinarioRoute
-  '/gado/$id': typeof GadoIdRoute
   '/granja/$id': typeof GranjaIdRoute
-  '/gado/': typeof GadoIndexRoute
   '/granja/': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
@@ -558,57 +306,29 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
-    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/chat'
     | '/checklist-granja'
-    | '/chuvas'
     | '/comparativo-lotes'
-    | '/compras'
     | '/custos'
     | '/diario'
-    | '/energia'
-    | '/engorda'
     | '/entregas-racao'
-    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/financeiro-lote'
-    | '/fornecedores'
-    | '/gado-pro'
-    | '/guia-cultivo'
     | '/historico-lotes'
     | '/indicadores'
-    | '/integracoes-gov'
-    | '/leite'
     | '/lembretes'
     | '/manejo'
-    | '/maquinas'
-    | '/medir-area'
-    | '/mercado'
-    | '/modo-campo'
     | '/modulos'
-    | '/monitoramento'
-    | '/onedrive'
-    | '/orcamento'
     | '/pesagem-pro'
-    | '/planilhas'
-    | '/plantios'
-    | '/prioridades'
-    | '/propriedade'
-    | '/quiz'
-    | '/racao'
     | '/relatorios'
-    | '/sanidade'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
-    | '/veterinario'
-    | '/gado/$id'
     | '/granja/$id'
-    | '/gado/'
     | '/granja/'
     | '/api/public/whatsapp'
   fileRoutesByTo: FileRoutesByTo
@@ -619,57 +339,29 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
-    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/chat'
     | '/checklist-granja'
-    | '/chuvas'
     | '/comparativo-lotes'
-    | '/compras'
     | '/custos'
     | '/diario'
-    | '/energia'
-    | '/engorda'
     | '/entregas-racao'
-    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/financeiro-lote'
-    | '/fornecedores'
-    | '/gado-pro'
-    | '/guia-cultivo'
     | '/historico-lotes'
     | '/indicadores'
-    | '/integracoes-gov'
-    | '/leite'
     | '/lembretes'
     | '/manejo'
-    | '/maquinas'
-    | '/medir-area'
-    | '/mercado'
-    | '/modo-campo'
     | '/modulos'
-    | '/monitoramento'
-    | '/onedrive'
-    | '/orcamento'
     | '/pesagem-pro'
-    | '/planilhas'
-    | '/plantios'
-    | '/prioridades'
-    | '/propriedade'
-    | '/quiz'
-    | '/racao'
     | '/relatorios'
-    | '/sanidade'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
-    | '/veterinario'
-    | '/gado/$id'
     | '/granja/$id'
-    | '/gado'
     | '/granja'
     | '/api/public/whatsapp'
   id:
@@ -680,57 +372,29 @@ export interface FileRouteTypes {
     | '/analise-aves'
     | '/automacoes'
     | '/backup'
-    | '/calculadora-agro'
     | '/calendario-sanitario'
     | '/chat'
     | '/checklist-granja'
-    | '/chuvas'
     | '/comparativo-lotes'
-    | '/compras'
     | '/custos'
     | '/diario'
-    | '/energia'
-    | '/engorda'
     | '/entregas-racao'
-    | '/equipe'
     | '/estoque'
     | '/excelencia-lote'
     | '/ficha-lote'
     | '/financeiro'
     | '/financeiro-lote'
-    | '/fornecedores'
-    | '/gado-pro'
-    | '/guia-cultivo'
     | '/historico-lotes'
     | '/indicadores'
-    | '/integracoes-gov'
-    | '/leite'
     | '/lembretes'
     | '/manejo'
-    | '/maquinas'
-    | '/medir-area'
-    | '/mercado'
-    | '/modo-campo'
     | '/modulos'
-    | '/monitoramento'
-    | '/onedrive'
-    | '/orcamento'
     | '/pesagem-pro'
-    | '/planilhas'
-    | '/plantios'
-    | '/prioridades'
-    | '/propriedade'
-    | '/quiz'
-    | '/racao'
     | '/relatorios'
-    | '/sanidade'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
-    | '/veterinario'
-    | '/gado/$id'
     | '/granja/$id'
-    | '/gado/'
     | '/granja/'
     | '/api/public/whatsapp'
   fileRoutesById: FileRoutesById
@@ -742,70 +406,35 @@ export interface RootRouteChildren {
   AnaliseAvesRoute: typeof AnaliseAvesRoute
   AutomacoesRoute: typeof AutomacoesRoute
   BackupRoute: typeof BackupRoute
-  CalculadoraAgroRoute: typeof CalculadoraAgroRoute
   CalendarioSanitarioRoute: typeof CalendarioSanitarioRoute
   ChatRoute: typeof ChatRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
-  ChuvasRoute: typeof ChuvasRoute
   ComparativoLotesRoute: typeof ComparativoLotesRoute
-  ComprasRoute: typeof ComprasRoute
   CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
-  EnergiaRoute: typeof EnergiaRoute
-  EngordaRoute: typeof EngordaRoute
   EntregasRacaoRoute: typeof EntregasRacaoRoute
-  EquipeRoute: typeof EquipeRoute
   EstoqueRoute: typeof EstoqueRoute
   ExcelenciaLoteRoute: typeof ExcelenciaLoteRoute
   FichaLoteRoute: typeof FichaLoteRoute
   FinanceiroRoute: typeof FinanceiroRoute
   FinanceiroLoteRoute: typeof FinanceiroLoteRoute
-  FornecedoresRoute: typeof FornecedoresRoute
-  GadoProRoute: typeof GadoProRoute
-  GuiaCultivoRoute: typeof GuiaCultivoRoute
   HistoricoLotesRoute: typeof HistoricoLotesRoute
   IndicadoresRoute: typeof IndicadoresRoute
-  IntegracoesGovRoute: typeof IntegracoesGovRoute
-  LeiteRoute: typeof LeiteRoute
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
-  MaquinasRoute: typeof MaquinasRoute
-  MedirAreaRoute: typeof MedirAreaRoute
-  MercadoRoute: typeof MercadoRoute
-  ModoCampoRoute: typeof ModoCampoRoute
   ModulosRoute: typeof ModulosRoute
-  MonitoramentoRoute: typeof MonitoramentoRoute
-  OnedriveRoute: typeof OnedriveRoute
-  OrcamentoRoute: typeof OrcamentoRoute
   PesagemProRoute: typeof PesagemProRoute
-  PlanilhasRoute: typeof PlanilhasRoute
-  PlantiosRoute: typeof PlantiosRoute
-  PrioridadesRoute: typeof PrioridadesRoute
-  PropriedadeRoute: typeof PropriedadeRoute
-  QuizRoute: typeof QuizRoute
-  RacaoRoute: typeof RacaoRoute
   RelatoriosRoute: typeof RelatoriosRoute
-  SanidadeRoute: typeof SanidadeRoute
   SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
-  VeterinarioRoute: typeof VeterinarioRoute
-  GadoIdRoute: typeof GadoIdRoute
   GranjaIdRoute: typeof GranjaIdRoute
-  GadoIndexRoute: typeof GadoIndexRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
   ApiPublicWhatsappRoute: typeof ApiPublicWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/veterinario': {
-      id: '/veterinario'
-      path: '/veterinario'
-      fullPath: '/veterinario'
-      preLoaderRoute: typeof VeterinarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/tarefas': {
       id: '/tarefas'
       path: '/tarefas'
@@ -827,60 +456,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiloRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sanidade': {
-      id: '/sanidade'
-      path: '/sanidade'
-      fullPath: '/sanidade'
-      preLoaderRoute: typeof SanidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/relatorios': {
       id: '/relatorios'
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/racao': {
-      id: '/racao'
-      path: '/racao'
-      fullPath: '/racao'
-      preLoaderRoute: typeof RacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/quiz': {
-      id: '/quiz'
-      path: '/quiz'
-      fullPath: '/quiz'
-      preLoaderRoute: typeof QuizRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/propriedade': {
-      id: '/propriedade'
-      path: '/propriedade'
-      fullPath: '/propriedade'
-      preLoaderRoute: typeof PropriedadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/prioridades': {
-      id: '/prioridades'
-      path: '/prioridades'
-      fullPath: '/prioridades'
-      preLoaderRoute: typeof PrioridadesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plantios': {
-      id: '/plantios'
-      path: '/plantios'
-      fullPath: '/plantios'
-      preLoaderRoute: typeof PlantiosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/planilhas': {
-      id: '/planilhas'
-      path: '/planilhas'
-      fullPath: '/planilhas'
-      preLoaderRoute: typeof PlanilhasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pesagem-pro': {
@@ -890,60 +470,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PesagemProRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/orcamento': {
-      id: '/orcamento'
-      path: '/orcamento'
-      fullPath: '/orcamento'
-      preLoaderRoute: typeof OrcamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onedrive': {
-      id: '/onedrive'
-      path: '/onedrive'
-      fullPath: '/onedrive'
-      preLoaderRoute: typeof OnedriveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/monitoramento': {
-      id: '/monitoramento'
-      path: '/monitoramento'
-      fullPath: '/monitoramento'
-      preLoaderRoute: typeof MonitoramentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/modulos': {
       id: '/modulos'
       path: '/modulos'
       fullPath: '/modulos'
       preLoaderRoute: typeof ModulosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/modo-campo': {
-      id: '/modo-campo'
-      path: '/modo-campo'
-      fullPath: '/modo-campo'
-      preLoaderRoute: typeof ModoCampoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mercado': {
-      id: '/mercado'
-      path: '/mercado'
-      fullPath: '/mercado'
-      preLoaderRoute: typeof MercadoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/medir-area': {
-      id: '/medir-area'
-      path: '/medir-area'
-      fullPath: '/medir-area'
-      preLoaderRoute: typeof MedirAreaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maquinas': {
-      id: '/maquinas'
-      path: '/maquinas'
-      fullPath: '/maquinas'
-      preLoaderRoute: typeof MaquinasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manejo': {
@@ -960,20 +491,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LembretesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/leite': {
-      id: '/leite'
-      path: '/leite'
-      fullPath: '/leite'
-      preLoaderRoute: typeof LeiteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integracoes-gov': {
-      id: '/integracoes-gov'
-      path: '/integracoes-gov'
-      fullPath: '/integracoes-gov'
-      preLoaderRoute: typeof IntegracoesGovRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/indicadores': {
       id: '/indicadores'
       path: '/indicadores'
@@ -986,27 +503,6 @@ declare module '@tanstack/react-router' {
       path: '/historico-lotes'
       fullPath: '/historico-lotes'
       preLoaderRoute: typeof HistoricoLotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/guia-cultivo': {
-      id: '/guia-cultivo'
-      path: '/guia-cultivo'
-      fullPath: '/guia-cultivo'
-      preLoaderRoute: typeof GuiaCultivoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gado-pro': {
-      id: '/gado-pro'
-      path: '/gado-pro'
-      fullPath: '/gado-pro'
-      preLoaderRoute: typeof GadoProRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fornecedores': {
-      id: '/fornecedores'
-      path: '/fornecedores'
-      fullPath: '/fornecedores'
-      preLoaderRoute: typeof FornecedoresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/financeiro-lote': {
@@ -1044,32 +540,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/equipe': {
-      id: '/equipe'
-      path: '/equipe'
-      fullPath: '/equipe'
-      preLoaderRoute: typeof EquipeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/entregas-racao': {
       id: '/entregas-racao'
       path: '/entregas-racao'
       fullPath: '/entregas-racao'
       preLoaderRoute: typeof EntregasRacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/engorda': {
-      id: '/engorda'
-      path: '/engorda'
-      fullPath: '/engorda'
-      preLoaderRoute: typeof EngordaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/energia': {
-      id: '/energia'
-      path: '/energia'
-      fullPath: '/energia'
-      preLoaderRoute: typeof EnergiaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diario': {
@@ -1086,25 +561,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/compras': {
-      id: '/compras'
-      path: '/compras'
-      fullPath: '/compras'
-      preLoaderRoute: typeof ComprasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/comparativo-lotes': {
       id: '/comparativo-lotes'
       path: '/comparativo-lotes'
       fullPath: '/comparativo-lotes'
       preLoaderRoute: typeof ComparativoLotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chuvas': {
-      id: '/chuvas'
-      path: '/chuvas'
-      fullPath: '/chuvas'
-      preLoaderRoute: typeof ChuvasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checklist-granja': {
@@ -1126,13 +587,6 @@ declare module '@tanstack/react-router' {
       path: '/calendario-sanitario'
       fullPath: '/calendario-sanitario'
       preLoaderRoute: typeof CalendarioSanitarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/calculadora-agro': {
-      id: '/calculadora-agro'
-      path: '/calculadora-agro'
-      fullPath: '/calculadora-agro'
-      preLoaderRoute: typeof CalculadoraAgroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/backup': {
@@ -1184,25 +638,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GranjaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/gado/': {
-      id: '/gado/'
-      path: '/gado'
-      fullPath: '/gado/'
-      preLoaderRoute: typeof GadoIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/granja/$id': {
       id: '/granja/$id'
       path: '/granja/$id'
       fullPath: '/granja/$id'
       preLoaderRoute: typeof GranjaIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gado/$id': {
-      id: '/gado/$id'
-      path: '/gado/$id'
-      fullPath: '/gado/$id'
-      preLoaderRoute: typeof GadoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/whatsapp': {
@@ -1222,57 +662,29 @@ const rootRouteChildren: RootRouteChildren = {
   AnaliseAvesRoute: AnaliseAvesRoute,
   AutomacoesRoute: AutomacoesRoute,
   BackupRoute: BackupRoute,
-  CalculadoraAgroRoute: CalculadoraAgroRoute,
   CalendarioSanitarioRoute: CalendarioSanitarioRoute,
   ChatRoute: ChatRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
-  ChuvasRoute: ChuvasRoute,
   ComparativoLotesRoute: ComparativoLotesRoute,
-  ComprasRoute: ComprasRoute,
   CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
-  EnergiaRoute: EnergiaRoute,
-  EngordaRoute: EngordaRoute,
   EntregasRacaoRoute: EntregasRacaoRoute,
-  EquipeRoute: EquipeRoute,
   EstoqueRoute: EstoqueRoute,
   ExcelenciaLoteRoute: ExcelenciaLoteRoute,
   FichaLoteRoute: FichaLoteRoute,
   FinanceiroRoute: FinanceiroRoute,
   FinanceiroLoteRoute: FinanceiroLoteRoute,
-  FornecedoresRoute: FornecedoresRoute,
-  GadoProRoute: GadoProRoute,
-  GuiaCultivoRoute: GuiaCultivoRoute,
   HistoricoLotesRoute: HistoricoLotesRoute,
   IndicadoresRoute: IndicadoresRoute,
-  IntegracoesGovRoute: IntegracoesGovRoute,
-  LeiteRoute: LeiteRoute,
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
-  MaquinasRoute: MaquinasRoute,
-  MedirAreaRoute: MedirAreaRoute,
-  MercadoRoute: MercadoRoute,
-  ModoCampoRoute: ModoCampoRoute,
   ModulosRoute: ModulosRoute,
-  MonitoramentoRoute: MonitoramentoRoute,
-  OnedriveRoute: OnedriveRoute,
-  OrcamentoRoute: OrcamentoRoute,
   PesagemProRoute: PesagemProRoute,
-  PlanilhasRoute: PlanilhasRoute,
-  PlantiosRoute: PlantiosRoute,
-  PrioridadesRoute: PrioridadesRoute,
-  PropriedadeRoute: PropriedadeRoute,
-  QuizRoute: QuizRoute,
-  RacaoRoute: RacaoRoute,
   RelatoriosRoute: RelatoriosRoute,
-  SanidadeRoute: SanidadeRoute,
   SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
-  VeterinarioRoute: VeterinarioRoute,
-  GadoIdRoute: GadoIdRoute,
   GranjaIdRoute: GranjaIdRoute,
-  GadoIndexRoute: GadoIndexRoute,
   GranjaIndexRoute: GranjaIndexRoute,
   ApiPublicWhatsappRoute: ApiPublicWhatsappRoute,
 }

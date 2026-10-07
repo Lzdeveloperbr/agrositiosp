@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import logoUrl from "@/assets/logo-agrositio.png";
+import logoUrl from "@/assets/logo-aviario-pro.png";
 
 export function EntrarFazenda() {
   const { entrar, criar, setOperador } = useFazenda();
@@ -30,22 +30,13 @@ export function EntrarFazenda() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background grain relative overflow-hidden">
-      <Card className="w-full max-w-md p-6 sm:p-8 space-y-6 card-elevated relative border-primary/15">
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className="relative">
-            <img src={logoUrl} alt="AgroSítio" width={120} height={120} className="h-28 w-28 object-contain relative" />
-          </div>
-          <div>
-            <h1 className="font-display text-3xl font-extrabold leading-tight">
-              Agro<span className="text-gradient">Sítio</span>
-            </h1>
-            <div className="mt-1 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.28em] text-primary/90 font-semibold">
-              <span className="h-px w-6 bg-primary/50" />
-              Avicultura de Corte
-              <span className="h-px w-6 bg-primary/50" />
-            </div>
-          </div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md p-6 sm:p-8 space-y-6 border-border">
+        <div className="flex flex-col items-center text-center gap-2">
+          <img src={logoUrl} alt="Aviário Pro" width={160} height={160} className="h-36 w-36 object-contain" />
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground font-semibold">
+            Gestão profissional de frango de corte
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-secondary/60 border border-border">

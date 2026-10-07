@@ -200,7 +200,7 @@ function GranjaPage() {
                   <QuickAction to="/manejo" icon={BookOpen} label="Manejo" />
                   <QuickAction to="/silo" icon={Boxes} label="Silo ao vivo" />
                   <QuickAction to="/pesagem-pro" icon={Scale} label="Pesagem" />
-                  <QuickAction to="/sanidade" icon={Syringe} label="Sanidade" />
+                  <QuickAction to="/calendario-sanitario" icon={Syringe} label="Sanidade" />
                 </div>
               </div>
             </div>

@@ -17,9 +17,9 @@ import { isoLocal } from "@/lib/data";
 export const Route = createFileRoute("/indicadores")({
   head: () => ({
     meta: [
-      { title: "Indicadores Comparativos — AgroSítio" },
+      { title: "Indicadores Comparativos — Aviário Pro" },
       { name: "description", content: "Compare lotes, safras e períodos com ranking de desempenho, gráficos e evolução financeira da propriedade." },
-      { property: "og:title", content: "Indicadores Comparativos — AgroSítio" },
+      { property: "og:title", content: "Indicadores Comparativos — Aviário Pro" },
       { property: "og:description", content: "Ranking de lotes, comparativo de safras e evolução financeira mês a mês." },
     ],
   }),

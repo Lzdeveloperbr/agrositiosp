@@ -31,7 +31,7 @@ import {
 export const Route = createFileRoute("/silo")({
   head: () => ({
     meta: [
-      { title: "Silo ao Vivo — estoque de ração em tempo real | AgroSítio" },
+      { title: "Silo ao Vivo — estoque de ração em tempo real | Aviário Pro" },
       { name: "description", content: "Estoque de ração do silo calculado em tempo real por balanço de massa, peso das aves, mortalidade e curva da linhagem, com autonomia, projeção e pedido recomendado." },
       { property: "og:title", content: "Silo ao Vivo — estoque de ração em tempo real" },
       { property: "og:description", content: "Modelo híbrido de estoque de ração: pesagem física, consumo real, peso das aves e curva da linhagem." },

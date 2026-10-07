@@ -14,9 +14,9 @@ import { fmtData } from "@/lib/data";
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
-      { title: "Relatórios em PDF — AgroSítio" },
+      { title: "Relatórios em PDF — Aviário Pro" },
       { name: "description", content: "Relatórios profissionais em PDF: lotes, rebanho, energia, livro caixa e diário." },
-      { property: "og:title", content: "Relatórios em PDF — AgroSítio" },
+      { property: "og:title", content: "Relatórios em PDF — Aviário Pro" },
       { property: "og:description", content: "Relatórios profissionais em PDF: lotes, rebanho, energia, livro caixa e diário." },
     ],
   }),

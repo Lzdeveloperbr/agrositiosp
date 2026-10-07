@@ -17,9 +17,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 export const Route = createFileRoute("/financeiro-lote")({
   head: () => ({
     meta: [
-      { title: "Painel Financeiro do Lote — AgroSítio" },
+      { title: "Painel Financeiro do Lote — Aviário Pro" },
       { name: "description", content: "Custo por ave, custo por kg, receita, participação do produtor e lucro projetado do lote de frangos em tempo real." },
-      { property: "og:title", content: "Painel Financeiro do Lote — AgroSítio" },
+      { property: "og:title", content: "Painel Financeiro do Lote — Aviário Pro" },
       { property: "og:description", content: "Custo por ave, custo por kg, receita e lucro projetado do lote de frangos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

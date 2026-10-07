@@ -1,10 +1,8 @@
 // Fonte única de verdade da navegação do app (sidebar, menu mobile, busca e hub /modulos).
 import {
-  LayoutDashboard, Bird, Beef, Zap, FileText, BookOpen, ListChecks,
-  Boxes, Wallet, Database, Tractor, CloudRain, Bug, ShoppingCart, Sprout, BellRing,
-  Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Factory, Milk, Truck,
-  ClipboardCheck, Trophy, BarChart3, Syringe, History, Ruler, Calculator, MapPin,
-  Landmark, Scale, MessagesSquare, Store, Target, Cloud, Table2, Users, ShieldCheck, PieChart,
+  LayoutDashboard, Bird, FileText, BookOpen, ListChecks, Boxes, Wallet, Database,
+  BellRing, Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Truck,
+  ClipboardCheck, Trophy, BarChart3, Syringe, History, Scale, MessagesSquare, PieChart,
 } from "lucide-react";
 
 export type NavItem = {
@@ -20,104 +18,66 @@ export type NavGroup = { label: string; icon: any; items: NavItem[] };
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Dia a dia",
+    label: "Operação",
     icon: LayoutDashboard,
     items: [
-      { to: "/", label: "Início", icon: LayoutDashboard, desc: "Painel geral com clima, alertas e indicadores", tags: ["painel", "dashboard", "home"] },
-      { to: "/propriedade", label: "Visão da Propriedade", icon: Landmark, desc: "Frango, leite e engorda em um só painel com o resultado do mês", tags: ["visao", "geral", "atividades", "resumo"] },
-      { to: "/planilhas", label: "Planilhas Inteligentes", icon: Table2, desc: "Planilhas com fórmulas e variáveis vivas dos módulos", tags: ["planilha", "excel", "formula", "calculo"] },
-      { to: "/agro-ia", label: "Agro IA", icon: Sparkles, desc: "Assistente técnico com os dados da sua fazenda", tags: ["ia", "chat", "inteligencia"] },
-      { to: "/chat", label: "Chat da Equipe", icon: MessagesSquare, desc: "Conversa em tempo real com todo o time", tags: ["mensagem", "equipe"] },
-      { to: "/modo-campo", label: "Modo Campo", icon: MapPin, desc: "Foto + GPS, leitor de brinco e ditado por voz", tags: ["mobile", "gps", "campo"] },
-      { to: "/diario", label: "Diário de Campo", icon: BookOpen, desc: "Registros diários com fotos, clima e localização", tags: ["registro", "foto"] },
-      { to: "/prioridades", label: "Prioridades do Mês", icon: Target, desc: "Plano mensal do sítio com metas, prazos, responsáveis e custo", tags: ["plano", "mes", "meta", "prioridade"] },
-      { to: "/tarefas", label: "Tarefas", icon: ListChecks, desc: "Lista de atividades por prioridade e categoria", tags: ["todo", "atividade"] },
-      { to: "/lembretes", label: "Lembretes", icon: BellRing, desc: "Avisos recorrentes com notificação", tags: ["alerta", "notificacao"] },
-      { to: "/quiz", label: "Quiz Diário", icon: ClipboardList, desc: "Treinamento rápido da equipe", tags: ["treino", "curso"] },
+      { to: "/", label: "Central", icon: LayoutDashboard, desc: "Lote ativo, alertas e rotina de hoje", tags: ["painel", "inicio"] },
+      { to: "/granja", label: "Lotes", icon: Bird, desc: "Lotes, lançamento diário, mortalidade e peso", tags: ["frango", "lote", "aves"] },
+      { to: "/checklist-granja", label: "Checklist diário", icon: ClipboardCheck, desc: "Rotina do galpão item a item", tags: ["rotina"] },
+      { to: "/manejo", label: "Manejo D0–D42", icon: BookOpen, desc: "Água, cama, luz, temperatura e protocolo diário", tags: ["luz", "cama", "agua", "protocolo"] },
+      { to: "/ambiencia", label: "Ambiência", icon: Wind, desc: "Temperatura, umidade, pressão e ventilação", tags: ["clima", "ventilacao"] },
+      { to: "/pesagem-pro", label: "Pesagem", icon: Scale, desc: "Amostras, uniformidade, CV% e GPD", tags: ["peso", "balanca"] },
     ],
   },
   {
-    label: "Granja (Aves)",
-    icon: Bird,
-    items: [
-      { to: "/granja", label: "Granja", icon: Bird, desc: "Lotes de frango, mortalidade e desempenho", tags: ["frango", "lote", "aves"] },
-      { to: "/pesagem-pro", label: "Pesagem Pro", icon: Scale, desc: "Pesagens com uniformidade, CV% e GPD", tags: ["peso", "balanca", "uniformidade"] },
-      { to: "/checklist-granja", label: "Checklist Diário", icon: ClipboardCheck, desc: "Rotina diária do galpão item a item", tags: ["rotina", "conferencia"] },
-      { to: "/excelencia-lote", label: "Excelência do Lote", icon: Trophy, desc: "IEP, GPD e curva de peso vs. meta", tags: ["iep", "kpi", "meta"] },
-      { to: "/manejo", label: "Manejo do Frango", icon: BookOpen, desc: "Água, cama, luz, anti-calo e vazio sanitário", tags: ["luz", "cama", "agua", "protocolo"] },
-      { to: "/ambiencia", label: "Ambiência do Aviário", icon: Wind, desc: "Temperatura, umidade e ventilação por idade", tags: ["clima", "ventilacao", "temperatura"] },
-      { to: "/calendario-sanitario", label: "Calendário Sanitário", icon: Syringe, desc: "Vacinas e medicações programadas", tags: ["vacina", "sanidade"] },
-      { to: "/analise-aves", label: "Análise IA das Aves", icon: Stethoscope, desc: "Diagnóstico por foto e sintomas", tags: ["doenca", "diagnostico"] },
-      { to: "/ficha-lote", label: "Ficha do Lote", icon: ClipboardList, desc: "Ficha técnica completa do lote atual", tags: ["relatorio", "lote"] },
-      { to: "/comparativo-lotes", label: "Comparativo de Lotes", icon: BarChart3, desc: "Compare desempenho entre lotes", tags: ["comparar", "grafico"] },
-      { to: "/historico-lotes", label: "Histórico & Benchmark", icon: History, desc: "Todos os lotes encerrados e médias", tags: ["historico", "benchmark"] },
-      { to: "/entregas-racao", label: "Entregas de Ração", icon: Truck, desc: "Controle de cargas, viagens e consumo", tags: ["racao", "carga", "caminhao"] },
-      { to: "/silo", label: "Silo ao Vivo", icon: Boxes, desc: "Estoque de ração em tempo real, autonomia e pedido", tags: ["silo", "racao", "estoque", "tempo real"] },
-    ],
-  },
-  {
-    label: "Gado & Leite",
-    icon: Beef,
-    items: [
-      { to: "/gado", label: "Rebanho", icon: Beef, desc: "Cadastro, categorias e movimentação do rebanho", tags: ["boi", "vaca", "gedave"] },
-      { to: "/gado-pro", label: "Gado Pro", icon: TrendingUp, desc: "GMD, reprodução e lotação de pasto", tags: ["gmd", "reproducao", "pasto"] },
-      { to: "/leite", label: "Gado de Leite", icon: Milk, desc: "Rebanho leiteiro, controle leiteiro, lactações e reprodução", tags: ["ordenha", "litros", "vaca", "leite"] },
-      { to: "/engorda", label: "Gado de Engorda", icon: Scale, desc: "Lotes de engorda com GMD, arrobas e lucro por cabeça", tags: ["boi", "gmd", "arroba", "confinamento"] },
-      { to: "/sanidade", label: "Rastreabilidade & Sanidade", icon: ShieldCheck, desc: "Vacinas, medicamentos, carência e histórico rastreável por brinco ou lote", tags: ["vacina", "carencia", "rastreabilidade", "sanidade", "medicamento"] },
-      { to: "/veterinario", label: "Veterinário", icon: Stethoscope, desc: "Atendimentos, tratamentos e carências", tags: ["saude", "medicamento"] },
-      { to: "/racao", label: "Fábrica de Ração", icon: Factory, desc: "Fórmulas e custo por tonelada", tags: ["formula", "nutricao"] },
-    ],
-  },
-  {
-    label: "Lavoura & Clima",
-    icon: Sprout,
-    items: [
-      { to: "/plantios", label: "Plantios", icon: Sprout, desc: "Áreas plantadas, tratos e colheita", tags: ["safra", "cultura"] },
-      { to: "/guia-cultivo", label: "Guia de Cultivo", icon: BookOpen, desc: "Manual por cultura com adubação calculada", tags: ["adubo", "npk"] },
-      { to: "/monitoramento", label: "Monitoramento", icon: Bug, desc: "Pragas, doenças e daninhas com foto e GPS", tags: ["praga", "doenca"] },
-      { to: "/chuvas", label: "Chuvas", icon: CloudRain, desc: "Pluviômetro com histórico mensal", tags: ["pluviometro", "mm"] },
-      { to: "/medir-area", label: "Medir Área (satélite)", icon: Ruler, desc: "Hectares e alqueires desenhando no mapa", tags: ["hectare", "alqueire", "mapa"] },
-    ],
-  },
-  {
-    label: "Recursos",
+    label: "Ração e sanidade",
     icon: Boxes,
     items: [
-      { to: "/estoque", label: "Estoque", icon: Boxes, desc: "Insumos e ração com alerta de mínimo", tags: ["insumo", "almoxarifado"] },
-      { to: "/compras", label: "Compras", icon: ShoppingCart, desc: "Pedidos, cotações e recebimentos", tags: ["pedido", "cotacao"] },
-      { to: "/fornecedores", label: "Fornecedores", icon: Store, desc: "Mapa de fornecedores com rotas e contatos", tags: ["mapa", "contato"] },
-      { to: "/maquinas", label: "Máquinas", icon: Tractor, desc: "Abastecimentos, manutenções e horímetro", tags: ["trator", "manutencao"] },
-      { to: "/energia", label: "Energia", icon: Zap, desc: "Leitura dos relógios e consumo em kWh", tags: ["luz", "kwh", "relogio"] },
+      { to: "/silo", label: "Silo ao vivo", icon: Boxes, desc: "Saldo de ração, autonomia e pedido", tags: ["silo", "racao", "estoque"] },
+      { to: "/entregas-racao", label: "Entregas de ração", icon: Truck, desc: "Cargas recebidas por lote", tags: ["racao", "carga"] },
+      { to: "/estoque", label: "Estoque do lote", icon: Boxes, desc: "Ração e insumos do aviário", tags: ["insumo"] },
+      { to: "/calendario-sanitario", label: "Calendário sanitário", icon: Syringe, desc: "Vacinas e medicações programadas", tags: ["vacina", "sanidade"] },
+      { to: "/analise-aves", label: "Análise das aves", icon: Stethoscope, desc: "Diagnóstico por foto e sintomas", tags: ["doenca"] },
     ],
   },
   {
-    label: "Gestão",
-    icon: Wallet,
+    label: "Desempenho",
+    icon: TrendingUp,
     items: [
-      { to: "/financeiro", label: "Finanças", icon: Wallet, desc: "Receitas, despesas e contas a pagar", tags: ["dinheiro", "caixa"] },
-      { to: "/custos", label: "Custos por Lote", icon: TrendingUp, desc: "Rateio de custo e margem por lote", tags: ["margem", "lucro"] },
-      { to: "/financeiro-lote", label: "Painel Financeiro do Lote", icon: Wallet, desc: "Custo por ave, custo/kg, participação e lucro projetado", tags: ["custo", "ave", "lucro", "participacao"] },
-      { to: "/indicadores", label: "Indicadores Comparativos", icon: PieChart, desc: "Ranking de lotes, comparativo de safras e evolução financeira", tags: ["comparar", "ranking", "iep", "grafico", "kpi"] },
-      { to: "/orcamento", label: "Orçamento & Metas", icon: Target, desc: "Planejamento anual por atividade com previsto x realizado", tags: ["orcamento", "meta", "planejamento", "anual"] },
-      { to: "/equipe", label: "Equipe & Ponto", icon: Users, desc: "Funcionários, jornada, horas extras e custo de mão de obra", tags: ["funcionario", "ponto", "rh", "folha", "horas"] },
-      { to: "/mercado", label: "Mercado Agro", icon: BarChart3, desc: "Cotações e notícias do agronegócio", tags: ["cotacao", "boi", "soja"] },
-      { to: "/relatorios", label: "Relatórios", icon: FileText, desc: "PDFs técnicos e fechamento de lote", tags: ["pdf", "impressao"] },
-      { to: "/calculadora-agro", label: "Calculadora Agro", icon: Calculator, desc: "NPK, calagem, vazão e logística", tags: ["calculo", "conta"] },
-      { to: "/automacoes", label: "Automação & AVI Smart", icon: Sparkles, desc: "Motor de regras da granja e integração com o SMAAI-03", tags: ["regra", "gatilho", "smaai", "inobram", "avi smart", "controlador"] },
-      { to: "/integracoes-gov", label: "Integrações Gov", icon: Landmark, desc: "CNPJ, CEP, CAR, INCRA e SISBOV", tags: ["governo", "cnpj", "car"] },
-      { to: "/onedrive", label: "OneDrive + IA", icon: Cloud, desc: "IA lê planilhas e PDFs do OneDrive e atualiza os módulos sozinha", tags: ["onedrive", "importar", "excel", "pdf", "ia"] },
-      { to: "/backup", label: "Backup & Dados", icon: Database, desc: "Exportar, importar e limpar dados", tags: ["exportar", "importar"] },
+      { to: "/excelencia-lote", label: "Excelência do lote", icon: Trophy, desc: "IEP, GPD e curva de peso vs. meta", tags: ["iep", "kpi"] },
+      { to: "/ficha-lote", label: "Ficha do lote", icon: ClipboardList, desc: "Ficha técnica completa", tags: ["lote"] },
+      { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3, desc: "Compare desempenho entre lotes", tags: ["comparar"] },
+      { to: "/historico-lotes", label: "Histórico", icon: History, desc: "Lotes encerrados e médias", tags: ["benchmark"] },
+      { to: "/indicadores", label: "Indicadores", icon: PieChart, desc: "Ranking e evolução dos lotes", tags: ["ranking"] },
+      { to: "/custos", label: "Custos por lote", icon: TrendingUp, desc: "Custo, margem e projeção", tags: ["margem", "lucro"] },
+      { to: "/financeiro-lote", label: "Resultado do lote", icon: Wallet, desc: "Custo por ave, custo/kg e lucro", tags: ["custo"] },
+      { to: "/financeiro", label: "Lançamentos", icon: Wallet, desc: "Receitas e despesas da granja", tags: ["caixa"] },
+      { to: "/relatorios", label: "Relatórios", icon: FileText, desc: "PDFs técnicos e fechamento", tags: ["pdf"] },
+    ],
+  },
+  {
+    label: "Equipe e sistema",
+    icon: Sparkles,
+    items: [
+      { to: "/agro-ia", label: "Assistente IA", icon: Sparkles, desc: "Perguntas técnicas com os dados do lote", tags: ["ia"] },
+      { to: "/automacoes", label: "Automação", icon: Sparkles, desc: "Regras da granja e AVI Smart", tags: ["regra", "smaai"] },
+      { to: "/chat", label: "Chat da equipe", icon: MessagesSquare, desc: "Conversa em tempo real", tags: ["mensagem"] },
+      { to: "/diario", label: "Diário do aviário", icon: BookOpen, desc: "Registros com fotos", tags: ["registro"] },
+      { to: "/tarefas", label: "Tarefas", icon: ListChecks, desc: "Atividades por prioridade", tags: ["todo"] },
+      { to: "/lembretes", label: "Lembretes", icon: BellRing, desc: "Avisos recorrentes", tags: ["alerta"] },
+      { to: "/backup", label: "Backup", icon: Database, desc: "Exportar e importar dados", tags: ["exportar"] },
     ],
   },
 ];
 
 export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
+const item = (to: string, short: string) => ({ ...ALL_NAV_ITEMS.find((i) => i.to === to)!, short });
 export const MOBILE_BOTTOM: NavItem[] = [
-  { ...ALL_NAV_ITEMS[0]!, short: "Início" },
-  { ...NAV_GROUPS[1]!.items[0]!, short: "Granja" },
-  { ...NAV_GROUPS[2]!.items[0]!, short: "Gado" },
-  { ...ALL_NAV_ITEMS.find((i) => i.to === "/chat")!, short: "Chat" },
+  item("/", "Central"),
+  item("/granja", "Lotes"),
+  item("/manejo", "Manejo"),
+  item("/silo", "Silo"),
 ];
 
 const norm = (s: string) =>

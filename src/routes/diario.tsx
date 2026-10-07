@@ -22,9 +22,9 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/diario")({
   head: () => ({
     meta: [
-      { title: "Diário de Campo — AgroSítio" },
+      { title: "Diário de Campo — Aviário Pro" },
       { name: "description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
-      { property: "og:title", content: "Diário de Campo — AgroSítio" },
+      { property: "og:title", content: "Diário de Campo — Aviário Pro" },
       { property: "og:description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
     ],
   }),

@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChatNotifier } from "@/components/ChatNotifier";
 import { NAV_GROUPS, MOBILE_BOTTOM, ALL_NAV_ITEMS, buscarModulos, type NavItem } from "@/lib/nav";
-import logoUrl from "@/assets/logo-agrositio.png";
+import logoUrl from "@/assets/logo-aviario-pro.png";
 
 function NavLinkRow({ item, active, onClick, compact }: { item: NavItem; active: boolean; onClick?: () => void; compact?: boolean }) {
   const Icon = item.icon;
@@ -37,7 +37,7 @@ function NavTree({ pathname, onNavigate, initialOpenAll }: { pathname: string; o
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const base: Record<string, boolean> = {};
     NAV_GROUPS.forEach((g) => {
-      base[g.label] = initialOpenAll ? true : g.items.some((i) => isActive(i.to)) || g.label === "Dia a dia";
+      base[g.label] = initialOpenAll ? true : g.items.some((i) => isActive(i.to)) || g.label === "Operação";
     });
     return base;
   });
@@ -163,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(to + "/"));
   const atual = ALL_NAV_ITEMS.find((i) => i.to !== "/" && isActive(i.to));
-  const titulo = atual?.label ?? (pathname.startsWith("/modulos") ? "Módulos" : (fazendaNome ?? "AgroSítio"));
+  const titulo = atual?.label ?? (pathname.startsWith("/modulos") ? "Módulos" : (fazendaNome ?? "Aviário Pro"));
   const subtitulo = titulo === fazendaNome ? (operador || codigo || "") : (fazendaNome ?? operador ?? codigo ?? "");
 
   return (
@@ -175,13 +175,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative shrink-0">
-              <img src={logoUrl} alt="AgroSítio" width={40} height={40} className="h-10 w-10 object-contain relative" />
+              <img src={logoUrl} alt="Aviário Pro" width={40} height={40} className="h-10 w-10 object-contain relative" />
             </div>
             <div className="min-w-0">
-               <div className="font-display text-lg font-extrabold leading-tight">
-                Agro<span className="text-gradient">Sítio</span>
+              <div className="font-display text-2xl leading-none tracking-wide">
+                AVIÁRIO <span className="text-primary">PRO</span>
               </div>
-              <div className="text-[11px] text-muted-foreground truncate">{fazendaNome ?? "Granja & Gado"}</div>
+              <div className="text-[11px] text-muted-foreground truncate mt-1">{fazendaNome ?? "Frango de corte"}</div>
             </div>
           </Link>
         </div>
@@ -215,7 +215,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-sidebar-border bg-sidebar/95 backdrop-blur-xl sticky top-0 z-30">
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
-          <img src={logoUrl} alt="AgroSítio" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
+          <img src={logoUrl} alt="Aviário Pro" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
             <div className="font-display font-bold text-sm truncate tracking-tight">{titulo}</div>
             <div className="text-[10px] text-muted-foreground truncate">{subtitulo}</div>
@@ -229,7 +229,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent side="right" className="w-[88vw] sm:w-[380px] overflow-y-auto p-0 bg-sidebar">
               <SheetHeader className="p-5 border-b border-sidebar-border text-left">
-                <SheetTitle className="font-display tracking-tight">{fazendaNome ?? "AgroSítio"}</SheetTitle>
+                <SheetTitle className="font-display tracking-tight">{fazendaNome ?? "Aviário Pro"}</SheetTitle>
                 <p className="text-xs text-muted-foreground">{operador ? `${operador} · ` : ""}{codigo}</p>
               </SheetHeader>
               <nav className="p-3">
@@ -274,7 +274,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             {isActive("/modulos") && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-10 rounded-b bg-primary" />}
             <Grid3X3 className="h-5 w-5" />
-            Módulos
+            Mais
           </Link>
         </nav>
       </main>

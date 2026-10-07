@@ -19,9 +19,9 @@ import { fmtDataHora } from "@/lib/data";
 export const Route = createFileRoute("/manejo")({
   head: () => ({
     meta: [
-      { title: "Manejo do Frango — AgroSítio" },
+      { title: "Manejo do Frango — Aviário Pro" },
       { name: "description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
-      { property: "og:title", content: "Manejo do Frango — AgroSítio" },
+      { property: "og:title", content: "Manejo do Frango — Aviário Pro" },
       { property: "og:description", content: "Protocolo profissional dia a dia: temperatura, equipamentos, luz, ração e CA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

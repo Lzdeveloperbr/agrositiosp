@@ -15,12 +15,17 @@ import {
 import { useLotes } from "@/lib/state";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { fetchWeather } from "@/lib/weather";
+import { calcularResumoLote } from "@/lib/granja";
 
 export const Route = createFileRoute("/ambiencia")({
   head: () => ({
     meta: [
-      { title: "Ambiência do Aviário — AgroSítio" },
+      { title: "Ambiência do Aviário — Aviário Pro" },
       { name: "description", content: "Calculadora profissional de pressão negativa, troca de ar mínima, sensação térmica das aves e comparativo de peso por linhagem (Cobb 500 / Ross 308)." },
+      { property: "og:title", content: "Ambiência do Aviário — Aviário Pro" },
+      { property: "og:description", content: "Pressão, ventilação mínima e sensação térmica pela idade real do lote." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AmbienciaPage,
@@ -66,12 +71,12 @@ function AmbienciaPage() {
     try { localStorage.setItem(STORAGE_KEY + ":" + (fazendaId ?? "_"), JSON.stringify(cfg)); } catch {}
   }, [cfg, fazendaId]);
 
-  // Lote ativo (idade + nº aves vivas)
+  // Lote ativo: idade pelo calendário (D0 = alojamento), vivas descontando mortes e eliminados.
   const ativo = lotes.find((l) => !l.encerrado);
-  const idadeDias = ativo ? Math.max(1, ativo.entries.length) : 21;
-  const mortas = ativo ? ativo.entries.reduce((s, e) => s + e.mortalidade, 0) : 0;
-  const numeroAves = ativo ? Math.max(0, ativo.quantidadeInicial - mortas) : 20000;
-  const pesoMedioG = ativo?.entries[ativo.entries.length - 1]?.pesoMedioG ?? 0;
+  const resumo = ativo ? calcularResumoLote(ativo) : null;
+  const idadeDias = resumo ? Math.max(1, resumo.idade) : 21;
+  const numeroAves = resumo ? resumo.vivas : 20000;
+  const pesoMedioG = resumo?.ultimaPesagem && resumo.ultimaPesagem.idade === resumo.idade ? resumo.ultimaPesagem.pesoG : resumo ? Math.round(resumo.pesoProjetadoHojeG) : 0;
 
   // Pressão
   const pressao = useMemo(() => pressaoIdealPa(cfg.larguraM), [cfg.larguraM]);

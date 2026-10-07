@@ -19,7 +19,7 @@ import { diffDias } from "@/lib/data";
 export const Route = createFileRoute("/excelencia-lote")({
   head: () => ({
     meta: [
-      { title: "Excelência do Lote — AgroSítio" },
+      { title: "Excelência do Lote — Aviário Pro" },
       { name: "description", content: "Ferramentas profissionais: biossegurança, plano sanitário, uniformidade, performance e pré-abate." },
     ],
   }),
