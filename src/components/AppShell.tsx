@@ -37,7 +37,7 @@ function NavTree({ pathname, onNavigate, initialOpenAll }: { pathname: string; o
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const base: Record<string, boolean> = {};
     NAV_GROUPS.forEach((g) => {
-      base[g.label] = initialOpenAll ? true : g.items.some((i) => isActive(i.to)) || g.label === "Dia a dia";
+      base[g.label] = initialOpenAll ? true : g.items.some((i) => isActive(i.to)) || g.label === "Operação";
     });
     return base;
   });
@@ -178,10 +178,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <img src={logoUrl} alt="Aviário Pro" width={40} height={40} className="h-10 w-10 object-contain relative" />
             </div>
             <div className="min-w-0">
-               <div className="font-display text-lg font-extrabold leading-tight">
-                Agro<span className="text-gradient">Sítio</span>
+              <div className="font-display text-2xl leading-none tracking-wide">
+                AVIÁRIO <span className="text-primary">PRO</span>
               </div>
-              <div className="text-[11px] text-muted-foreground truncate">{fazendaNome ?? "Granja & Gado"}</div>
+              <div className="text-[11px] text-muted-foreground truncate mt-1">{fazendaNome ?? "Frango de corte"}</div>
             </div>
           </Link>
         </div>
@@ -274,7 +274,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             {isActive("/modulos") && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-10 rounded-b bg-primary" />}
             <Grid3X3 className="h-5 w-5" />
-            Módulos
+            Mais
           </Link>
         </nav>
       </main>

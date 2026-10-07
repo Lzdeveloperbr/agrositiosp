@@ -143,7 +143,7 @@ function LoteDetalhe() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <KPI label="Inicial" value={lote.quantidadeInicial.toLocaleString("pt-BR")} />
           <KPI label="Vivas" value={vivas.toLocaleString("pt-BR")} />
-          <KPI label="Mort.+Elim." value={`${((totalMort + totalElim) / lote.quantidadeInicial * 100).toFixed(2)}%`} />
+          <KPI label="Mort.+Elim." value={`${resumo.mortalidadePct.toFixed(2)}%`} />
           <KPI label="Peso esperado" value={`${resumo.pesoEsperadoHojeG.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} g`} />
           <KPI label="Peso medido" value={resumo.ultimaPesagem ? `${resumo.ultimaPesagem.pesoG.toLocaleString("pt-BR")} g` : "—"} />
           <KPI label="Diferença da meta" value={resumo.diferencaPesoPct == null ? "—" : `${resumo.diferencaPesoPct > 0 ? "+" : ""}${resumo.diferencaPesoPct.toFixed(1)}%`} />

@@ -11,12 +11,17 @@ import { useLotes, useFinanceiro, useEstoque } from "@/lib/state";
 import { TrendingUp, TrendingDown, Bird, Wallet, Percent, Scale, ArrowRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import { hojeISO } from "@/lib/data";
+import { calcularResumoLote } from "@/lib/granja";
 
 export const Route = createFileRoute("/custos")({
   head: () => ({
     meta: [
       { title: "Custos por Lote — Aviário Pro" },
       { name: "description", content: "Análise de custo, receita prevista, margem real e projeção de lucro de cada lote da granja com indicadores zootécnicos." },
+      { property: "og:title", content: "Custos por Lote — Aviário Pro" },
+      { property: "og:description", content: "Custo por kg, margem e projeção de lucro do lote de frango." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: CustosPage,
@@ -37,13 +42,15 @@ function CustosPage() {
     const inicio = lote.dataEntrada;
     const ents = [...lote.entries].sort((a, b) => a.date.localeCompare(b.date));
     const fim = ents[ents.length - 1]?.date ?? hojeISO();
-    const mort = ents.reduce((s, e) => s + e.mortalidade, 0);
-    const vivas = lote.quantidadeInicial - mort;
-    const mortPct = (mort / lote.quantidadeInicial) * 100;
-    const pesoG = ents[ents.length - 1]?.pesoMedioG ?? 0;
+    const resumo = calcularResumoLote(lote);
+    const mort = resumo.baixas;
+    const vivas = resumo.vivas;
+    const mortPct = resumo.mortalidadePct;
+    // Última pesagem real; dias sem peso não zeram custo/kg nem margem.
+    const pesoG = resumo.ultimaPesagem?.pesoG ?? 0;
     const pesoKg = pesoG / 1000;
-    const dias = ents.length;
-    const ganhoDiario = dias > 1 ? pesoG / dias : 0;
+    const dias = Math.max(1, resumo.idade);
+    const ganhoDiario = resumo.ultimaPesagem && resumo.ultimaPesagem.idade > 0 ? (pesoG - 42) / resumo.ultimaPesagem.idade : 0;
 
     // Despesas reais lançadas no período (módulo granja)
     const despesas = fin.filter((l) => l.tipo === "despesa" && (l.modulo === "granja" || !l.modulo) && l.data >= inicio && l.data <= fim);
