@@ -9,9 +9,9 @@ export const Route = createFileRoute("/modulos")({
   head: () => ({
     meta: [
       { title: "Módulos — Aviário Pro" },
-      { name: "description", content: "Todos os módulos do AgroSítio organizados por área: granja, gado, lavoura, recursos e gestão." },
+      { name: "description", content: "Todas as ferramentas do Aviário Pro: operação, ração, sanidade e desempenho dos lotes." },
       { property: "og:title", content: "Módulos — Aviário Pro" },
-      { property: "og:description", content: "Todos os módulos do AgroSítio organizados por área: granja, gado, lavoura, recursos e gestão." },
+      { property: "og:description", content: "Todas as ferramentas do Aviário Pro: operação, ração, sanidade e desempenho dos lotes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -29,8 +29,8 @@ function Modulos() {
       <div className="space-y-6">
         <header className="space-y-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold">Módulos</h1>
-            <p className="text-sm text-muted-foreground mt-1">Tudo o que o AgroSítio faz, separado por área.</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold">Ferramentas</h1>
+            <p className="text-sm text-muted-foreground mt-1">Ferramentas da granja organizadas por rotina.</p>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />

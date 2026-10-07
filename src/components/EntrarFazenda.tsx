@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import logoUrl from "@/assets/logo-agrositio.png";
+import logoUrl from "@/assets/logo-aviario-pro.png";
 
 export function EntrarFazenda() {
   const { entrar, criar, setOperador } = useFazenda();
@@ -34,7 +34,7 @@ export function EntrarFazenda() {
       <Card className="w-full max-w-md p-6 sm:p-8 space-y-6 card-elevated relative border-primary/15">
         <div className="flex flex-col items-center text-center gap-3">
           <div className="relative">
-            <img src={logoUrl} alt="AgroSítio" width={120} height={120} className="h-28 w-28 object-contain relative" />
+            <img src={logoUrl} alt="Aviário Pro" width={120} height={120} className="h-28 w-28 object-contain relative" />
           </div>
           <div>
             <h1 className="font-display text-3xl font-extrabold leading-tight">

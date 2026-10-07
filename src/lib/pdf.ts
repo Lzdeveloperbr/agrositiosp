@@ -38,7 +38,7 @@ function header(doc: jsPDF, title: string, subtitle?: string) {
   doc.text(`Responsável: ${SITIO.responsavel}`, 14, 30);
 
   doc.setFontSize(9);
-  doc.text("AgroSítio · Gestão Rural", w - 14, 13, { align: "right" });
+  doc.text("Aviário Pro · Frango de Corte", w - 14, 13, { align: "right" });
   doc.setFontSize(8);
   doc.text(fmtData(new Date()), w - 14, 20, { align: "right" });
 

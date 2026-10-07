@@ -38,7 +38,7 @@ export function InstallAppButton({ size = "sm" as const }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Download className="h-5 w-5" /> Instalar AgroSítio</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Download className="h-5 w-5" /> Instalar Aviário Pro</DialogTitle>
             <DialogDescription>Tenha o app na tela inicial, com ícone próprio e funcionando offline.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 text-sm">
@@ -55,7 +55,7 @@ export function InstallAppButton({ size = "sm" as const }) {
               <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
                 <li>Toque no botão <b>Compartilhar</b>.</li>
                 <li>Escolha <b>Adicionar à Tela de Início</b>.</li>
-                <li>Confirme com o nome AgroSítio.</li>
+                <li>Confirme com o nome Aviário Pro.</li>
               </ol>
             </div>
             <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">

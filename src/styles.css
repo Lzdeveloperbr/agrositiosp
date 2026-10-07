@@ -49,7 +49,7 @@
   --font-display: "Bebas Neue", "Barlow Condensed", system-ui, sans-serif;
 }
 
-/* Aviário Pro — agroindustrial: grafite #111827, aço #334155, cinza #E5E7EB, âmbar #F59E0B */
+/* Aviário Pro tokens */
 :root {
   --radius: 0.5rem;
   --background: oklch(0.155 0.02 265);
