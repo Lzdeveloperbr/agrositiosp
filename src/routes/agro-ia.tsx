@@ -15,7 +15,7 @@ import { hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/agro-ia")({
   head: () => ({
     meta: [
-      { title: "Agro IA — Assistente Especialista | AgroSítio" },
+      { title: "Agro IA — Assistente Especialista | Aviário Pro" },
       { name: "description", content: "Chat IA especialista em granja, gado e plantio com contexto real da sua fazenda." },
     ],
   }),

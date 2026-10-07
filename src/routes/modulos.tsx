@@ -8,9 +8,9 @@ import { NAV_GROUPS, buscarModulos } from "@/lib/nav";
 export const Route = createFileRoute("/modulos")({
   head: () => ({
     meta: [
-      { title: "Módulos — AgroSítio" },
+      { title: "Módulos — Aviário Pro" },
       { name: "description", content: "Todos os módulos do AgroSítio organizados por área: granja, gado, lavoura, recursos e gestão." },
-      { property: "og:title", content: "Módulos — AgroSítio" },
+      { property: "og:title", content: "Módulos — Aviário Pro" },
       { property: "og:description", content: "Todos os módulos do AgroSítio organizados por área: granja, gado, lavoura, recursos e gestão." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

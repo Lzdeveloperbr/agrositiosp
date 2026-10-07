@@ -24,9 +24,9 @@ import { diffDias, fmtData, hojeISO, isoLocal, parseData } from "@/lib/data";
 export const Route = createFileRoute("/pesagem-pro")({
   head: () => ({
     meta: [
-      { title: "Pesagem de Frangos — AgroSítio" },
+      { title: "Pesagem de Frangos — Aviário Pro" },
       { name: "description", content: "Pesagem profissional de frangos com peso esperado, uniformidade, GPD e comparação por linhagem." },
-      { property: "og:title", content: "Pesagem de Frangos — AgroSítio" },
+      { property: "og:title", content: "Pesagem de Frangos — Aviário Pro" },
       { property: "og:description", content: "Acompanhe peso, uniformidade e ganho diário do lote." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

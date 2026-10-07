@@ -13,9 +13,9 @@ import { fmtData } from "@/lib/data";
 export const Route = createFileRoute("/historico-lotes")({
   head: () => ({
     meta: [
-      { title: "Histórico & Benchmark — AgroSítio" },
+      { title: "Histórico & Benchmark — Aviário Pro" },
       { name: "description", content: "Evolução histórica dos lotes da granja com média móvel, recorde de melhor lote e comparação contra o benchmark da fazenda." },
-      { property: "og:title", content: "Histórico & Benchmark — AgroSítio" },
+      { property: "og:title", content: "Histórico & Benchmark — Aviário Pro" },
       { property: "og:description", content: "Evolução histórica dos lotes da granja com média móvel, recorde de melhor lote e comparação contra o benchmark da fazenda." },
     ],
   }),

@@ -17,9 +17,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/automacoes")({
   head: () => ({
     meta: [
-      { title: "Central de Automação da Granja — AgroSítio" },
+      { title: "Central de Automação da Granja — Aviário Pro" },
       { name: "description", content: "Motor de regras que vigia mortalidade, peso vs. meta, conversão, estoque de ração, ambiência, vacinas e contas — e integra com o AVI Smart Config do SMAAI-03." },
-      { property: "og:title", content: "Central de Automação da Granja — AgroSítio" },
+      { property: "og:title", content: "Central de Automação da Granja — Aviário Pro" },
       { property: "og:description", content: "Regras automáticas de granja com alertas em tempo real e integração com o consultor IA do controlador SMAAI-03." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

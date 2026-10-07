@@ -152,25 +152,8 @@ export function gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }: D
     });
   }
 
-  // ===== Gado: vacinas e reforços =====
-  const em30 = isoLocal(new Date(Date.now() + 30 * 86400000));
-  const vac = animais
-    .filter((a) => a.status === "ativo")
-    .flatMap((a) => (a.sanidade ?? []).filter((s) => s.proximaData && s.proximaData <= em30).map((s) => ({ a, s })));
-  const vencidas = vac.filter((v) => v.s.proximaData! < hj);
-  if (vencidas.length) {
-    out.push({
-      id: "vacina-vencida", severidade: "critico", modulo: "gado", to: "/gado",
-      titulo: `${vencidas.length} vacina(s)/reforço(s) vencido(s)`,
-      detalhe: `Ex.: brinco ${vencidas[0]!.a.brinco} — ${vencidas[0]!.s.produto}.`,
-    });
-  } else if (vac.length) {
-    out.push({
-      id: "vacina-proxima", severidade: "atencao", modulo: "gado", to: "/gado",
-      titulo: `${vac.length} manejo(s) sanitário(s) em 30 dias`,
-      detalhe: `Próximo: brinco ${vac[0]!.a.brinco} — ${vac[0]!.s.produto} em ${fmtData(vac[0]!.s.proximaData!)}.`,
-    });
-  }
+  void animais;
+
 
   // ===== Tarefas =====
   const atrasadasT = tarefas.filter((t) => !t.concluida && t.vencimento && t.vencimento < hj);

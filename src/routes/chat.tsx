@@ -12,9 +12,9 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
-      { title: "Chat da Equipe — AgroSítio" },
+      { title: "Chat da Equipe — Aviário Pro" },
       { name: "description", content: "Converse em tempo real com toda a equipe da fazenda. Histórico permanente, sem apagar mensagens." },
-      { property: "og:title", content: "Chat da Equipe — AgroSítio" },
+      { property: "og:title", content: "Chat da Equipe — Aviário Pro" },
       { property: "og:description", content: "Converse em tempo real com toda a equipe da fazenda. Histórico permanente." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

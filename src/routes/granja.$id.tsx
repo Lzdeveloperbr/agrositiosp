@@ -20,9 +20,9 @@ import { refPesoG } from "@/lib/silo";
 export const Route = createFileRoute("/granja/$id")({
   head: () => ({
     meta: [
-      { title: "Detalhes do Lote — AgroSítio" },
+      { title: "Detalhes do Lote — Aviário Pro" },
       { name: "description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
-      { property: "og:title", content: "Detalhes do Lote — AgroSítio" },
+      { property: "og:title", content: "Detalhes do Lote — Aviário Pro" },
       { property: "og:description", content: "Lote de frango: mortalidade diária, peso médio, ração, água e conversão alimentar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -19,7 +19,7 @@ import { fetchWeather } from "@/lib/weather";
 export const Route = createFileRoute("/ambiencia")({
   head: () => ({
     meta: [
-      { title: "Ambiência do Aviário — AgroSítio" },
+      { title: "Ambiência do Aviário — Aviário Pro" },
       { name: "description", content: "Calculadora profissional de pressão negativa, troca de ar mínima, sensação térmica das aves e comparativo de peso por linhagem (Cobb 500 / Ross 308)." },
     ],
   }),

@@ -10,9 +10,9 @@ import { hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/backup")({
   head: () => ({
     meta: [
-      { title: "Backup e Restauração — AgroSítio" },
+      { title: "Backup e Restauração — Aviário Pro" },
       { name: "description", content: "Exporte e restaure todos os dados da fazenda em um único arquivo seguro." },
-      { property: "og:title", content: "Backup e Restauração — AgroSítio" },
+      { property: "og:title", content: "Backup e Restauração — Aviário Pro" },
       { property: "og:description", content: "Exporte e restaure todos os dados da fazenda em um único arquivo seguro." },
     ],
   }),

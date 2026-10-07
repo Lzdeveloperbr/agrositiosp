@@ -15,7 +15,7 @@ import { hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/custos")({
   head: () => ({
     meta: [
-      { title: "Custos por Lote — AgroSítio" },
+      { title: "Custos por Lote — Aviário Pro" },
       { name: "description", content: "Análise de custo, receita prevista, margem real e projeção de lucro de cada lote da granja com indicadores zootécnicos." },
     ],
   }),

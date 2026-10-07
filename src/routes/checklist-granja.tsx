@@ -24,7 +24,7 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/checklist-granja")({
   head: () => ({
     meta: [
-      { title: "Checklist Diário da Granja — AgroSítio" },
+      { title: "Checklist Diário da Granja — Aviário Pro" },
       { name: "description", content: "Checklist profissional diário para frangos de corte: ambiência, água, ração, cama, biosseguridade e mortalidade." },
     ],
   }),
