@@ -7,20 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useLotes, useFinanceiro, usePlantios, useAnimais } from "@/lib/state";
+import { useLotes, useFinanceiro } from "@/lib/state";
 import { BarChart3, Trophy, TrendingUp, Wallet, Sprout } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
-import { isoLocal } from "@/lib/data";
+import { isoLocal, diffDias, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/indicadores")({
   head: () => ({
     meta: [
       { title: "Indicadores Comparativos — Aviário Pro" },
-      { name: "description", content: "Compare lotes, safras e períodos com ranking de desempenho, gráficos e evolução financeira da propriedade." },
+      { name: "description", content: "Compare lotes e períodos com ranking de desempenho, gráficos e evolução financeira da propriedade." },
       { property: "og:title", content: "Indicadores Comparativos — Aviário Pro" },
-      { property: "og:description", content: "Ranking de lotes, comparativo de safras e evolução financeira mês a mês." },
+      { property: "og:description", content: "Ranking de lotes e evolução financeira mês a mês." },
     ],
   }),
   component: IndicadoresPage,
@@ -37,22 +37,20 @@ type LoteKPI = {
 function IndicadoresPage() {
   const [lotes] = useLotes();
   const [financ] = useFinanceiro();
-  const [plantios] = usePlantios();
-  const [animais] = useAnimais();
   const [meses, setMeses] = useState(12);
 
   const kpis: LoteKPI[] = useMemo(() => {
     return lotes.map((l) => {
       const entries = [...(l.entries ?? [])].sort((a, b) => a.date.localeCompare(b.date));
       const mortos = entries.reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
-      const dias = entries.length;
+      const dias = entries.length ? Math.max(0, diffDias(l.dataEntrada, entries.at(-1)?.date ?? hojeISO())) : 0;
       const alojadas = l.quantidadeInicial || 0;
       const vivas = Math.max(alojadas - mortos, 0);
       const viab = alojadas ? (vivas / alojadas) * 100 : 0;
       const ultimoPeso = [...entries].reverse().find((e) => (e.pesoMedioG ?? 0) > 0)?.pesoMedioG ?? 0;
       const pesoKg = ultimoPeso / 1000;
       const gpd = dias > 0 ? (ultimoPeso - 45) / dias : 0;
-      const iep = dias > 0 && pesoKg > 0 ? (viab * pesoKg) / dias * 100 : 0;
+      const iep = 0; // CA real indisponível: não inventar IEP.
       return {
         id: l.id, numero: l.numero, dias, alojadas, vivas,
         mortPct: alojadas ? (mortos / alojadas) * 100 : 0,
@@ -61,7 +59,7 @@ function IndicadoresPage() {
     });
   }, [lotes]);
 
-  const ranking = useMemo(() => [...kpis].sort((a, b) => b.iep - a.iep), [kpis]);
+  const ranking = useMemo(() => [...kpis].sort((a, b) => b.viab - a.viab), [kpis]);
   const melhor = ranking[0];
   const mediaIEP = kpis.length ? kpis.reduce((s, k) => s + k.iep, 0) / kpis.length : 0;
   const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : 0;
@@ -92,20 +90,6 @@ function IndicadoresPage() {
     return [...map.entries()].map(([categoria, valor]) => ({ categoria, valor })).sort((a, b) => b.valor - a.valor).slice(0, 8);
   }, [financ, meses]);
 
-  const safras = useMemo(() => {
-    const map = new Map<string, { cultura: string; areaHa: number; produzido: number; receita: number; n: number }>();
-    plantios.forEach((p) => {
-      const k = p.cultura || "—";
-      const cur = map.get(k) ?? { cultura: k, areaHa: 0, produzido: 0, receita: 0, n: 0 };
-      cur.areaHa += p.areaHa || 0;
-      cur.produzido += p.produtividadeKg || 0;
-      cur.receita += (p.produtividadeKg || 0) * (p.precoKg || 0);
-      cur.n += 1;
-      map.set(k, cur);
-    });
-    return [...map.values()].map((s) => ({ ...s, kgHa: s.areaHa ? s.produzido / s.areaHa : 0 })).sort((a, b) => b.receita - a.receita);
-  }, [plantios]);
-
   return (
     <AppShell>
       <div className="space-y-6">
@@ -113,7 +97,7 @@ function IndicadoresPage() {
           <div>
             <p className="eyebrow">Inteligência</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-[-0.03em]">Indicadores Comparativos</h1>
-            <p className="text-sm text-muted-foreground mt-1">Compare lotes, safras e períodos com ranking de desempenho.</p>
+            <p className="text-sm text-muted-foreground mt-1">Compare lotes e períodos com ranking de desempenho.</p>
           </div>
           <div className="flex gap-2">
             {[3, 6, 12, 24].map((m) => (
@@ -123,8 +107,8 @@ function IndicadoresPage() {
         </header>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard label="Melhor lote (IEP)" value={melhor ? Math.round(melhor.iep).toString() : "—"} hint={melhor ? `Lote ${melhor.numero}` : "sem dados"} icon={Trophy} tone="accent" />
-          <StatCard label="IEP médio" value={Math.round(mediaIEP).toString()} hint={`${kpis.length} lote(s)`} icon={BarChart3} tone="primary" />
+          <StatCard label="Maior viabilidade" value={melhor ? `${n2(melhor.viab)}%` : "—"} hint={melhor ? `Lote ${melhor.numero}` : "sem dados"} icon={Trophy} tone="accent" />
+          <StatCard label="Lotes registrados" value={String(kpis.length)} hint={`${kpis.length} lote(s)`} icon={BarChart3} tone="primary" />
           <StatCard label="Viabilidade média" value={`${n2(mediaViab)}%`} hint={`GPD médio ${n2(mediaGPD)} g/dia`} icon={TrendingUp} tone="primary" />
           <StatCard label="Resultado do período" value={fmtBRL(totalReceita - totalDespesa)} hint={`${fmtBRL(totalReceita)} - ${fmtBRL(totalDespesa)}`} icon={Wallet} tone={totalReceita - totalDespesa >= 0 ? "accent" : "destructive"} />
         </div>
@@ -133,13 +117,11 @@ function IndicadoresPage() {
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="lotes">Lotes</TabsTrigger>
             <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
-            <TabsTrigger value="safras">Safras</TabsTrigger>
-            <TabsTrigger value="rebanho">Rebanho</TabsTrigger>
           </TabsList>
 
           <TabsContent value="lotes" className="space-y-4 mt-4">
             <Card className="p-4">
-              <h2 className="font-semibold mb-3">IEP por lote</h2>
+              <h2 className="font-semibold mb-3">Viabilidade por lote</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={ranking.map((r) => ({ nome: r.numero, IEP: Math.round(r.iep), Viabilidade: Number(r.viab.toFixed(1)) }))}>
@@ -148,7 +130,7 @@ function IndicadoresPage() {
                     <YAxis fontSize={11} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="IEP" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="Viabilidade" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -167,7 +149,7 @@ function IndicadoresPage() {
                     <TableHead className="text-right">Viab.</TableHead>
                     <TableHead className="text-right">Peso</TableHead>
                     <TableHead className="text-right">GPD</TableHead>
-                    <TableHead className="text-right">IEP</TableHead>
+                    <TableHead className="text-right">IEP / CA</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -182,7 +164,7 @@ function IndicadoresPage() {
                       <TableCell className="text-right tabular-nums">{n2(r.pesoKg)} kg</TableCell>
                       <TableCell className="text-right tabular-nums">{n2(r.gpd)} g</TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={r.iep >= mediaIEP ? "secondary" : "outline"}>{Math.round(r.iep)}</Badge>
+                        <Badge variant={r.iep >= mediaIEP ? "secondary" : "outline"}>—</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -228,66 +210,8 @@ function IndicadoresPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="safras" className="mt-4">
-            <Card className="p-4 overflow-x-auto">
-              <h2 className="font-semibold mb-3 flex items-center gap-2"><Sprout className="h-4 w-4 text-primary" /> Comparativo por cultura</h2>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cultura</TableHead>
-                    <TableHead className="text-right">Plantios</TableHead>
-                    <TableHead className="text-right">Área (ha)</TableHead>
-                    <TableHead className="text-right">Produção (kg)</TableHead>
-                    <TableHead className="text-right">kg/ha</TableHead>
-                    <TableHead className="text-right">Receita</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {safras.map((s) => (
-                    <TableRow key={s.cultura}>
-                      <TableCell className="font-medium capitalize">{s.cultura}</TableCell>
-                      <TableCell className="text-right tabular-nums">{s.n}</TableCell>
-                      <TableCell className="text-right tabular-nums">{s.areaHa.toFixed(1)}</TableCell>
-                      <TableCell className="text-right tabular-nums">{s.produzido.toLocaleString("pt-BR")}</TableCell>
-                      <TableCell className="text-right tabular-nums">{Math.round(s.kgHa).toLocaleString("pt-BR")}</TableCell>
-                      <TableCell className="text-right tabular-nums">{fmtBRL(s.receita)}</TableCell>
-                    </TableRow>
-                  ))}
-                  {safras.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum plantio cadastrado.</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="rebanho" className="mt-4">
-            <Card className="p-4">
-              <h2 className="font-semibold mb-3">Rebanho por categoria</h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoriasRebanho(animais)}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                    <XAxis dataKey="categoria" fontSize={11} />
-                    <YAxis fontSize={11} />
-                    <Tooltip />
-                    <Bar dataKey="qtd" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </AppShell>
   );
-}
-
-function categoriasRebanho(animais: any[]) {
-  const map = new Map<string, number>();
-  animais.filter((a) => a.status === "ativo").forEach((a) => {
-    const k = a.categoria || "sem categoria";
-    map.set(k, (map.get(k) ?? 0) + 1);
-  });
-  return [...map.entries()].map(([categoria, qtd]) => ({ categoria, qtd })).sort((a, b) => b.qtd - a.qtd);
 }

@@ -22,16 +22,16 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/diario")({
   head: () => ({
     meta: [
-      { title: "Diário de Campo — Aviário Pro" },
+      { title: "Diário do Aviário — Aviário Pro" },
       { name: "description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
-      { property: "og:title", content: "Diário de Campo — Aviário Pro" },
+      { property: "og:title", content: "Diário do Aviário — Aviário Pro" },
       { property: "og:description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
     ],
   }),
   component: DiarioPage,
 });
 
-const CATS = ["granja", "gado", "cerca", "maquina", "geral"] as const;
+const CATS = ["granja", "geral"] as const;
 
 // upload de fotos agora vai para o Storage da nuvem (ver lib/cloud/uploadFoto.ts)
 
