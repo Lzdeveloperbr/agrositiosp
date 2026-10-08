@@ -18,9 +18,9 @@ export const Route = createFileRoute("/financeiro")({
   head: () => ({
     meta: [
       { title: "Financeiro — Aviário Pro" },
-      { name: "description", content: "Receitas, despesas, contas a vencer e livro caixa do produtor rural." },
+      { name: "description", content: "Receitas, despesas, contas a vencer e livro caixa do avicultor." },
       { property: "og:title", content: "Financeiro — Aviário Pro" },
-      { property: "og:description", content: "Receitas, despesas, contas a vencer e livro caixa do produtor rural." },
+      { property: "og:description", content: "Receitas, despesas, contas a vencer e livro caixa do avicultor." },
     ],
   }),
   component: FinanceiroPage,
@@ -32,7 +32,7 @@ function FinanceiroPage() {
   const [lancamentos, setLan] = useFinanceiro();
   const [open, setOpen] = useState(false);
   const [filtro, setFiltro] = useState<"todos" | "receita" | "despesa">("todos");
-  const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+  const [mes, setMes] = useState(hojeISO().slice(0, 7));
 
   const [form, setForm] = useState({
     data: hojeISO(),
@@ -71,7 +71,7 @@ function FinanceiroPage() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2"><Wallet className="h-8 w-8 text-primary" /> Financeiro</h1>
-            <p className="text-muted-foreground mt-1">Receitas e despesas do sítio com fluxo mensal.</p>
+            <p className="text-muted-foreground mt-1">Receitas e despesas da granja com fluxo mensal.</p>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Novo lançamento</Button></DialogTrigger>
@@ -93,9 +93,7 @@ function FinanceiroPage() {
                     <SelectContent>
                       <SelectItem value="geral">Geral</SelectItem>
                       <SelectItem value="granja">Granja</SelectItem>
-                      <SelectItem value="gado">Gado</SelectItem>
                       <SelectItem value="energia">Energia</SelectItem>
-                      <SelectItem value="maquina">Máquina</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>

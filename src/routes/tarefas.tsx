@@ -14,7 +14,7 @@ import { useTarefas } from "@/lib/state";
 import { uid } from "@/lib/storage";
 import { ListChecks, Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { fmtData } from "@/lib/data";
+import { fmtData, hojeISO } from "@/lib/data";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({
@@ -70,7 +70,7 @@ function TarefasPage() {
       });
   }, [tarefas, filtro]);
 
-  const isVencida = (v?: string) => v && new Date(v) < new Date(new Date().toDateString());
+  const isVencida = (v?: string) => v && v < hojeISO();
 
   return (
     <AppShell>
@@ -78,7 +78,7 @@ function TarefasPage() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2"><ListChecks className="h-8 w-8 text-primary" /> Tarefas</h1>
-            <p className="text-muted-foreground mt-1">Lembretes, vacinas, manutenção e to-do do sítio.</p>
+            <p className="text-muted-foreground mt-1">Lembretes, vacinas, manutenção e to-do da granja.</p>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Nova tarefa</Button></DialogTrigger>
@@ -100,9 +100,6 @@ function TarefasPage() {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="granja">Granja</SelectItem>
-                        <SelectItem value="gado">Gado</SelectItem>
-                        <SelectItem value="cerca">Cerca</SelectItem>
-                        <SelectItem value="maquina">Máquina</SelectItem>
                         <SelectItem value="geral">Geral</SelectItem>
                       </SelectContent>
                     </Select>

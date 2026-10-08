@@ -1,6 +1,6 @@
 @import "tailwindcss" source(none);
-@source "../src";
 @import "tw-animate-css";
+@source "../src";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -117,7 +117,7 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.02em; font-weight: 400; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0; font-weight: 400; }
   h4 { font-weight: 600; }
   ::selection { background: oklch(0.77 0.165 70 / 0.35); color: oklch(0.98 0.01 85); }
   /* Refined scrollbar */
@@ -216,7 +216,7 @@
 @utility eyebrow {
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }

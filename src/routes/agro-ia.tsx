@@ -9,14 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Send, Loader2, Trash2, RefreshCw, Bot, User } from "lucide-react";
 import { toast } from "sonner";
 import { chatAgroIA, type ChatMsg } from "@/lib/agroChat.functions";
-import { useLotes, useAnimais, useEstoque, useFinanceiro, usePlantios, useChuvas, useTarefas } from "@/lib/state";
-import { hojeISO } from "@/lib/data";
+import { useLotes, useEstoque, useFinanceiro, useTarefas } from "@/lib/state";
+import { hojeISO, diffDias } from "@/lib/data";
 
 export const Route = createFileRoute("/agro-ia")({
   head: () => ({
     meta: [
-      { title: "Agro IA — Assistente Especialista | Aviário Pro" },
-      { name: "description", content: "Chat IA especialista em granja, gado e plantio com contexto real da sua fazenda." },
+      { title: "Assistente avícola — Assistente Especialista | Aviário Pro" },
+      { name: "description", content: "Chat IA especialista em frango de corte com contexto real da sua fazenda." },
     ],
   }),
   component: AgroIAPage,
@@ -26,19 +26,16 @@ const SUGESTOES = [
   "Como está meu lote ativo? Algum alerta?",
   "Qual o consumo de ração esperado pros próximos 7 dias?",
   "Calcula a CA atual e compara com a meta da linhagem",
-  "Quantos animais estão prontos para vacina de brucelose?",
+  "Quais cuidados sanitários preciso conferir no lote?",
   "Sugere um plano de manejo pra esta semana",
-  "Qual o melhor momento para colher meu plantio?",
+  "Meu lote está pronto para o abate?",
 ];
 
 function AgroIAPage() {
   const fn = useServerFn(chatAgroIA);
   const [lotes] = useLotes();
-  const [animais] = useAnimais();
   const [estoque] = useEstoque();
   const [fin] = useFinanceiro();
-  const [plantios] = usePlantios();
-  const [chuvas] = useChuvas();
   const [tarefas] = useTarefas();
 
   const [messages, setMessages] = useState<ChatMsg[]>(() => {
@@ -64,10 +61,9 @@ function AgroIAPage() {
     const ativo = lotes.find((l) => !l.encerrado) ?? lotes[0];
     const mortAcum = ativo ? ativo.entries.reduce((s, e) => s + (e.mortalidade ?? 0) + (e.eliminados ?? 0), 0) : 0;
     const vivas = ativo ? Math.max(0, ativo.quantidadeInicial - mortAcum) : 0;
-    const dias = ativo ? ativo.entries.length : 0;
+    const dias = ativo ? Math.max(0, diffDias(ativo.dataEntrada)) : 0;
     const pesoUlt = ativo?.entries.slice().reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? null;
     const lancMes = fin.filter((l) => l.data?.startsWith(new Date().toISOString().slice(0, 7)));
-    const ativosGado = animais.filter((a) => a.status === "ativo");
     return JSON.stringify({
       data: hojeISO(),
       granja_lote_ativo: ativo ? {
@@ -81,17 +77,14 @@ function AgroIAPage() {
         previsao_abate_dias: ativo.previsaoAbateDias,
         data_alojamento: ativo.dataEntrada,
       } : null,
-      gado: { cabecas_ativas: ativosGado.length, historico: animais.length },
-      plantios_ativos: plantios.filter((p) => p.status !== "colheita" && p.status !== "encerrado").map((p) => ({ cultura: p.cultura, area_ha: p.areaHa, previsao: p.previsaoColheita })),
       estoque_baixo: estoque.filter((i) => i.minimo != null && i.quantidade <= (i.minimo ?? 0)).map((i) => ({ nome: i.nome, qtd: i.quantidade, un: i.unidade })),
       financeiro_mes: {
         receitas: lancMes.filter((l) => l.tipo === "receita").reduce((s, l) => s + l.valor, 0),
         despesas: lancMes.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0),
       },
       tarefas_pendentes: tarefas.filter((t) => !t.concluida).length,
-      chuva_ultimos_7d_mm: chuvas.slice(-7).reduce((s, c) => s + (c.mm ?? 0), 0),
     });
-  }, [lotes, animais, estoque, fin, plantios, chuvas, tarefas]);
+  }, [lotes, estoque, fin, tarefas]);
 
   async function enviar(texto?: string) {
     const t = (texto ?? input).trim();
@@ -124,7 +117,7 @@ function AgroIAPage() {
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-accent" /> Agro IA
+              <Sparkles className="h-8 w-8 text-accent" /> Assistente avícola
             </h1>
             <p className="text-muted-foreground mt-1">Consultor especialista 24/7 com acesso aos dados da sua fazenda.</p>
           </div>
@@ -145,7 +138,7 @@ function AgroIAPage() {
                 </div>
                 <div>
                   <h2 className="font-display font-bold text-xl">Olá! Pergunte qualquer coisa sobre sua fazenda</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Eu já estou olhando seu lote, gado, estoque e finanças.</p>
+                  <p className="text-sm text-muted-foreground mt-1">Peso, mortalidade, manejo e ração do lote.</p>
                 </div>
                 <div className="grid md:grid-cols-2 gap-2 max-w-2xl mx-auto pt-2">
                   {SUGESTOES.map((s) => (

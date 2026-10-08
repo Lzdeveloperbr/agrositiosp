@@ -72,7 +72,11 @@ export const NAV_GROUPS: NavGroup[] = [
 
 export const ALL_NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
-const item = (to: string, short: string) => ({ ...ALL_NAV_ITEMS.find((i) => i.to === to)!, short });
+const item = (to: string, short: string): NavItem => {
+  const found = ALL_NAV_ITEMS.find((i) => i.to === to);
+  if (!found) throw new Error(`Missing navigation item: ${to}`);
+  return { ...found, short };
+};
 export const MOBILE_BOTTOM: NavItem[] = [
   item("/", "Central"),
   item("/granja", "Lotes"),

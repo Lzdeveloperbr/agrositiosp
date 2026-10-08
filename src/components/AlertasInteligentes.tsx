@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, ShieldCheck, Info, TriangleAlert, ArrowRight } from "lucide-react";
 import { gerarAlertas, type Alerta, type Severidade } from "@/lib/alertas";
-import { useLotes, useEstoque, useFinanceiro, useTarefas, useAnimais } from "@/lib/state";
+import { useLotes, useEstoque, useFinanceiro, useTarefas } from "@/lib/state";
 
 const ESTILO: Record<Severidade, { cls: string; icon: any; label: string }> = {
   critico: { cls: "border-destructive/40 bg-destructive/10 text-destructive", icon: AlertTriangle, label: "Crítico" },
@@ -18,12 +18,11 @@ export function AlertasInteligentes({ limite = 6 }: { limite?: number }) {
   const [estoque] = useEstoque();
   const [financeiro] = useFinanceiro();
   const [tarefas] = useTarefas();
-  const [animais] = useAnimais();
   const [tudo, setTudo] = useState(false);
 
   const alertas: Alerta[] = useMemo(
-    () => gerarAlertas({ lotes, estoque, financeiro, tarefas, animais }),
-    [lotes, estoque, financeiro, tarefas, animais],
+    () => gerarAlertas({ lotes, estoque, financeiro: financeiro.filter(l => !l.modulo || l.modulo === "granja" || l.modulo === "geral"), tarefas: tarefas.filter(t => t.categoria === "granja" || t.categoria === "geral"), animais: [] }),
+    [lotes, estoque, financeiro, tarefas],
   );
 
   const criticos = alertas.filter((a) => a.severidade === "critico").length;

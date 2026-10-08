@@ -68,7 +68,7 @@ function Central() {
           </div>
           <div className="flex gap-2">
             <InstallAppButton />
-            <Button asChild><Link to={ativo ? "/granja/$id" : "/granja"} params={ativo ? { id: ativo.id } : undefined as never}><Plus className="h-4 w-4" />{ativo ? "Lançar dados de hoje" : "Cadastrar lote"}</Link></Button>
+            {ativo ? <Button asChild><Link to="/granja/$id" params={{ id: ativo.id }}><Plus className="h-4 w-4" />Lançar dados de hoje</Link></Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
           </div>
         </header>
 
