@@ -18,6 +18,8 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/estoque")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Estoque — Aviário Pro" },
       { name: "description", content: "Controle de ração, vacinas, medicamentos e insumos com alerta de mínimo." },
       { property: "og:title", content: "Estoque — Aviário Pro" },

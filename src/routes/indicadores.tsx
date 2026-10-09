@@ -17,6 +17,8 @@ import { isoLocal, diffDias, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/indicadores")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Indicadores Comparativos — Aviário Pro" },
       { name: "description", content: "Compare lotes e períodos com ranking de desempenho, gráficos e evolução financeira da propriedade." },
       { property: "og:title", content: "Indicadores Comparativos — Aviário Pro" },

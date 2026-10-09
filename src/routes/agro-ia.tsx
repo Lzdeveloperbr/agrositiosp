@@ -15,6 +15,10 @@ import { hojeISO, diffDias } from "@/lib/data";
 export const Route = createFileRoute("/agro-ia")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Assistente avícola — Assistente Especialista | Aviário Pro" },
+      { property: "og:description", content: "Chat IA especialista em frango de corte com contexto real da sua fazenda." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Assistente avícola — Assistente Especialista | Aviário Pro" },
       { name: "description", content: "Chat IA especialista em frango de corte com contexto real da sua fazenda." },
     ],
@@ -38,13 +42,7 @@ function AgroIAPage() {
   const [fin] = useFinanceiro();
   const [tarefas] = useTarefas();
 
-  const [messages, setMessages] = useState<ChatMsg[]>(() => {
-    try {
-      const raw = localStorage.getItem("agro:ia:chat");
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return [];
-  });
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -62,7 +60,7 @@ function AgroIAPage() {
     const mortAcum = ativo ? ativo.entries.reduce((s, e) => s + (e.mortalidade ?? 0) + (e.eliminados ?? 0), 0) : 0;
     const vivas = ativo ? Math.max(0, ativo.quantidadeInicial - mortAcum) : 0;
     const dias = ativo ? Math.max(0, diffDias(ativo.dataEntrada)) : 0;
-    const pesoUlt = ativo?.entries.slice().reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? null;
+    const pesoUlt = ativo?.entries.slice().sort((a,b) => a.date.localeCompare(b.date)).reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? null;
     const lancMes = fin.filter((l) => l.data?.startsWith(new Date().toISOString().slice(0, 7)));
     return JSON.stringify({
       data: hojeISO(),

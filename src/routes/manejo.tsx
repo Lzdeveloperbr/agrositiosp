@@ -184,6 +184,7 @@ function protocoloDoDia(d: number): DiaProtocolo {
       ],
     };
   }
+  if (d > 42) return { ...PROTOCOLO[41], dia: d, manejo: ["Ciclo prolongado: confirmar programa de ração e abate com a integradora", "Monitorar conforto térmico, densidade e qualidade da cama diariamente"] };
   return PROTOCOLO[Math.min(PROTOCOLO.length - 1, d - 1)];
 }
 
@@ -201,8 +202,8 @@ function ManejoPage() {
 
   // idade D0 = 0. Protocolo interno usa dia 1..42, então protoIdx = idadeReal.
   const idadeReal = useMemo(() => (lote ? idadeDias(lote.dataEntrada) : 0), [lote]);
-  const [diaSel, setDiaSel] = useState<number>(Math.min(42, idadeReal));
-  const diaDisplay = Math.max(0, Math.min(42, diaSel));
+  const [diaSel, setDiaSel] = useState<number>(Math.min(60, idadeReal));
+  const diaDisplay = Math.max(0, Math.min(60, diaSel));
   const dia = protocoloDoDia(diaDisplay);
   const agua = aguaParaIdade(diaDisplay);
 
@@ -212,7 +213,7 @@ function ManejoPage() {
   }, [ativos, loteId]);
 
   useEffect(() => {
-    if (lote) setDiaSel(Math.min(42, idadeDias(lote.dataEntrada)));
+    if (lote) setDiaSel(Math.min(60, idadeDias(lote.dataEntrada)));
   }, [lote?.id]);
 
   useEffect(() => {
@@ -335,7 +336,7 @@ function ManejoPage() {
               <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="ross_ap95">Ross 308 AP</SelectItem><SelectItem value="ross308">Ross 308</SelectItem><SelectItem value="cobb500">Cobb 500</SelectItem></SelectContent>
             </Select>
-            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(Math.min(42, idadeDias(l.dataEntrada))); }}>
+            <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(Math.min(60, idadeDias(l.dataEntrada))); }}>
               <SelectTrigger className="w-56"><SelectValue placeholder="Selecionar lote" /></SelectTrigger>
               <SelectContent>{ativos.map((l) => <SelectItem key={l.id} value={l.id}>Lote {l.numero} · D{idadeDias(l.dataEntrada)}</SelectItem>)}</SelectContent>
             </Select>
@@ -471,19 +472,20 @@ function ManejoPage() {
           </section>
         )}
 
+        {diaDisplay > 42 && <p className="border-l-2 border-primary pl-3 text-sm text-muted-foreground">D{diaDisplay}: ciclo prolongado. Parâmetros ambientais orientativos; confirme o programa com o técnico da integradora. Valores além da curva disponível não são objetivos oficiais.</p>}
         {/* Seletor de dia */}
         <Card className="p-4" style={{ background: "var(--gradient-surface)" }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-semibold">Selecionar dia do lote</h2>
             <div className="flex items-center gap-2">
-              {lote && diaDisplay !== Math.min(42, idadeReal) && (
-                <Button size="sm" variant="ghost" onClick={() => setDiaSel(Math.min(42, idadeReal))}>Ir para hoje</Button>
+              {lote && diaDisplay !== Math.min(60, idadeReal) && (
+                <Button size="sm" variant="ghost" onClick={() => setDiaSel(Math.min(60, idadeReal))}>Ir para hoje</Button>
               )}
-              <Badge variant="outline">D{diaDisplay} / D42</Badge>
+              <Badge variant="outline">D{diaDisplay} / D60</Badge>
             </div>
           </div>
           <div className="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-14 gap-1.5">
-            {DIAS_LOTE.map((d) => {
+            {Array.from({ length: 61 }, (_, d) => d).map((d) => {
               const p = protocoloDoDia(d);
               const isPesagem = d > 0 && d % 7 === 0;
               const isTroca = p.manejo.some((m) => m.includes("TROCA") || m.includes("INICIAR ração"));
@@ -495,10 +497,10 @@ function ManejoPage() {
                   size="icon"
                   key={d}
                   onClick={() => setDiaSel(d)}
-                  aria-label={`Dia ${d}${lote && d === Math.min(42, idadeReal) ? ", hoje" : ""}`}
+                  aria-label={`Dia ${d}${lote && d === Math.min(60, idadeReal) ? ", hoje" : ""}`}
                   className={`aspect-square size-auto min-h-9 rounded-md text-xs font-semibold tabular-nums border transition ${
                     diaSel === d ? "bg-primary text-primary-foreground border-primary" :
-                    lote && d === Math.min(42, idadeReal) ? "ring-2 ring-primary/60 bg-primary/10 border-primary/40" :
+                    lote && d === Math.min(60, idadeReal) ? "ring-2 ring-primary/60 bg-primary/10 border-primary/40" :
                     isPesagem ? "bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30" :
                     isTroca ? "bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30" :
                     isCama ? "bg-emerald-500/15 border-emerald-500/40 hover:bg-emerald-500/25" :

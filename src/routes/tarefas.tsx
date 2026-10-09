@@ -19,6 +19,8 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/tarefas")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Tarefas — Aviário Pro" },
       { name: "description", content: "Lista de tarefas da fazenda com prioridade, categoria e vencimento." },
       { property: "og:title", content: "Tarefas — Aviário Pro" },

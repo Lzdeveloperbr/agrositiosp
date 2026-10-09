@@ -36,7 +36,7 @@ export function AIInsightsCard({ context }: { context: string }) {
             </div>
             <div>
               <h3 className="font-display font-semibold">Análise inteligente</h3>
-              <p className="text-xs text-muted-foreground">IA agrícola sobre seus dados</p>
+              <p className="text-xs text-muted-foreground">Desempenho avícola</p>
             </div>
           </div>
           <Button size="sm" onClick={rodar} disabled={loading}>
@@ -46,7 +46,7 @@ export function AIInsightsCard({ context }: { context: string }) {
         {texto ? (
           <div className="text-sm whitespace-pre-wrap leading-relaxed prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: renderMd(texto) }} />
         ) : (
-          <p className="text-sm text-muted-foreground">Clique em <strong>Analisar</strong> para receber diagnóstico, ações da semana e oportunidades de lucro com base na sua granja, gado e finanças.</p>
+          <p className="text-sm text-muted-foreground">Clique em <strong>Analisar</strong> para receber diagnóstico, ações da semana e oportunidades de lucro com base na sua granja e finanças.</p>
         )}
       </div>
     </Card>

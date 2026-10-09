@@ -15,7 +15,7 @@ import { savePdf } from "@/lib/pdfHistory";
 import { SITIO } from "@/lib/pdf";
 import { fmtData, isoLocal } from "@/lib/data";
 
-export const Route = createFileRoute("/ficha-lote")({ component: FichaLotePage });
+export const Route = createFileRoute("/ficha-lote")({ head: () => ({ meta: [{ title: "Ficha do Lote — Aviário Pro" }, { name: "description", content: "Ficha de alojamento e acompanhamento sanitário do lote de frangos." }, { property: "og:title", content: "Ficha do Lote — Aviário Pro" }, { property: "og:description", content: "Registros de alojamento, mortalidade e peso do lote." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FichaLotePage });
 
 const IDADES = [4, 7, 14, 21, 28, 35, 42, 49] as const;
 const DIAS_SEM = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"] as const;
@@ -153,7 +153,7 @@ function FichaLotePage() {
           <ClipboardList className="h-7 w-7 text-primary" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Ficha de Acompanhamento do Lote</h1>
-            <p className="text-sm text-muted-foreground">Bello Alimentos · Sítio Santo Antônio</p>
+            <p className="text-sm text-muted-foreground">Aviário Pro · Ficha de acompanhamento</p>
           </div>
         </div>
         <div className="flex gap-2">

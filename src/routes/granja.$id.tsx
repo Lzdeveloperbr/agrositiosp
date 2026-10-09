@@ -112,7 +112,7 @@ function LoteDetalhe() {
   };
 
   const ultimaIdade = Math.max(dias + 7, lote.previsaoAbateDias || 42);
-  const chartData = Array.from({ length: Math.min(57, ultimaIdade + 1) }, (_, idade) => {
+  const chartData = Array.from({ length: Math.min(61, ultimaIdade + 1) }, (_, idade) => {
     const data = addDias(lote.dataEntrada, idade);
     const registro = lote.entries.find((e) => e.date === data);
     return { dia: `D${idade}`, peso: registro?.pesoMedioG ?? null, esperado: Math.round(refPesoG(idade, "ross_ap95", "misto")), projetado: Math.round(resumo.projetarPesoG(idade)), mort: registro?.mortalidade ?? null };

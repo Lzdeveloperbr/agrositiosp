@@ -22,6 +22,8 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/diario")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Diário do Aviário — Aviário Pro" },
       { name: "description", content: "Registros diários da fazenda com fotos, clima e GPS para histórico completo." },
       { property: "og:title", content: "Diário do Aviário — Aviário Pro" },

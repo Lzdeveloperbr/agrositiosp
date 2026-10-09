@@ -149,6 +149,10 @@ const CFG_KEY = (fid: string) => `racao_lote_cfg_${fid}`;
 export const Route = createFileRoute("/entregas-racao")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Controle de Ração — Aviário Pro" },
+      { property: "og:description", content: "Registro simples de entregas de ração no aviário: kg, placa, motorista, data, foto da nota e do caminhão." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Controle de Ração — Aviário Pro" },
       { name: "description", content: "Registro simples de entregas de ração no aviário: kg, placa, motorista, data, foto da nota e do caminhão." },
     ],
