@@ -5,6 +5,8 @@ export type DailyEntry = {
   mortalidade: number;
   eliminados?: number;
   pesoMedioG?: number;
+  amostraPesagem?: { id: string; sexo: "macho" | "femea" | "misto"; pesoG: number }[];
+  operadorPesagem?: string;
   observacoes?: string;
 };
 
