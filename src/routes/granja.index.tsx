@@ -20,9 +20,9 @@ import { refPesoG } from "@/lib/silo";
 export const Route = createFileRoute("/granja/")({
   head: () => ({
     meta: [
-      { title: "Granja de Frango — AgroSítio" },
+      { title: "Granja de Frango — Aviário Pro" },
       { name: "description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
-      { property: "og:title", content: "Granja de Frango — AgroSítio" },
+      { property: "og:title", content: "Granja de Frango — Aviário Pro" },
       { property: "og:description", content: "Gestão de lotes de frango de corte: mortalidade, ração, água, peso e CA." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

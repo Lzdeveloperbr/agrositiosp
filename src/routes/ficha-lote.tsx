@@ -15,7 +15,7 @@ import { savePdf } from "@/lib/pdfHistory";
 import { SITIO } from "@/lib/pdf";
 import { fmtData, isoLocal } from "@/lib/data";
 
-export const Route = createFileRoute("/ficha-lote")({ component: FichaLotePage });
+export const Route = createFileRoute("/ficha-lote")({ head: () => ({ meta: [{ title: "Ficha do Lote — Aviário Pro" }, { name: "description", content: "Ficha de alojamento e acompanhamento sanitário do lote de frangos." }, { property: "og:title", content: "Ficha do Lote — Aviário Pro" }, { property: "og:description", content: "Registros de alojamento, mortalidade e peso do lote." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FichaLotePage });
 
 const IDADES = [4, 7, 14, 21, 28, 35, 42, 49] as const;
 const DIAS_SEM = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"] as const;
