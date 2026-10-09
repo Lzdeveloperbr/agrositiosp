@@ -17,6 +17,8 @@ import { useLembretes, type Lembrete, pedirPermissaoNotificacao, lembretesDoDia,
 export const Route = createFileRoute("/lembretes")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Lembretes Mensais — Aviário Pro" },
       { name: "description", content: "Contas e tarefas recorrentes (energia, internet, leituras) com notificação no dia." },
       { property: "og:title", content: "Lembretes Mensais — Aviário Pro" },

@@ -14,6 +14,8 @@ import { fmtData } from "@/lib/data";
 export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Relatórios em PDF — Aviário Pro" },
       { name: "description", content: "Relatórios profissionais em PDF: lotes de frango, livro caixa da granja e diário do aviário." },
       { property: "og:title", content: "Relatórios em PDF — Aviário Pro" },

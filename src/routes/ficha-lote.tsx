@@ -153,7 +153,7 @@ function FichaLotePage() {
           <ClipboardList className="h-7 w-7 text-primary" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Ficha de Acompanhamento do Lote</h1>
-            <p className="text-sm text-muted-foreground">Bello Alimentos · Sítio Santo Antônio</p>
+            <p className="text-sm text-muted-foreground">Aviário Pro · Ficha de acompanhamento</p>
           </div>
         </div>
         <div className="flex gap-2">

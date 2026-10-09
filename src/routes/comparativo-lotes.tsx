@@ -13,6 +13,8 @@ import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGri
 export const Route = createFileRoute("/comparativo-lotes")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Comparativo de Lotes — Aviário Pro" },
       { name: "description", content: "Compare mortalidade, peso, conversão e rentabilidade de todos os lotes da granja com ranking automático." },
       { property: "og:title", content: "Comparativo de Lotes — Aviário Pro" },

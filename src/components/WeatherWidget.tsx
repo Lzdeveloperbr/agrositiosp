@@ -52,7 +52,7 @@ export function WeatherWidget({ compact }: { compact?: boolean }) {
           <MapPin className="h-4 w-4 text-primary" />
           <h3 className="font-display font-semibold">Definir localização da fazenda</h3>
         </div>
-        <p className="text-xs text-muted-foreground mb-3">Necessária para previsão do tempo, alertas e janelas de plantio.</p>
+        <p className="text-xs text-muted-foreground mb-3">Necessária para previsão do tempo, alertas de calor na granja.</p>
         <div className="flex gap-2 mb-2">
           <Input placeholder="Cidade, ex: Patos de Minas" value={busca} onChange={(e) => setBusca(e.target.value)} onKeyDown={(e) => e.key === "Enter" && buscar()} />
           <Button onClick={buscar} variant="secondary">Buscar</Button>

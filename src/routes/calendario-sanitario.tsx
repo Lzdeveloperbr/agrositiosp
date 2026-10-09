@@ -17,6 +17,8 @@ import { fmtData, hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/calendario-sanitario")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Calendário Sanitário — Aviário Pro" },
       { name: "description", content: "Calendário automático de vacinas e medicamentos do lote ativo da granja, com check-off de aplicação, dose e observações." },
       { property: "og:title", content: "Calendário Sanitário — Aviário Pro" },

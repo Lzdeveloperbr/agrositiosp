@@ -18,15 +18,15 @@ export function EntrarFazenda() {
 
   const submit = async () => {
     if (!operador.trim()) { toast.error("Diga seu nome"); return; }
-    if (!codigo.trim()) { toast.error("Informe o código da fazenda"); return; }
+    if (!codigo.trim()) { toast.error("Informe o código da granja"); return; }
     setLoading(true);
     setOperador(operador.trim());
     const r = modo === "entrar"
       ? await entrar(codigo)
-      : await criar(nome || "Minha Fazenda", codigo);
+      : await criar(nome || "Minha Granja", codigo);
     setLoading(false);
     if (!r.ok) { toast.error(r.erro || "Erro"); return; }
-    toast.success(modo === "entrar" ? `Bem-vindo a ${(r as any).nome ?? "fazenda"}` : "Fazenda criada");
+    toast.success(modo === "entrar" ? `Bem-vindo a ${(r as any).nome ?? "granja"}` : "Granja criada");
   };
 
   return (
@@ -34,6 +34,7 @@ export function EntrarFazenda() {
       <Card className="w-full max-w-md p-6 sm:p-8 space-y-6 border-border">
         <div className="flex flex-col items-center text-center gap-2">
           <img src={logoUrl} alt="Aviário Pro" width={160} height={160} className="h-36 w-36 object-contain" />
+          <h1 className="font-display text-4xl">AVIÁRIO <span className="text-primary">PRO</span></h1>
           <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground font-semibold">
             Gestão profissional de frango de corte
           </p>
@@ -52,7 +53,7 @@ export function EntrarFazenda() {
             onClick={() => setModo("criar")}
             className="h-10 rounded-md"
           >
-            Criar fazenda
+            Criar granja
           </Button>
         </div>
 
@@ -64,14 +65,14 @@ export function EntrarFazenda() {
 
           {modo === "criar" && (
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">Nome da fazenda</Label>
-              <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Sítio Boa Vista" className="h-12" />
+              <Label className="text-xs font-medium text-muted-foreground">Nome da granja</Label>
+              <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Granja Boa Vista" className="h-12" />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">Código da fazenda</Label>
-            <Input value={codigo} onChange={(e) => setCodigo(e.target.value.toUpperCase())} placeholder="EX: SITIO2026" className="uppercase tracking-[0.16em] font-mono h-12 text-center text-base" />
+            <Label className="text-xs font-medium text-muted-foreground">Código da granja</Label>
+            <Input value={codigo} onChange={(e) => setCodigo(e.target.value.toUpperCase())} placeholder="EX: GRANJA2026" className="uppercase tracking-[0.16em] font-mono h-12 text-center text-base" />
             <p className="text-[11px] text-muted-foreground/80 pt-0.5">
               {modo === "entrar"
                 ? "Use o mesmo código combinado com sua família."
@@ -81,7 +82,7 @@ export function EntrarFazenda() {
         </div>
 
         <Button className="w-full h-12 text-base font-bold" size="lg" onClick={submit} disabled={loading}>
-          {loading ? "..." : modo === "entrar" ? "Entrar na fazenda →" : "Criar fazenda →"}
+          {loading ? "..." : modo === "entrar" ? "Entrar na granja →" : "Criar granja →"}
         </Button>
 
         <p className="text-center text-[10px] uppercase tracking-[0.28em] text-muted-foreground/60">

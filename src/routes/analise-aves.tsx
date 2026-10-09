@@ -20,6 +20,10 @@ import { hojeISO } from "@/lib/data";
 export const Route = createFileRoute("/analise-aves")({
   head: () => ({
     meta: [
+      { property: "og:title", content: "Análise IA das Aves — Aviário Pro" },
+      { property: "og:description", content: "Envie fotos do lote e receba laudo veterinário e extensionista detalhado gerado por IA, com plano de ação e PDF." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Análise IA das Aves — Aviário Pro" },
       { name: "description", content: "Envie fotos do lote e receba laudo veterinário e extensionista detalhado gerado por IA, com plano de ação e PDF." },
     ],
