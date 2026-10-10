@@ -8,5 +8,6 @@
 - [x] Revisar projeção de peso pelas pesagens e isolamento das pesagens do silo por lote; separar CA estimada de leitura real.
 - [x] Recalibrar a previsão de peso dos próximos dias a cada pesagem real, mantendo a referência genética separada e consistente entre granja, manejo e silo.
 
-- [ ] Reconstruir o app exclusivamente para granja: nova marca, interface, navegação e remoção dos módulos alheios à avicultura.
-- [ ] Auditar e corrigir erros funcionais e visuais dos fluxos preservados de granja.
+- [x] Reconstruir o app exclusivamente para granja: nova marca, interface, navegação e remoção dos módulos alheios à avicultura.
+- [ ] Validar lançamento de pesagem, leitura no lote, manejo e silo com dados reais. Bloqueado: acesso à granja indisponível na sessão de teste. Auditoria, correções, compilação e entrada pública verificadas.
+- [ ] Confirmar a logo final. Bloqueado: escolha do usuário ainda pendente; conceito galo/desempenho aplicado provisoriamente.

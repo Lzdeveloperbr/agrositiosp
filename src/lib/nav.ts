@@ -24,7 +24,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/", label: "Central", icon: LayoutDashboard, desc: "Lote ativo, alertas e rotina de hoje", tags: ["painel", "inicio"] },
       { to: "/granja", label: "Lotes", icon: Bird, desc: "Lotes, lançamento diário, mortalidade e peso", tags: ["frango", "lote", "aves"] },
       { to: "/checklist-granja", label: "Checklist diário", icon: ClipboardCheck, desc: "Rotina do galpão item a item", tags: ["rotina"] },
-      { to: "/manejo", label: "Manejo D0–D42", icon: BookOpen, desc: "Água, cama, luz, temperatura e protocolo diário", tags: ["luz", "cama", "agua", "protocolo"] },
+      { to: "/manejo", label: "Manejo do lote", icon: BookOpen, desc: "Água, cama, luz, temperatura e protocolo diário", tags: ["luz", "cama", "agua", "protocolo"] },
       { to: "/ambiencia", label: "Ambiência", icon: Wind, desc: "Temperatura, umidade, pressão e ventilação", tags: ["clima", "ventilacao"] },
       { to: "/pesagem-pro", label: "Pesagem", icon: Scale, desc: "Amostras, uniformidade, CV% e GPD", tags: ["peso", "balanca"] },
     ],
