@@ -6,12 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useFazenda } from "@/lib/cloud/fazenda";
-import { useLotes, useEstoque, useAnimais, useFinanceiro } from "@/lib/state";
+import { useLotes, useEstoque, useFinanceiro } from "@/lib/state";
 import { Zap, Bell, CheckCircle2, Bird, PackageX, Wallet, Syringe, Thermometer, Scale, Gauge, ExternalLink, Copy, Cpu, RefreshCw, Droplets } from "lucide-react";
 import { hojeISO, isoLocal, diffDias } from "@/lib/data";
 import { metaPeso, sensacaoTermica, statusTermico, LINHAGEM_LABEL } from "@/lib/linhagens";
 import { fetchWeather } from "@/lib/weather";
 import { lerGalpaoCfg, montarContexto, aviSmartUrl, resumoTexto, AVI_SMART_URL, type AviContexto } from "@/lib/aviSmart";
+import { gerarCalendario } from "@/lib/calendarioSanitario";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/automacoes")({
@@ -35,7 +36,6 @@ type Regra = { id: string; titulo: string; descricao: string; icon: any; grupo: 
 function AutomacoesPage() {
   const [lotes] = useLotes();
   const [estoque] = useEstoque();
-  const [animais] = useAnimais();
   const [fin] = useFinanceiro();
   const { fazendaId, coords } = useFazenda();
   const storageKey = `agro:automacoes:${fazendaId ?? "_"}`;
@@ -150,7 +150,7 @@ function AutomacoesPage() {
       ativa: isOn("estoque-racao"),
       gatilho: () => {
         if (!loteAtivo) return [];
-        const silo = estoque.filter((i) => /ra[çc][ãa]o/i.test(i.categoria) || /ra[çc][ãa]o/i.test(i.nome))
+        const silo = estoque.filter((i) => i.loteId === loteAtivo.id).filter((i) => /ra[çc][ãa]o/i.test(i.categoria) || /ra[çc][ãa]o/i.test(i.nome))
           .reduce((s, i) => s + (i.unidade?.toLowerCase() === "t" ? i.quantidade * 1000 : i.quantidade), 0);
         if (silo <= 0) return [];
         const idade = Math.max(1, diffDias(loteAtivo.dataEntrada));
@@ -175,9 +175,10 @@ function AutomacoesPage() {
       descricao: "Lista aplicações atrasadas e as previstas para os próximos 30 dias.",
       ativa: isOn("vacina-proxima"),
       gatilho: () => {
-        const evts = animais.flatMap((a) => a.sanidade.map((s) => ({ ...s, brinco: a.brinco })));
-        const atras = evts.filter((e) => e.proximaData && e.proximaData < hoje);
-        const prox = evts.filter((e) => e.proximaData && e.proximaData >= hoje && e.proximaData <= em30);
+        if (!loteAtivo) return [];
+        const evts = gerarCalendario({ dataEntrada: loteAtivo.dataEntrada, aplicacoes: loteAtivo.aplicacoes ?? [] });
+        const atras = evts.filter(e => e.status === "atraso");
+        const prox = evts.filter(e => (e.status === "hoje" || e.status === "futuro") && e.dataPrevista <= em30);
         const out: Disparo[] = [];
         if (atras.length) out.push({ severidade: "critico", mensagem: `${atras.length} aplicação(ões) atrasada(s).`, acao: { to: "/calendario-sanitario", label: "Sanitário" } });
         if (prox.length) out.push({ severidade: "info", mensagem: `${prox.length} aplicação(ões) nos próximos 30 dias.`, acao: { to: "/calendario-sanitario", label: "Sanitário" } });
@@ -190,7 +191,7 @@ function AutomacoesPage() {
       ativa: isOn("contas-vencendo"),
       gatilho: () => {
         const pend = fin.filter((l) => l.status !== "pago" && l.vencimento && l.vencimento <= em7);
-        const atr = pend.filter((l) => l.vencimento! < hoje);
+        const atr = pend.filter((l) => l.vencimento && l.vencimento < hoje);
         const out: Disparo[] = [];
         if (atr.length) out.push({ severidade: "critico", mensagem: `${atr.length} conta(s) atrasada(s).`, acao: { to: "/financeiro", label: "Financeiro" } });
         if (pend.length - atr.length > 0) out.push({ severidade: "alerta", mensagem: `${pend.length - atr.length} conta(s) vencendo em 7 dias.`, acao: { to: "/financeiro", label: "Financeiro" } });
@@ -209,7 +210,7 @@ function AutomacoesPage() {
         return [];
       },
     },
-  ], [lotes, estoque, animais, fin, enabled, clima, cfg, loteAtivo, tick]);
+  ], [lotes, estoque, fin, enabled, clima, cfg, loteAtivo, tick]);
 
   const ativos = regras.filter((r) => r.ativa).flatMap((r) => r.gatilho().map((g) => ({ ...g, regra: r })));
   const criticos = ativos.filter((a) => a.severidade === "critico");

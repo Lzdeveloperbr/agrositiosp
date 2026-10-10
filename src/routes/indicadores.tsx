@@ -49,9 +49,11 @@ function IndicadoresPage() {
       const alojadas = l.quantidadeInicial || 0;
       const vivas = Math.max(alojadas - mortos, 0);
       const viab = alojadas ? (vivas / alojadas) * 100 : 0;
-      const ultimoPeso = [...entries].reverse().find((e) => (e.pesoMedioG ?? 0) > 0)?.pesoMedioG ?? 0;
+      const pesagem = [...entries].reverse().find((e) => (e.pesoMedioG ?? 0) > 0);
+      const ultimoPeso = pesagem?.pesoMedioG ?? 0;
+      const idadePesagem = pesagem ? diffDias(l.dataEntrada, pesagem.date) : 0;
       const pesoKg = ultimoPeso / 1000;
-      const gpd = dias > 0 ? (ultimoPeso - 45) / dias : 0;
+      const gpd = idadePesagem > 0 ? (ultimoPeso - 45) / idadePesagem : 0;
       const iep = 0; // CA real indisponível: não inventar IEP.
       return {
         id: l.id, numero: l.numero, dias, alojadas, vivas,
@@ -132,7 +134,7 @@ function IndicadoresPage() {
                     <YAxis fontSize={11} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="Viabilidade" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="Viabilidade" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -189,9 +191,9 @@ function IndicadoresPage() {
                     <YAxis fontSize={11} />
                     <Tooltip formatter={(v: any) => fmtBRL(Number(v))} />
                     <Legend />
-                    <Line type="monotone" dataKey="receita" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="despesa" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="lucro" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="receita" stroke="var(--primary)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="despesa" stroke="var(--destructive)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="lucro" stroke="var(--accent)" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -205,7 +207,7 @@ function IndicadoresPage() {
                     <XAxis type="number" fontSize={11} />
                     <YAxis type="category" dataKey="categoria" width={110} fontSize={11} />
                     <Tooltip formatter={(v: any) => fmtBRL(Number(v))} />
-                    <Bar dataKey="valor" fill="hsl(var(--destructive))" radius={[0, 6, 6, 0]} />
+                    <Bar dataKey="valor" fill="var(--destructive)" radius={[0, 6, 6, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
