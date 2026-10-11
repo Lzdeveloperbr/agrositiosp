@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Melhorar contexto e respostas do assistente avícola e corrigir regras das automações.
+- [ ] Adicionar conversa por voz com abertura, legendas e encerramento seguro.
+- [ ] Verificar conversa, cálculos das automações e acesso à granja; registrar limitações reais.
+
 - [x] Criar API segura para o bot Baileys consultar lotes e resumo operacional.
 - [x] Permitir lançamento diário e correção do mesmo dia com validações.
 - [ ] Configurar a chave privada compartilhada da integração. Bloqueado: o usuário fechou o campo seguro sem salvar.
