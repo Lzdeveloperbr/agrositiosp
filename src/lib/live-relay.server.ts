@@ -14,7 +14,11 @@ export type LiveConfig = {
 };
 
 // Fill from co-loaded knowledge: the gateway URL, the Live model and the resolved chat model.
-const liveSettings = { baseURL: "https://ai.gateway.lovable.dev/v1", liveModel: "openai/gpt-live-1", backendModel: "openai/gpt-6-astra" };
+const liveSettings = {
+  baseURL: "https://ai.gateway.lovable.dev/v1",
+  liveModel: "openai/gpt-live-1",
+  backendModel: "openai/gpt-6-astra",
+};
 
 export type LiveSocket = {
   readonly readyState: number;
@@ -26,7 +30,11 @@ export type LiveSocket = {
 };
 
 export type LiveExecutionContext = { waitUntil(task: Promise<unknown>): void };
-export type LiveConnector = (url: string, headers: Record<string, string>, signal: AbortSignal) => Promise<LiveSocket>;
+export type LiveConnector = (
+  url: string,
+  headers: Record<string, string>,
+  signal: AbortSignal,
+) => Promise<LiveSocket>;
 
 type WorkerSocket = WebSocket & { accept(): void };
 declare const WebSocketPair: { new (): { 0: WorkerSocket; 1: WorkerSocket } };
@@ -70,7 +78,10 @@ async function gatewayRejection(response: Response) {
   return new Error(message || `Voice gateway rejected the connection (${response.status})`);
 }
 
-export function validateLiveUpgrade(request: Request, options: { allowMissingOrigin?: boolean } = {}): Response | null {
+export function validateLiveUpgrade(
+  request: Request,
+  options: { allowMissingOrigin?: boolean } = {},
+): Response | null {
   const origin = request.headers.get("origin");
   if (origin === null ? !options.allowMissingOrigin : origin !== new URL(request.url).origin) {
     return new Response("Voice connection origin rejected", { status: 403 });
@@ -122,7 +133,9 @@ Delegate to the backend when: Perguntas sobre lotes, peso, ração, água, morta
 Do not delegate to the backend when: Cumprimentos, esclarecimentos simples ou repetição de resposta ainda válida. Aguarde dados verificados antes de responder. Se faltar informação, diga qual. Recomende o veterinário para decisões sanitárias.`;
 
 const studyScheduleInput = z.object({ numero_lote: z.string().nullable() }).strict();
-function planStudySchedule(args: unknown) { return args; }
+function planStudySchedule(args: unknown) {
+  return args;
+}
 
 function isListeningSound(text: string) {
   const normalized = text.toLowerCase().replace(/[\s\p{Pd}]/gu, "");
@@ -182,11 +195,13 @@ async function answerQuestion(
           : {}),
       },
     },
-    instructions: "Você assessora uma conversa de avicultura em português brasileiro. Consulte consultar_lote para qualquer dado da granja. Use a última correção e os resultados reais. Diferencie medido, estimado e referência; CA estimada não é CA real. Não invente sanidade, metas oficiais, clima interno ou consumo. Informe exatamente os dados faltantes. Responda em até 150 palavras, com ações prioritárias e motivo. Não grava dados nem controla equipamentos.",
+    instructions:
+      "Você assessora uma conversa de avicultura em português brasileiro. Consulte consultar_lote para qualquer dado da granja. Use a última correção e os resultados reais. Diferencie medido, estimado e referência; CA estimada não é CA real. Não invente sanidade, metas oficiais, clima interno ou consumo. Informe exatamente os dados faltantes. Responda em até 150 palavras, com ações prioritárias e motivo. Não grava dados nem controla equipamentos.",
     messages,
     tools: {
       consultar_lote: tool({
-        description: "Consulta dados atuais, histórico, projeções e silo de um lote da granja autorizada. Número nulo seleciona o lote ativo.",
+        description:
+          "Consulta dados atuais, histórico, projeções e silo de um lote da granja autorizada. Número nulo seleciona o lote ativo.",
         inputSchema: studyScheduleInput,
         execute: async ({ numero_lote }) => {
           signal.throwIfAborted();
@@ -203,9 +218,15 @@ async function answerQuestion(
   // Drain through HTTP EOF so successful work is not recorded as cancelled by the Gateway.
   for await (const part of result.fullStream) {
     if (part.type === "start-step") stepCompleted = false;
-    if (part.type === "raw" && part.rawValue && typeof part.rawValue === "object" && "type" in part.rawValue) {
+    if (
+      part.type === "raw" &&
+      part.rawValue &&
+      typeof part.rawValue === "object" &&
+      "type" in part.rawValue
+    ) {
       if (part.rawValue.type === "response.completed") stepCompleted = true;
-      if (part.rawValue.type === "response.failed" || part.rawValue.type === "response.incomplete") failed = true;
+      if (part.rawValue.type === "response.failed" || part.rawValue.type === "response.incomplete")
+        failed = true;
     }
     if (part.type === "finish-step" && !stepCompleted) failed = true;
     if (part.type === "error") throw part.error;
@@ -250,7 +271,11 @@ export function bindLiveConnection(
   execution: LiveExecutionContext,
   connect: LiveConnector,
 ): void {
-  const config = { ...configuration, openingInstructions: "Cumprimente em português brasileiro: Olá, sou seu assistente do Aviário Pro. Quer conferir o peso, a ração ou os cuidados do lote hoje? Depois escute." };
+  const config = {
+    ...configuration,
+    openingInstructions:
+      "Cumprimente em português brasileiro: Olá, sou seu assistente do Aviário Pro. Quer conferir o peso, a ração ou os cuidados do lote hoje? Depois escute.",
+  };
   const runID = crypto.randomUUID();
   const setupAbort = new AbortController();
   let gateway: LiveSocket | undefined;
@@ -313,13 +338,19 @@ export function bindLiveConnection(
     if (!content || !browserReady || !sessionID || greetingRequested || closing) return;
     greetingRequested = true;
     if (new TextEncoder().encode(content).length > 480) {
-      emit({ type: "app.greeting.error", error: { message: "The opening instructions are too long" } });
+      emit({
+        type: "app.greeting.error",
+        error: { message: "The opening instructions are too long" },
+      });
       return;
     }
     greetingCommand = { id: crypto.randomUUID(), type: "instructions" };
     greetingTimer = setTimeout(() => {
       clearGreeting();
-      emit({ type: "app.greeting.error", error: { message: "The opening could not be confirmed" } });
+      emit({
+        type: "app.greeting.error",
+        error: { message: "The opening could not be confirmed" },
+      });
     }, 10_000);
     gateway?.send(
       JSON.stringify({
@@ -383,7 +414,11 @@ export function bindLiveConnection(
     restartTimer = setTimeout(() => void runDelegation(), 300);
   }
 
-  function deliverResult(delegationID: string, answer: string, plan?: ReturnType<typeof planStudySchedule>) {
+  function deliverResult(
+    delegationID: string,
+    answer: string,
+    plan?: ReturnType<typeof planStudySchedule>,
+  ) {
     if (closing) return;
     if (gateway?.readyState !== 1) return stop();
     try {
@@ -421,7 +456,8 @@ export function bindLiveConnection(
         controller.signal,
         () => {
           const updates = transcripts.slice(transcriptCursor);
-          if (updates.some(({ role, listeningSound }) => role === "user" && !listeningSound)) delete pending.plan;
+          if (updates.some(({ role, listeningSound }) => role === "user" && !listeningSound))
+            delete pending.plan;
           backendMessages.push(...updates.map(({ role, text }) => ({ role, content: text })));
           transcriptCursor = transcripts.length;
           taskRevision = revision;
@@ -435,7 +471,12 @@ export function bindLiveConnection(
       deliverResult(id, answer.trim(), pending.plan);
     } catch (error) {
       if (closing || controller.signal.aborted) return;
-      emit({ type: "app.error", error: { message: error instanceof Error ? error.message : "Não foi possível consultar a granja." } });
+      emit({
+        type: "app.error",
+        error: {
+          message: error instanceof Error ? error.message : "Não foi possível consultar a granja.",
+        },
+      });
       stop();
       return;
     } finally {
@@ -452,11 +493,16 @@ export function bindLiveConnection(
 
   function receiveGateway(data: unknown) {
     try {
-      if (typeof data !== "string" || data.length > 1024 * 1024) throw new Error("Invalid voice event");
+      if (typeof data !== "string" || data.length > 1024 * 1024)
+        throw new Error("Invalid voice event");
       const event: ProviderEvent = JSON.parse(data);
       if (browser.readyState === 1) browser.send(data);
       if (event.type === "session.closed") return finish();
-      if (event.type === "gateway.session.closing" || event.type === "gateway.error" || event.type === "app.error") {
+      if (
+        event.type === "gateway.session.closing" ||
+        event.type === "gateway.error" ||
+        event.type === "app.error"
+      ) {
         return stop();
       }
       if (closing) return;
@@ -484,11 +530,21 @@ export function bindLiveConnection(
           clearGreeting();
           emit({ type: "app.greeting.accepted" });
         }
-      } else if (greetingCommand && event.type === "error" && event.error?.client_event_id === greetingCommand.id) {
+      } else if (
+        greetingCommand &&
+        event.type === "error" &&
+        event.error?.client_event_id === greetingCommand.id
+      ) {
         clearGreeting();
-        emit({ type: "app.greeting.error", error: { message: event.error.message ?? "The opening was rejected" } });
+        emit({
+          type: "app.greeting.error",
+          error: { message: event.error.message ?? "The opening was rejected" },
+        });
       }
-      if (event.type === "session.input_transcript.delta" || event.type === "session.output_transcript.delta") {
+      if (
+        event.type === "session.input_transcript.delta" ||
+        event.type === "session.output_transcript.delta"
+      ) {
         const role = event.type === "session.input_transcript.delta" ? "user" : "assistant";
         if (!event.delta?.trim()) return;
         const listeningSound = role === "user" && Boolean(task) && isListeningSound(event.delta);
@@ -519,7 +575,10 @@ export function bindLiveConnection(
             completedDelegation = undefined;
           }
           if (pendingDelegations.length) {
-            emit({ type: "app.delegation.pending", delegation_id: pendingDelegations[0]?.event.delegation?.id });
+            emit({
+              type: "app.delegation.pending",
+              delegation_id: pendingDelegations[0]?.event.delegation?.id,
+            });
           }
         }
         scheduleDelegation();
@@ -543,7 +602,8 @@ export function bindLiveConnection(
       emit({ type: "app.error", error: { message: "Voice startup timed out" } });
       stop();
     }, 40_000);
-    if (typeof code !== "string" || !code.trim() || code.length > 80) throw new Error("Entre na granja antes de iniciar a conversa.");
+    if (typeof code !== "string" || !code.trim() || code.length > 80)
+      throw new Error("Entre na granja antes de iniciar a conversa.");
     await getPoultryContext(code, null, setupAbort.signal);
     config.farmCode = code;
     const accepted = await connect(
@@ -582,12 +642,18 @@ export function bindLiveConnection(
 
   browser.onMessage((data) => {
     try {
-      if (typeof data !== "string" || data.length > 64 * 1024) throw new Error("Invalid client message");
+      if (typeof data !== "string" || data.length > 64 * 1024)
+        throw new Error("Invalid client message");
       const event = JSON.parse(data);
       if (event.type === "session.close") return stop();
       if (closing) return;
       if (!gateway) {
-        if (starting || event.type !== "app.start" || typeof event.sdp !== "string" || !event.sdp.trim()) {
+        if (
+          starting ||
+          event.type !== "app.start" ||
+          typeof event.sdp !== "string" ||
+          !event.sdp.trim()
+        ) {
           throw new Error("Voice startup message required");
         }
         starting = true;
@@ -614,7 +680,10 @@ export function bindLiveConnection(
       if (gateway.readyState !== 1) return stop();
       gateway.send(data);
     } catch {
-      emit({ type: "app.error", error: { message: "Voice connection could not be started or continued" } });
+      emit({
+        type: "app.error",
+        error: { message: "Voice connection could not be started or continued" },
+      });
       stop();
     }
   });
