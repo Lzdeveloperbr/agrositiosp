@@ -5,5 +5,9 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { liveVoiceDev } from "./live-vite-plugin";
 
-export default defineConfig();
+export default defineConfig({
+  tanstackStart: { server: { entry: "server" } },
+  vite: { plugins: [liveVoiceDev()] },
+});
