@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { stepCountIs, streamText, tool, type ModelMessage } from "ai";
+import { isStepCount, streamText, tool, type ModelMessage } from "ai";
 import process from "node:process";
 import { z } from "zod";
 import { getPoultryContext } from "./poultry-context.server";
@@ -152,7 +152,7 @@ async function answerQuestion(
     model: provider.responses(config.backendModel),
     abortSignal: signal,
     maxRetries: 0,
-    stopWhen: stepCountIs(50),
+    stopWhen: isStepCount(50),
     includeRawChunks: true,
     prepareStep() {
       consumeInput();
@@ -438,13 +438,6 @@ export function bindLiveConnection(
       emit({ type: "app.error", error: { message: error instanceof Error ? error.message : "Não foi possível consultar a granja." } });
       stop();
       return;
-      backendMessages.push({
-        role: "assistant",
-        content:
-          "The backend attempt failed. Completed tool results remain valid; verify uncertain external actions before any retry.",
-      });
-      if (taskRevision !== revision) return;
-      deliverResult(id, "The backend could not finish the answer. Ask whether the user wants to try again.");
     } finally {
       if (task === controller) task = undefined;
       scheduleDelegation();
