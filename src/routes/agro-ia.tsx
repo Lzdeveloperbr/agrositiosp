@@ -1,217 +1,118 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AppShell } from "@/components/AppShell";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Send, Loader2, Trash2, RefreshCw, Bot, User } from "lucide-react";
-import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mic, MicOff, PhoneOff, Trash2, Zap, Volume2, Send } from "lucide-react";
 import { chatAgroIA, type ChatMsg } from "@/lib/agroChat.functions";
-import { useLotes, useEstoque, useFinanceiro, useTarefas } from "@/lib/state";
-import { hojeISO, diffDias } from "@/lib/data";
+import { useFazenda } from "@/lib/cloud/fazenda";
+import { useLotes } from "@/lib/state";
+import { useLiveVoice, type LiveEvent } from "@/hooks/use-live-voice";
+import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse, MessageAction, MessageActions } from "@/components/ai-elements/message";
+import { PromptInput, PromptInputTextarea, PromptInputFooter, PromptInputSubmit } from "@/components/ai-elements/prompt-input";
+import { Shimmer } from "@/components/ai-elements/shimmer";
+import logo from "@/assets/logo-aviario-pro.png";
 
 export const Route = createFileRoute("/agro-ia")({
-  head: () => ({
-    meta: [
-      { property: "og:title", content: "Assistente avícola — Assistente Especialista | Aviário Pro" },
-      { property: "og:description", content: "Chat IA especialista em frango de corte com contexto real da sua fazenda." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { title: "Assistente avícola — Assistente Especialista | Aviário Pro" },
-      { name: "description", content: "Chat IA especialista em frango de corte com contexto real da sua fazenda." },
-    ],
-  }),
-  component: AgroIAPage,
+  head: () => ({ meta: [
+    { title: "Assistente por voz e texto — Aviário Pro" },
+    { name: "description", content: "Converse com o assistente avícola sobre peso, ração, mortalidade e manejo da sua granja." },
+    { property: "og:title", content: "Assistente por voz e texto — Aviário Pro" },
+    { property: "og:description", content: "Orientação avícola com dados reais dos lotes e conversa por voz." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }), component: AgroIAPage,
 });
-
-const SUGESTOES = [
-  "Como está meu lote ativo? Algum alerta?",
-  "Qual o consumo de ração esperado pros próximos 7 dias?",
-  "Calcula a CA atual e compara com a meta da linhagem",
-  "Quais cuidados sanitários preciso conferir no lote?",
-  "Sugere um plano de manejo pra esta semana",
-  "Meu lote está pronto para o abate?",
-];
-
+const suggestions = ["Como está o lote? Priorize os riscos de hoje.", "Compare as últimas pesagens e o ganho diário.", "Quanto tempo a ração deve durar?", "Monte as três prioridades de manejo desta semana."];
+type Caption = { role: "user" | "assistant"; text: string; start: number; end: number };
+const labels = { idle: "Pronto para conversar", connecting: "Conectando…", connected: "Conversa em andamento", stopping: "Encerrando…", closed: "Conversa encerrada" };
 function AgroIAPage() {
   const fn = useServerFn(chatAgroIA);
+  const { codigo, fazendaId, fazendaNome } = useFazenda();
   const [lotes] = useLotes();
-  const [estoque] = useEstoque();
-  const [fin] = useFinanceiro();
-  const [tarefas] = useTarefas();
-
+  const [selected, setSelected] = useState("ativo");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [captions, setCaptions] = useState<Caption[]>([]);
+  const [seconds, setSeconds] = useState<number | null>(null);
+  const [pending, setPending] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
+  const requestRef = useRef(false);
+  const storageKey = `aviario:ia:${fazendaId ?? "sem-acesso"}`;
   useEffect(() => {
-    try { localStorage.setItem("agro:ia:chat", JSON.stringify(messages.slice(-30))); } catch {}
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => { inputRef.current?.focus(); }, []);
-
-  const context = useMemo(() => {
-    const ativo = lotes.find((l) => !l.encerrado) ?? lotes[0];
-    const mortAcum = ativo ? ativo.entries.reduce((s, e) => s + (e.mortalidade ?? 0) + (e.eliminados ?? 0), 0) : 0;
-    const vivas = ativo ? Math.max(0, ativo.quantidadeInicial - mortAcum) : 0;
-    const dias = ativo ? Math.max(0, diffDias(ativo.dataEntrada)) : 0;
-    const pesoUlt = ativo?.entries.slice().sort((a,b) => a.date.localeCompare(b.date)).reverse().find((e) => e.pesoMedioG)?.pesoMedioG ?? null;
-    const lancMes = fin.filter((l) => l.data?.startsWith(new Date().toISOString().slice(0, 7)));
-    return JSON.stringify({
-      data: hojeISO(),
-      granja_lote_ativo: ativo ? {
-        numero: ativo.numero,
-        integradora: ativo.integradora ?? null,
-        alojadas: ativo.quantidadeInicial,
-        vivas, mortalidade_acum: mortAcum,
-        mortalidade_pct: ativo.quantidadeInicial ? +(mortAcum / ativo.quantidadeInicial * 100).toFixed(2) : 0,
-        dias_de_vida: dias,
-        peso_ultimo_g: pesoUlt,
-        previsao_abate_dias: ativo.previsaoAbateDias,
-        data_alojamento: ativo.dataEntrada,
-      } : null,
-      estoque_baixo: estoque.filter((i) => i.minimo != null && i.quantidade <= (i.minimo ?? 0)).map((i) => ({ nome: i.nome, qtd: i.quantidade, un: i.unidade })),
-      financeiro_mes: {
-        receitas: lancMes.filter((l) => l.tipo === "receita").reduce((s, l) => s + l.valor, 0),
-        despesas: lancMes.filter((l) => l.tipo === "despesa").reduce((s, l) => s + l.valor, 0),
-      },
-      tarefas_pendentes: tarefas.filter((t) => !t.concluida).length,
-    });
-  }, [lotes, estoque, fin, tarefas]);
-
-  async function enviar(texto?: string) {
-    const t = (texto ?? input).trim();
-    if (!t || loading) return;
-    const next: ChatMsg[] = [...messages, { role: "user", content: t }];
-    setMessages(next);
-    setInput("");
-    setLoading(true);
+    setReady(false); setMessages([]); setError(null);
     try {
-      const r = await fn({ data: { messages: next.slice(-12), context } });
-      setMessages((m) => [...m, { role: "assistant", content: r.texto || "(sem resposta)" }]);
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha ao consultar IA");
-      setMessages((m) => [...m, { role: "assistant", content: `⚠️ ${e.message ?? "Erro"}` }]);
-    } finally {
-      setLoading(false);
-      inputRef.current?.focus();
-    }
+      const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+      if (Array.isArray(stored)) setMessages(stored.filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string"));
+    } catch { /* empty history */ }
+    setReady(true);
+  }, [storageKey]);
+  useEffect(() => { if (ready) { try { localStorage.setItem(storageKey, JSON.stringify(messages)); } catch { /* unavailable */ } } }, [messages, ready, storageKey]);
+  useEffect(() => { inputRef.current?.focus(); }, [loading]);
+  function onEvent(event: LiveEvent) {
+    if (event.type === "app.delegation.pending") setPending(true);
+    if (event.type === "app.poultry.facts" || event.type === "app.closed" || event.type === "app.error") setPending(false);
+    if (event.type === "gateway.session.created") setSeconds(15);
+    if ((event.type === "session.usage.updated" || event.type === "session.closed") && typeof event.usage?.seconds === "number") setSeconds(Math.max(15, event.usage.seconds));
+    if (event.type !== "session.input_transcript.delta" && event.type !== "session.output_transcript.delta") return;
+    if (typeof event.delta !== "string") return;
+    const delta = event.delta;
+    const role = event.type === "session.input_transcript.delta" ? "user" : "assistant";
+    const start = typeof event.start_ms === "number" ? event.start_ms : 0;
+    const end = typeof event.end_ms === "number" ? event.end_ms : start;
+    setCaptions(prev => {
+      const rows = prev.map(r => ({ ...r }));
+      let index = rows.findIndex(r => r.role === role && start >= r.start && start <= r.end + 1800);
+      if (index < 0 && rows.at(-1)?.role === role) index = rows.length - 1;
+      if (index >= 0) { rows[index].text += delta; rows[index].end = Math.max(end, rows[index].end); }
+      else rows.push({ role, text: delta, start, end });
+      return rows;
+    });
   }
-
-  function limpar() {
-    if (!confirm("Limpar toda a conversa?")) return;
-    setMessages([]);
-    try { localStorage.removeItem("agro:ia:chat"); } catch {}
+  const voice = useLiveVoice({ codigo: codigo ?? undefined, onEvent });
+  const canStart = voice.status === "idle" || voice.status === "closed";
+  async function send(text: string) {
+    const t = text.trim();
+    if (!t || requestRef.current || !codigo) return;
+    requestRef.current = true;
+    const next: ChatMsg[] = [...messages, { role: "user", content: t }];
+    setMessages(next); setInput(""); setLoading(true); setError(null);
+    try {
+      const result = await fn({ data: { messages: next, codigo, ...(selected !== "ativo" ? { numeroLote: selected } : {}) } });
+      setMessages(prev => [...prev, { role: "assistant", content: result.texto }]);
+    } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível consultar o assistente."); setInput(t); }
+    finally { requestRef.current = false; setLoading(false); inputRef.current?.focus(); }
   }
-
-  return (
-    <AppShell>
-      <div className="space-y-4 max-w-4xl mx-auto">
-        <header className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-accent" /> Assistente avícola
-            </h1>
-            <p className="text-muted-foreground mt-1">Consultor especialista 24/7 com acesso aos dados da sua fazenda.</p>
-          </div>
-          <div className="flex gap-2">
-            <Badge variant="outline" className="text-[10px]"><Bot className="h-3 w-3 mr-1" /> Gemini 2.5 · contexto ao vivo</Badge>
-            {messages.length > 0 && (
-              <Button variant="outline" size="sm" onClick={limpar}><Trash2 className="h-4 w-4 mr-1" /> Limpar</Button>
-            )}
-          </div>
-        </header>
-
-        <Card className="p-0 overflow-hidden flex flex-col" style={{ minHeight: "60vh", background: "var(--gradient-surface)" }}>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "65vh" }}>
-            {messages.length === 0 && (
-              <div className="text-center py-8 space-y-4">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl mx-auto" style={{ background: "var(--gradient-accent)" }}>
-                  <Sparkles className="h-8 w-8 text-accent-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-display font-bold text-xl">Olá! Pergunte qualquer coisa sobre sua fazenda</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Peso, mortalidade, manejo e ração do lote.</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-2 max-w-2xl mx-auto pt-2">
-                  {SUGESTOES.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => enviar(s)}
-                      className="text-left text-sm p-3 rounded-lg border border-border hover:border-accent/50 hover:bg-accent/5 transition-colors"
-                    >
-                      <RefreshCw className="h-3.5 w-3.5 inline mr-2 text-accent" />{s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {messages.map((m, i) => (
-              <div key={i} className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`h-8 w-8 shrink-0 rounded-lg flex items-center justify-center ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
-                  {m.role === "user" ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-                </div>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-card border border-border rounded-tl-sm"}`}>
-                  <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: renderMd(m.content) }} />
-                </div>
-              </div>
-            ))}
-
-            {loading && (
-              <div className="flex gap-3">
-                <div className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center bg-accent text-accent-foreground">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3 text-sm flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" /> pensando...
-                </div>
-              </div>
-            )}
-            <div ref={endRef} />
-          </div>
-
-          <div className="border-t border-border p-3 bg-background/50">
-            <div className="flex gap-2 items-end">
-              <Textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviar(); } }}
-                placeholder="Pergunta sobre manejo, ração, sanidade, finanças, clima..."
-                rows={1}
-                className="min-h-[44px] max-h-32 resize-none"
-                disabled={loading}
-              />
-              <Button onClick={() => enviar()} disabled={loading || !input.trim()} size="lg" className="shrink-0">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-1.5 px-1">
-              Enter envia · Shift+Enter quebra linha · IA pode errar — confirme decisões críticas com seu veterinário.
-            </p>
-          </div>
-        </Card>
+  return <AppShell><div className="mx-auto max-w-5xl space-y-6">
+    <header className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-3"><img src={logo} alt="Aviário Pro" className="size-12 rounded-lg object-contain" /><div><h1 className="font-display text-3xl">Assistente avícola</h1><p className="text-sm text-muted-foreground">{fazendaNome ?? "Sua granja"}</p></div></div>
+      <Button asChild variant="outline" size="sm"><Link to="/automacoes"><Zap /> Automações</Link></Button>
+    </header>
+    <section className="border-y border-primary/30 py-5" aria-label="Conversa por voz">
+      <div className="flex flex-wrap items-center justify-between gap-4"><div><h2 className="font-display text-2xl flex items-center gap-2"><Mic className="size-5 text-primary" /> Conversar por voz</h2><p role="status" className="mt-1 text-sm text-muted-foreground">{labels[voice.status]}{pending ? " · Consultando o lote…" : ""}</p></div>
+        <div className="flex flex-wrap gap-2">{canStart ? <Button disabled={!codigo || loading} onClick={() => { setCaptions([]); setSeconds(null); voice.start(); }}><Mic /> Iniciar conversa</Button> : <><Button variant="outline" disabled={voice.status !== "connected"} aria-label={voice.muted ? "Ativar microfone" : "Silenciar microfone"} title={voice.muted ? "Ativar microfone" : "Silenciar microfone"} onClick={() => voice.setMuted(!voice.muted)}>{voice.muted ? <MicOff /> : <Mic />}</Button><Button variant="destructive" disabled={voice.status === "stopping"} onClick={voice.stop}><PhoneOff /> Encerrar</Button></>}{voice.playbackBlocked && <Button onClick={voice.resumePlayback}><Volume2 /> Ouvir voz</Button>}</div>
       </div>
-    </AppShell>
-  );
-}
-
-function renderMd(s: string): string {
-  return s
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, "<code class='px-1 py-0.5 rounded bg-muted text-xs'>$1</code>")
-    .replace(/^### (.+)$/gm, "<h4 class='font-semibold mt-2'>$1</h4>")
-    .replace(/^## (.+)$/gm, "<h3 class='font-semibold mt-2'>$1</h3>")
-    .replace(/^\d+\.\s(.+)$/gm, "<li>$1</li>")
-    .replace(/^[-•]\s(.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>[\s\S]+?<\/li>)/g, "<ul class='list-disc pl-5 my-1.5 space-y-0.5'>$1</ul>")
-    .replace(/\n\n/g, "<br/><br/>")
-    .replace(/\n/g, "<br/>");
+      <p className="mt-3 text-xs text-muted-foreground">O microfone é usado para ouvir sua fala. A conversa utiliza créditos de IA, com cobrança mínima de 15 segundos.</p>
+      <audio ref={voice.audioRef} controls className="mt-3 h-9 w-full max-w-sm" aria-label="Áudio do assistente" />
+      {seconds !== null && <p className="mt-2 text-xs text-muted-foreground">Uso de voz informado: {Math.ceil(seconds)} s{voice.finalized === false ? " · Total final não confirmado" : ""}</p>}
+      {voice.error && <p role="alert" className="mt-3 text-sm text-destructive">{voice.error}</p>}
+      {captions.length > 0 && <Conversation className="mt-4 h-52"><ConversationContent className="gap-3 p-0">{captions.map((c,i) => <Message key={i} from={c.role}><MessageContent><span className="text-xs text-muted-foreground">{c.role === "user" ? "Você" : "Assistente"}</span><MessageResponse>{c.text}</MessageResponse></MessageContent></Message>)}</ConversationContent><ConversationScrollButton aria-label="Última fala" /></Conversation>}
+    </section>
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3"><Select value={selected} onValueChange={setSelected}><SelectTrigger className="w-56" aria-label="Lote consultado"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="ativo">Lote ativo · Texto</SelectItem>{lotes.map(l => <SelectItem key={l.id} value={l.numero}>Lote {l.numero}{l.encerrado ? " · Encerrado" : ""}</SelectItem>)}</SelectContent></Select>
+      <Button size="icon" variant="ghost" title="Limpar conversa" aria-label="Limpar conversa" disabled={loading} onClick={() => { if (confirm("Limpar a conversa de texto?")) { setMessages([]); setError(null); } }}><Trash2 /></Button></div>
+      <Conversation className="h-[440px] border-y border-border"><ConversationContent className="gap-5 py-5">
+        {!messages.length && <div className="py-8"><h2 className="font-display text-2xl mb-5">O que vamos conferir no lote?</h2><div className="grid gap-2 sm:grid-cols-2">{suggestions.map(s => <Button key={s} variant="outline" className="h-auto min-h-14 whitespace-normal justify-start text-left" disabled={!codigo || loading} onClick={() => void send(s)}>{s}</Button>)}</div></div>}
+        {messages.map((m,i) => <Message key={i} from={m.role}><MessageContent className="group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground"><MessageResponse>{m.content}</MessageResponse></MessageContent>{m.role === "assistant" && <MessageActions><MessageAction tooltip="Copiar resposta" onClick={() => void navigator.clipboard.writeText(m.content)}>Copiar</MessageAction></MessageActions>}</Message>)}
+        {loading && <Shimmer>Consultando os dados da granja…</Shimmer>}
+      </ConversationContent><ConversationScrollButton aria-label="Última mensagem" /></Conversation>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      <PromptInput onSubmit={({ text }) => send(text)}><PromptInputTextarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)} disabled={loading || !codigo} placeholder="Pergunte sobre peso, ração, água ou manejo…" aria-label="Pergunta para o assistente" /><PromptInputFooter className="justify-end"><PromptInputSubmit aria-label="Enviar pergunta" status={loading ? "submitted" : "ready"} disabled={loading || !input.trim() || !codigo}><Send className="size-4" /></PromptInputSubmit></PromptInputFooter></PromptInput>
+      <p className="text-xs text-muted-foreground">Decisões sanitárias devem ser confirmadas com o veterinário responsável.</p>
+    </section>
+  </div></AppShell>;
 }
