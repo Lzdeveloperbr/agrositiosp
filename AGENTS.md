@@ -8,5 +8,6 @@
 - Poultry navigation is curated centrally; unrelated legacy data is retained without exposing its modules, to avoid destructive loss.
 - Individual bird samples live in the lot's daily entry alongside their mean weight, so weighing, management and silo projections use the same persisted measurement.
 - Text chat uses the AI SDK UI-message stream and browser-held history; its server verifies the farm code and reads RLS-scoped facts, so responses never trust browser-supplied farm figures.
+- Chat syntax highlighting imports individual Shiki grammars and two themes through the shared message-code plugin, never the full registry, to keep client/server compilation within memory limits; unknown languages retain plain code rendering.
 - Voice uses the shared Live hook and server relay with client delegation; farm queries use the same calculation engines as the app and cannot write records or control equipment.
 - Poultry automation rules use internal measurements and the shared silo engine; monitoring runs only while the page is open, so external weather cannot be presented as measured house conditions.
