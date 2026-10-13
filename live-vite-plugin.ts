@@ -113,7 +113,7 @@ export function liveVoiceDev(): Plugin {
     apply: "serve",
     configureServer(server) {
       const httpServer = server.httpServer;
-      if (!httpServer) throw new Error("Live voice preview requires Vite's HTTP server");
+      if (!httpServer) return;
       const sockets = new WebSocketServer({ noServer: true, maxPayload: 2 * 1024 * 1024 });
       let disposed = false;
       const upgrade = (request: IncomingMessage, socket: Duplex, head: Buffer) => {

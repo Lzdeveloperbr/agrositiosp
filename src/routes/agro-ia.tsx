@@ -171,7 +171,11 @@ function AgroIAPage() {
       return rows;
     });
   }
-  const voice = useLiveVoice({ codigo: codigo ?? undefined, onEvent });
+  const voice = useLiveVoice({
+    codigo: codigo ?? undefined,
+    numeroLote: selected === "ativo" ? undefined : selected,
+    onEvent,
+  });
   const canStart = voice.status === "idle" || voice.status === "closed";
   async function send(text: string) {
     const t = text.trim();
@@ -289,12 +293,12 @@ function AgroIAPage() {
         </section>
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <Select value={selected} onValueChange={setSelected} disabled={loading}>
+            <Select value={selected} onValueChange={setSelected} disabled={loading || !canStart}>
               <SelectTrigger className="w-56" aria-label="Lote consultado">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ativo">Lote ativo · Texto</SelectItem>
+                <SelectItem value="ativo">Lote ativo</SelectItem>
                 {lotes.map((l) => (
                   <SelectItem key={l.id} value={l.numero}>
                     Lote {l.numero}

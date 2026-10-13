@@ -11,6 +11,7 @@ export type LiveConfig = {
   backendModel: string;
   openingInstructions?: string;
   farmCode?: string;
+  numeroLote?: string;
 };
 
 // Fill from co-loaded knowledge: the gateway URL, the Live model and the resolved chat model.
@@ -205,7 +206,11 @@ async function answerQuestion(
         inputSchema: studyScheduleInput,
         execute: async ({ numero_lote }) => {
           signal.throwIfAborted();
-          const facts = await getPoultryContext(config.farmCode ?? "", numero_lote, signal);
+          const facts = await getPoultryContext(
+            config.farmCode ?? "",
+            numero_lote ?? config.numeroLote ?? null,
+            signal,
+          );
           onPlan(facts);
           return facts;
         },
@@ -595,7 +600,7 @@ export function bindLiveConnection(
     }
   }
 
-  async function startSession(sdp: string, code: unknown) {
+  async function startSession(sdp: string, code: unknown, numeroLote: unknown) {
     if (closing || browser.readyState !== 1) return;
     clearTimeout(startTimer);
     startupTimer = setTimeout(() => {
@@ -604,7 +609,10 @@ export function bindLiveConnection(
     }, 40_000);
     if (typeof code !== "string" || !code.trim() || code.length > 80)
       throw new Error("Entre na granja antes de iniciar a conversa.");
-    await getPoultryContext(code, null, setupAbort.signal);
+    if (numeroLote !== undefined && (typeof numeroLote !== "string" || numeroLote.length > 80))
+      throw new Error("Lote inválido.");
+    config.numeroLote = typeof numeroLote === "string" ? numeroLote : undefined;
+    await getPoultryContext(code, config.numeroLote ?? null, setupAbort.signal);
     config.farmCode = code;
     const accepted = await connect(
       new URL(`${gatewayAPIBase(config.baseURL)}/live/sessions`).href,
@@ -631,7 +639,7 @@ export function bindLiveConnection(
         type: "session.start",
         session: {
           model: config.liveModel,
-          instructions: conversationInstructions,
+          instructions: `${conversationInstructions} Lote selecionado: ${config.numeroLote ?? "lote ativo mais recente"}.`,
           audio: { output: { voice: "marin" } },
           delegation: { type: "client" },
         },
@@ -658,7 +666,7 @@ export function bindLiveConnection(
         }
         starting = true;
         execution.waitUntil(
-          startSession(event.sdp, event.codigo).catch((error) => {
+          startSession(event.sdp, event.codigo, event.numeroLote).catch((error) => {
             if (!closing)
               emit({
                 type: "app.error",
