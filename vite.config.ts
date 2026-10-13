@@ -9,5 +9,8 @@ import { liveVoiceDev } from "./live-vite-plugin";
 
 export default defineConfig({
   tanstackStart: { server: { entry: "server" } },
-  vite: { plugins: [liveVoiceDev()] },
+  vite: {
+    plugins: [liveVoiceDev()],
+    build: { reportCompressedSize: false },
+  },
 });
