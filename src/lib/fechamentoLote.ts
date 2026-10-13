@@ -1,5 +1,5 @@
 import type { Lote } from "./types";
-import { CURVAS, type Linhagem } from "./linhagens";
+import { CURVAS, resolveLinhagem, type Linhagem } from "./linhagens";
 import { diffDias } from "./data";
 
 function interp(curva: { dia: number; peso: number; consumoAcum: number; ca: number }[], dia: number, key: "peso" | "consumoAcum" | "ca"): number {
@@ -56,7 +56,7 @@ const DEFAULTS: Required<CustosLote> = {
   outrosCustos: 0,
 };
 
-export function fechamentoLote(lote: Lote, linhagem: Linhagem = "cobb500", custos: CustosLote = {}): FechamentoLote {
+export function fechamentoLote(lote: Lote, linhagem: Linhagem = resolveLinhagem(lote.linhagem), custos: CustosLote = {}): FechamentoLote {
   const c = { ...DEFAULTS, ...custos };
   const curva = CURVAS[linhagem];
   const previsao = lote.previsaoAbateDias || 42;
@@ -132,7 +132,7 @@ export function fechamentoLote(lote: Lote, linhagem: Linhagem = "cobb500", custo
 // Curva de ração por fase (kg/ave) — padrão indústria
 export type FaseRacao = { nome: string; diaInicio: number; diaFim: number; gPorAve: number };
 
-export function curvaRacaoPorFase(linhagem: Linhagem = "cobb500"): FaseRacao[] {
+export function curvaRacaoPorFase(linhagem: Linhagem = "ross_ap95"): FaseRacao[] {
   const c = CURVAS[linhagem];
   const fases = [
     { nome: "Pré-inicial", diaInicio: 1, diaFim: 10 },

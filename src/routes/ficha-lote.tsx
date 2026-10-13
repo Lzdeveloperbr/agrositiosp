@@ -14,6 +14,12 @@ import { toast } from "sonner";
 import { savePdf } from "@/lib/pdfHistory";
 import { SITIO } from "@/lib/pdf";
 import { fmtData, isoLocal } from "@/lib/data";
+import { useLotes } from "@/lib/state";
+import { AppShell } from "@/components/AppShell";
+import { WeeklyFlockReport } from "@/components/WeeklyFlockReport";
+import { calcularResumoLote } from "@/lib/granja";
+import { refPesoG } from "@/lib/silo";
+import { ROSS_AP95_PHOTO_TARGETS, ROSS_AP95_SOURCE } from "@/lib/ross-ap95";
 
 export const Route = createFileRoute("/ficha-lote")({ head: () => ({ meta: [{ title: "Ficha do Lote — Aviário Pro" }, { name: "description", content: "Ficha de alojamento e acompanhamento sanitário do lote de frangos." }, { property: "og:title", content: "Ficha do Lote — Aviário Pro" }, { property: "og:description", content: "Registros de alojamento, mortalidade e peso do lote." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FichaLotePage });
 
@@ -77,6 +83,26 @@ function salvar(fichas: Ficha[]) {
 function num(v: string): number { const n = Number(String(v).replace(",", ".")); return Number.isFinite(n) ? n : 0; }
 
 function FichaLotePage() {
+  const [lotes] = useLotes();
+  const [selected, setSelected] = useState("");
+  const [manual, setManual] = useState(false);
+  const lote = lotes.find((l) => l.id === selected) ?? lotes.find((l) => !l.encerrado) ?? lotes[0];
+  const resumo = lote ? calcularResumoLote(lote, "ross_ap95", lote.sexo ?? "misto") : null;
+  return <AppShell><div className="mx-auto max-w-7xl space-y-6">
+    <header className="flex flex-wrap items-end justify-between gap-3"><div><h1 className="font-display text-3xl">Ficha do lote · Ross AP95</h1><p className="text-sm text-muted-foreground">Alojamento, desempenho e fechamento semanal</p></div>
+      <Select value={lote?.id ?? ""} onValueChange={setSelected}><SelectTrigger className="w-56" aria-label="Lote da ficha"><SelectValue placeholder="Selecionar lote" /></SelectTrigger><SelectContent>{lotes.map(l=><SelectItem key={l.id} value={l.id}>Lote {l.numero}{l.encerrado ? " · Encerrado" : ""}</SelectItem>)}</SelectContent></Select>
+    </header>
+    {lote ? <><div className="grid grid-cols-2 gap-4 border-y border-border py-4 sm:grid-cols-4">{[["Alojadas",lote.quantidadeInicial.toLocaleString("pt-BR")],["Alojamento",fmtData(lote.dataEntrada)],["Aves vivas",resumo?.vivas.toLocaleString("pt-BR")],["Baixas acumuladas",`${resumo?.mortalidadePct.toFixed(2)}%`]].map(([label,value])=><div key={label}><p className="text-xs text-muted-foreground">{label}</p><p className="font-display text-2xl">{value}</p></div>)}</div>
+      <WeeklyFlockReport lote={lote} />
+      <section className="space-y-3"><h2 className="font-display text-2xl">Peso por idade · Ross AP95</h2><p className="text-sm text-muted-foreground">Misto · referência Aviagen 2022 e metas da ficha enviadas separadamente. Pesagem real não é substituída por projeção.</p><a href={ROSS_AP95_SOURCE} target="_blank" rel="noreferrer" className="text-sm text-primary underline">Fonte da referência</a>
+      <div className="overflow-x-auto"><table className="w-full min-w-[600px] text-sm"><thead><tr>{["Idade","Aviagen misto","Meta da ficha","Projeção do lote","Pesagem real"].map(h=><th key={h} className="p-3 text-right first:text-left">{h}</th>)}</tr></thead><tbody>{IDADES.map(d=><tr key={d} className="border-t border-border"><td className="p-3">D{d}</td><td className="p-3 text-right">{refPesoG(d,"ross_ap95","misto")} g</td><td className="p-3 text-right">{ROSS_AP95_PHOTO_TARGETS[d] ? `${ROSS_AP95_PHOTO_TARGETS[d]} g` : "—"}</td><td className="p-3 text-right">{resumo?.projetarPesoG(d).toFixed(0)} g</td><td className="p-3 text-right">{resumo?.pesagens.find(p=>p.idade===d)?.pesoG ?? "—"}</td></tr>)}</tbody></table></div></section>
+    </> : <p className="text-muted-foreground">Nenhum lote cadastrado.</p>}
+    <Button variant="outline" onClick={()=>setManual(!manual)}><ClipboardList /> {manual ? "Ocultar fichas manuais" : "Fichas manuais anteriores"}</Button>
+    {manual && <ManualFichaLotePage />}
+  </div></AppShell>;
+}
+
+function ManualFichaLotePage() {
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [ativaId, setAtivaId] = useState<string | null>(null);
 

@@ -3,7 +3,7 @@ import autoTable from "jspdf-autotable";
 import type { Lote, Medidor, Animal, DiarioEntry, Lancamento } from "./types";
 import { savePdf } from "./pdfHistory";
 import { fechamentoLote, type FechamentoLote, type FaseRacao } from "./fechamentoLote";
-import { CURVAS, type Linhagem } from "./linhagens";
+import { CURVAS, LINHAGEM_LABEL, resolveLinhagem, type Linhagem } from "./linhagens";
 import { fmtData, hojeISO } from "@/lib/data";
 
 const BRAND = { r: 88, g: 165, b: 90 };
@@ -73,8 +73,8 @@ function footer(doc: jsPDF) {
 // ===== Helpers do relatório do lote =====
 
 function getLoteLinhagem(loteId: string): Linhagem {
-  if (typeof window === "undefined") return "cobb500";
-  return (localStorage.getItem("granja:linhagem:" + loteId) as Linhagem) || "cobb500";
+  if (typeof window === "undefined") return "ross_ap95";
+  return resolveLinhagem(localStorage.getItem("granja:linhagem:" + loteId) ?? undefined);
 }
 function getLoteAreaM2(loteId: string): number | undefined {
   if (typeof window === "undefined") return undefined;
@@ -303,7 +303,7 @@ function ensurePage(doc: jsPDF, y: number, need = 40): number {
 export function gerarRelatorioLote(lote: Lote) {
   const doc = new jsPDF();
   const w = doc.internal.pageSize.getWidth();
-  const linhagem = getLoteLinhagem(lote.id);
+  const linhagem = lote.linhagem ? resolveLinhagem(lote.linhagem) : getLoteLinhagem(lote.id);
   const areaM2 = getLoteAreaM2(lote.id);
   const abateReal = getLoteAbateReal(lote.id);
   const f = fechamentoLote(lote, linhagem);
@@ -371,7 +371,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const producaoPorAve = f.inicial > 0 ? f.pesoVivoKg / f.inicial : 0;
 
   // ============ PÁGINA 1: Capa / Resumo ============
-  header(doc, `Relatório Técnico do Lote ${lote.numero}`, `${lote.integradora || "—"} · Linhagem ${linhagem === "cobb500" ? "Cobb 500" : "Ross 308"} · ${f.encerrado ? "Lote encerrado" : `Em andamento — D${f.idade}/${f.diasPrevistos}`}`);
+  header(doc, `Relatório Técnico do Lote ${lote.numero}`, `${lote.integradora || "—"} · Linhagem ${LINHAGEM_LABEL[linhagem]} · ${f.encerrado ? "Lote encerrado" : `Em andamento — D${f.idade}/${f.diasPrevistos}`}`);
 
   // Faixa de classificação
   doc.setFillColor(SOFT.r, SOFT.g, SOFT.b);
@@ -458,7 +458,7 @@ export function gerarRelatorioLote(lote: Lote) {
   const growth: Array<[string, string, string?, [number, number, number]?]> = [
     ["Ganho de peso diário (GPD)", `${gpd.toFixed(1)} g/dia`, "Média do período"],
     ["Peso realizado", f.pesoMedioG ? `${f.pesoMedioG.toLocaleString("pt-BR")} g` : "—", "Última pesagem"],
-    ["Peso esperado", `${Math.round(f.pesoMetaG).toLocaleString("pt-BR")} g`, `Curva ${linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}`],
+    ["Peso de referência", `${Math.round(f.pesoMetaG).toLocaleString("pt-BR")} g`, `Curva ${LINHAGEM_LABEL[linhagem]}`],
     ["Diferença", f.pesoMedioG ? `${f.pesoVsMetaPct >= 0 ? "+" : ""}${f.pesoVsMetaPct.toFixed(2)}%` : "—", "Realizado vs meta", f.pesoVsMetaPct >= 0 ? [OK.r, OK.g, OK.b] : [BAD.r, BAD.g, BAD.b]],
     ["Peso máximo", pesoMax ? `${pesoMax.toLocaleString("pt-BR")} g` : "—"],
     ["Peso mínimo", pesoMin ? `${pesoMin.toLocaleString("pt-BR")} g` : "—"],
@@ -615,7 +615,7 @@ export function gerarRelatorioLote(lote: Lote) {
   }
 
   if (f.pesoMedioG) {
-    if (f.pesoVsMetaPct < -6) recs.push({ area: "Peso vs meta", prio: "Alta", acao: `Peso ${f.pesoVsMetaPct.toFixed(1)}% abaixo da curva ${linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}. Revisar programa de ração, temperatura e fase inicial (7 primeiros dias).` });
+    if (f.pesoVsMetaPct < -6) recs.push({ area: "Peso vs meta", prio: "Alta", acao: `Peso ${f.pesoVsMetaPct.toFixed(1)}% abaixo da curva ${LINHAGEM_LABEL[linhagem]}. Revisar programa de ração, temperatura e fase inicial (7 primeiros dias).` });
     else if (f.pesoVsMetaPct < -2) recs.push({ area: "Peso vs meta", prio: "Média", acao: `Peso ${f.pesoVsMetaPct.toFixed(1)}% abaixo. Verificar qualidade da pré-inicial e uniformidade de água/luz.` });
     else recs.push({ area: "Peso vs meta", prio: "Baixa", acao: `Peso ${f.pesoVsMetaPct >= 0 ? "+" : ""}${f.pesoVsMetaPct.toFixed(1)}% vs meta. Ótimo desempenho.` });
   }

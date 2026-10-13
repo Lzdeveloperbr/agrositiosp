@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes, useFinanceiro } from "@/lib/state";
 import { fechamentoLote } from "@/lib/fechamentoLote";
-import type { Linhagem } from "@/lib/linhagens";
+import { resolveLinhagem, type Linhagem } from "@/lib/linhagens";
 import { baixarCSV } from "@/lib/exportar";
 import { Wallet, Download, TrendingUp, Bird, Percent, Scale, ArrowRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
@@ -32,7 +32,7 @@ const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 const brl2 = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 3, maximumFractionDigits: 3 });
 
 type Params = { precoPintinho: number; precoRacaoKg: number; outrosCustos: number; precoKgVivo: number; participacaoPct: number; linhagem: Linhagem };
-const PADRAO: Params = { precoPintinho: 2.8, precoRacaoKg: 2.5, outrosCustos: 0, precoKgVivo: 5.5, participacaoPct: 14, linhagem: "cobb500" };
+const PADRAO: Params = { precoPintinho: 2.8, precoRacaoKg: 2.5, outrosCustos: 0, precoKgVivo: 5.5, participacaoPct: 14, linhagem: "ross_ap95" };
 const KEY = "agro:financeiro-lote:params";
 
 function FinanceiroLotePage() {
@@ -54,7 +54,7 @@ function FinanceiroLotePage() {
 
   const calc = useMemo(() => {
     if (!lote) return null;
-    const f = fechamentoLote({ ...lote, precoKgVivo: p.precoKgVivo }, p.linhagem, {
+    const f = fechamentoLote({ ...lote, precoKgVivo: p.precoKgVivo }, resolveLinhagem(lote.linhagem), {
       precoPintinho: p.precoPintinho, precoRacaoKg: p.precoRacaoKg, outrosCustos: p.outrosCustos,
     });
     // Despesas reais lançadas no financeiro para o período do lote
@@ -122,9 +122,10 @@ function FinanceiroLotePage() {
                 </div>
                 <div>
                   <Label className="text-xs">Linhagem</Label>
-                  <Select value={p.linhagem} onValueChange={set("linhagem")}>
+                  <Select value={resolveLinhagem(lote?.linhagem)} disabled>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="ross_ap95">Ross AP95 (Ross 308 AP)</SelectItem>
                       <SelectItem value="cobb500">Cobb 500</SelectItem>
                       <SelectItem value="ross308">Ross 308</SelectItem>
                     </SelectContent>

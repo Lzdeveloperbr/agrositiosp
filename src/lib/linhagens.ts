@@ -1,9 +1,16 @@
 // Curvas oficiais aproximadas de peso vivo (g) por idade (dias) — machos mistos.
 // Fonte: manuais de performance Cobb 500 e Ross 308 (uso operacional, valores arredondados).
 
-export type Linhagem = "cobb500" | "ross308";
+import { ROSS_AP95_WEIGHTS, ROSS_AP95_FEED } from "./ross-ap95";
+
+export type Linhagem = "cobb500" | "ross308" | "ross_ap95";
+
+export function resolveLinhagem(value?: string): Linhagem {
+  return value === "cobb500" || value === "ross308" ? value : "ross_ap95";
+}
 
 export const CURVAS: Record<Linhagem, { dia: number; peso: number; consumoAcum: number; ca: number }[]> = {
+  ross_ap95: ROSS_AP95_WEIGHTS.map((peso, dia) => ({ dia, peso, consumoAcum: ROSS_AP95_FEED[dia], ca: ROSS_AP95_FEED[dia] / peso })),
   cobb500: [
     { dia: 1, peso: 42, consumoAcum: 13, ca: 0.31 },
     { dia: 7, peso: 185, consumoAcum: 165, ca: 0.89 },
@@ -27,6 +34,7 @@ export const CURVAS: Record<Linhagem, { dia: number; peso: number; consumoAcum: 
 };
 
 export const LINHAGEM_LABEL: Record<Linhagem, string> = {
+  ross_ap95: "Ross AP95 (Ross 308 AP)",
   cobb500: "Cobb 500",
   ross308: "Ross 308",
 };

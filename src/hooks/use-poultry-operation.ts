@@ -51,15 +51,8 @@ export function usePoultryOperation(lote: Lote | null, tick: number) {
         setState((prev) => ({ ...prev, error: "Não foi possível atualizar silo e medições." }));
         return;
       }
-      let linhagem: Linhagem = "ross_ap95",
-        sexo: Sexo = "misto";
-      try {
-        const p = JSON.parse(localStorage.getItem(`silo_pref_${fazendaId}`) ?? "{}");
-        if (["ross_ap95", "ross308", "cobb500"].includes(p.linhagem)) linhagem = p.linhagem;
-        if (["misto", "macho", "femea"].includes(p.sexo)) sexo = p.sexo;
-      } catch {
-        /* defaults */
-      }
+      const linhagem: Linhagem = lote.linhagem ?? "ross_ap95";
+      const sexo: Sexo = lote.sexo ?? "misto";
       const c = conf.data?.[0];
       const cfg = c
         ? {

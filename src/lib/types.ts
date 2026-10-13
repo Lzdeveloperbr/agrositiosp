@@ -19,6 +19,9 @@ export type Lote = {
   previsaoAbateDias: number;
   percentualLucro: number;
   precoKgVivo?: number;
+  linhagem?: import("./silo").Linhagem;
+  sexo?: import("./silo").Sexo;
+  galpao?: string;
   entries: DailyEntry[];
   aplicacoes?: import("./calendarioSanitario").AplicacaoSanitaria[];
   encerrado?: boolean;

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLotes } from "@/lib/state";
-import { CURVAS, metaPeso, type Linhagem } from "@/lib/linhagens";
+import { CURVAS, metaPeso, resolveLinhagem, type Linhagem } from "@/lib/linhagens";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { Trophy, ShieldCheck, Syringe, Scale, TrendingUp, Truck, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -98,7 +98,7 @@ function ExcelenciaLote() {
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
   const lote = lotes.find((l) => l.id === loteId);
 
-  const [linhagem, setLinhagem] = useState<Linhagem>("ross308");
+  const linhagem: Linhagem = resolveLinhagem(lote?.linhagem);
 
   // Pesagem amostral
   const [pesos, setPesos] = useState<string>("");
@@ -183,10 +183,11 @@ function ExcelenciaLote() {
           </div>
           <div className="flex-1">
             <Label>Linhagem</Label>
-            <Select value={linhagem} onValueChange={(v) => setLinhagem(v as Linhagem)}>
+            <Select value={linhagem} disabled>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="ross308">Ross 308 / AP 95</SelectItem>
+                <SelectItem value="ross_ap95">Ross AP95 (Ross 308 AP)</SelectItem>
+                <SelectItem value="ross308">Ross 308</SelectItem>
                 <SelectItem value="cobb500">Cobb 500</SelectItem>
               </SelectContent>
             </Select>
