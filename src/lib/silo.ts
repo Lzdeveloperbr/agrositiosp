@@ -11,6 +11,7 @@
 // ============================================================================
 import { diffDias, isoLocal, parseData } from "@/lib/data";
 import { criarProjecaoPeso } from "@/lib/projecaoPeso";
+import { dailyTable, ROSS_AP95_WEIGHTS, ROSS_AP95_FEED } from "./ross-ap95";
 
 // ---------- Curvas de referência (g/ave) ----------
 export type Linhagem = "cobb500" | "ross308" | "ross_ap95";
@@ -26,15 +27,15 @@ export const CURVAS_SILO: Record<Linhagem, { consumo: Record<number, number>; pe
     peso: { 0: 43, 1: 52, 7: 192, 14: 485, 21: 950, 28: 1560, 35: 2290, 42: 3050, 49: 3750, 56: 4380 },
   },
   ross_ap95: {
-    consumo: { 0: 0, 1: 14, 4: 75, 7: 200, 14: 617, 21: 1347, 28: 2379, 35: 3718, 42: 5192, 49: 6708, 56: 8420 },
-    peso: { 0: 44, 1: 55, 4: 123, 7: 211, 14: 523, 21: 1036, 28: 1699, 35: 2446, 42: 3205, 49: 3900, 56: 4550 },
+    consumo: dailyTable(ROSS_AP95_FEED),
+    peso: dailyTable(ROSS_AP95_WEIGHTS),
   },
 };
 
 export const LINHAGEM_SILO_LABEL: Record<Linhagem, string> = {
   cobb500: "Cobb 500",
   ross308: "Ross 308",
-  ross_ap95: "Ross 308 AP 95",
+  ross_ap95: "Ross AP95 (Ross 308 AP)",
 };
 
 const SEXO_MULT: Record<Sexo, { peso: number; consumo: number }> = {

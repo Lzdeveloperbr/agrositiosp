@@ -3,6 +3,7 @@ import type { Database } from "@/integrations/supabase/types";
 import type { DailyEntry, Lote } from "@/lib/types";
 import { calcularResumoLote } from "@/lib/granja";
 import { calcularSilo, CFG_PADRAO, type Linhagem, type Sexo } from "@/lib/silo";
+import { weeklyFlock } from "./weekly-flock";
 
 export async function getPoultryContext(
   code: string,
@@ -166,6 +167,7 @@ export async function getPoultryContext(
         peso_medio_g: e.pesoMedioG ?? null,
         observacoes: e.observacoes ?? null,
       })),
+    fechamento_semanal: weeklyFlock(lote, date).filter((r) => r.status !== "Não iniciada"),
     medicoes_internas: (med.data ?? []).filter((m) => m.data <= date),
     silo:
       ent.data?.length || pes.data?.length

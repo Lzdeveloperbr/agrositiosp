@@ -23,7 +23,7 @@ export function WeeklyFlockReport({ lote }: { lote: Lote }) {
       pdf.addPage(); pdf.setFontSize(14); pdf.text(`Lote ${lote.numero} | Semana ${row.week} | D${row.startAge}-D${row.endAge}`,14,18);
       autoTable(pdf,{startY:26,head:[["Data","Idade","Mortos","Eliminados","Registro"]],body:row.days.map((d)=>[fmtData(d.date),`D${d.age}`,d.recorded?d.deaths:"—",d.recorded?d.culls:"—",d.future?"Futuro":d.recorded?"Registrado":"Sem registro"])});
     }
-    savePdf(pdf, `fechamento-semanal-lote-${lote.numero}.pdf`, "granja");
+    savePdf(pdf, `fechamento-semanal-lote-${lote.numero}.pdf`, { titulo: `Fechamento semanal — Lote ${lote.numero}`, modulo: "granja", ref: lote.numero });
   }
   return <section className="space-y-4" aria-label="Fechamento semanal do lote">
     <header className="flex flex-wrap items-center justify-between gap-3">

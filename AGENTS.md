@@ -11,3 +11,5 @@
 - Chat syntax highlighting imports individual Shiki grammars and two themes through the shared message-code plugin, never the full registry, to keep client/server compilation within memory limits; unknown languages retain plain code rendering.
 - Voice uses the shared Live hook and server relay with client delegation; farm queries use the same calculation engines as the app and cannot write records or control equipment.
 - Poultry automation rules use internal measurements and the shared silo engine; monitoring runs only while the page is open, so external weather cannot be presented as measured house conditions.
+- Lineage and sex are persisted on each lot and drive shared calculations; official daily performance objectives and integrator photo targets remain distinct to avoid misrepresenting either as measured weight.
+- Weekly losses derive from lot daily entries through weekly-flock (seven dates, D0-D6 first week); UI, PDF and assistant reuse it and mark missing records instead of assuming zero.
