@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Wheat, TrendingDown, Activity, AlertTriangle, Timer, Package, Bird, CalendarClock, Gauge } from "lucide-react";
 import type { ItemEstoque, Lote } from "@/lib/types";
 import { useLotes } from "@/lib/state";
-import { CURVAS, LINHAGEM_LABEL, type Linhagem } from "@/lib/linhagens";
+import { CURVAS, LINHAGEM_LABEL, resolveLinhagem, type Linhagem } from "@/lib/linhagens";
 import { parseData, isoLocal, diffDias, fmtData } from "@/lib/data";
 
 function fmt(n: number, d = 0) {
@@ -186,7 +186,7 @@ function simularAutonomia(estoqueKgAgora: number, lotes: LoteAtivo[], agora: Dat
 
 const LS_KEY = "racao:linhagem:";
 const getLinhagem = (loteId: string): Linhagem =>
-  (typeof window !== "undefined" && (localStorage.getItem(LS_KEY + loteId) as Linhagem)) || "cobb500";
+  resolveLinhagem(typeof window !== "undefined" ? localStorage.getItem(LS_KEY + loteId) ?? undefined : undefined);
 
 export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
   const [lotes] = useLotes();
@@ -195,7 +195,7 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
 
   useEffect(() => {
     const map: Record<string, Linhagem> = {};
-    lotes.forEach((l) => { map[l.id] = getLinhagem(l.id); });
+    lotes.forEach((l) => { map[l.id] = l.linhagem ? resolveLinhagem(l.linhagem) : getLinhagem(l.id); });
     setLinhagens(map);
   }, [lotes]);
 
@@ -207,7 +207,7 @@ export function LiveRacaoBanner({ itens }: { itens: ItemEstoque[] }) {
   const diaAtual = isoLocal(now);
 
   const lotesAtivos = useMemo(
-    () => lotes.filter((l) => !l.encerrado).map((l) => calcularLote(l, linhagens[l.id] || "cobb500", now)),
+    () => lotes.filter((l) => !l.encerrado).map((l) => calcularLote(l, linhagens[l.id] || "ross_ap95", now)),
     // idade só muda quando o dia muda
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [lotes, linhagens, diaAtual],

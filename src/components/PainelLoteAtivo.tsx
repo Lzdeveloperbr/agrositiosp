@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import { useLotes } from "@/lib/state";
-import { CURVAS, type Linhagem } from "@/lib/linhagens";
+import { CURVAS, LINHAGEM_LABEL, resolveLinhagem, type Linhagem } from "@/lib/linhagens";
+import { diffDias, parseData, addDias } from "@/lib/data";
 
 function interp(curva: { dia: number; peso: number; consumoAcum: number; ca: number }[], dia: number, key: "peso" | "consumoAcum" | "ca"): number {
   if (dia <= curva[0].dia) return curva[0][key];
@@ -42,7 +43,7 @@ interface Props {
   linhagem?: Linhagem;
 }
 
-export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
+export function PainelLoteAtivo({ linhagem: linhagemOverride }: Props) {
   const [lotes] = useLotes();
   const ativo = useMemo(() => lotes.find((l) => !l.encerrado), [lotes]);
 
@@ -68,11 +69,12 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
   }
 
   const hoje = new Date();
-  const entrada = new Date(ativo.dataEntrada);
-  const idade = Math.max(0, Math.floor((hoje.getTime() - entrada.getTime()) / 86400000));
+  const linhagem = linhagemOverride ?? resolveLinhagem(ativo.linhagem);
+  const entrada = parseData(ativo.dataEntrada);
+  const idade = Math.max(0, diffDias(ativo.dataEntrada));
   const previsao = ativo.previsaoAbateDias || 42;
   const diasRestantes = Math.max(0, previsao - idade);
-  const dataAbate = new Date(entrada.getTime() + previsao * 86400000);
+  const dataAbate = parseData(addDias(ativo.dataEntrada, previsao));
 
   const entries = [...ativo.entries].sort((a, b) => a.date.localeCompare(b.date));
   const totalMort = entries.reduce((s, e) => s + (e.mortalidade || 0), 0);
@@ -108,7 +110,7 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
 
   // Chart: peso real vs meta + mortalidade acumulada
   const chartData = entries.map((e, i) => {
-    const d = Math.max(1, Math.floor((new Date(e.date).getTime() - entrada.getTime()) / 86400000) + 1);
+    const d = Math.max(0, diffDias(ativo.dataEntrada, e.date));
     const acumMort = entries.slice(0, i + 1).reduce((s, x) => s + (x.mortalidade || 0) + (x.eliminados || 0), 0);
     return {
       dia: `D${d}`,
@@ -123,7 +125,7 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
   // Alertas inteligentes
   const alertas: { tone: "destructive" | "warning"; msg: string }[] = [];
   if (mortPct > metaMortPct + 1) alertas.push({ tone: "destructive", msg: `Mortalidade ${mortPct.toFixed(2)}% acima da meta (${metaMortPct.toFixed(2)}%)` });
-  if (pesoReal && pesoVsMetaPct < -8) alertas.push({ tone: "warning", msg: `Peso ${Math.abs(pesoVsMetaPct).toFixed(1)}% abaixo da curva ${linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}` });
+  if (pesoReal && pesoVsMetaPct < -8) alertas.push({ tone: "warning", msg: `Peso ${Math.abs(pesoVsMetaPct).toFixed(1)}% abaixo da curva ${LINHAGEM_LABEL[linhagem]}` });
   if (diasRestantes <= 5 && diasRestantes > 0) alertas.push({ tone: "warning", msg: `Faltam ${diasRestantes} dias para o abate previsto` });
   if (!ultimaPesagem && idade >= 14) alertas.push({ tone: "warning", msg: "Nenhuma pesagem registrada — faça pesagem amostral" });
 
@@ -142,7 +144,7 @@ export function PainelLoteAtivo({ linhagem = "cobb500" }: Props) {
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="font-display font-bold text-xl md:text-2xl">Lote {ativo.numero}</h2>
                 <Badge variant="secondary" className="font-mono">Dia {idade}/{previsao}</Badge>
-                <Badge variant="outline" className="border-primary/40 text-primary">{linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}</Badge>
+                <Badge variant="outline" className="border-primary/40 text-primary">{LINHAGEM_LABEL[linhagem]}</Badge>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
                 {ativo.integradora || "Integradora"} · abate previsto {dataAbate.toLocaleDateString("pt-BR")}
