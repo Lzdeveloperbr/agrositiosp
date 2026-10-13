@@ -3,7 +3,7 @@
 // e abre o AVI Smart já com todos os parâmetros preenchidos via query string.
 import type { Lote } from "./types";
 import { diffDias } from "./data";
-import { metaPeso, type Linhagem } from "./linhagens";
+import { metaPeso, LINHAGEM_LABEL, resolveLinhagem, type Linhagem } from "./linhagens";
 
 export const AVI_SMART_URL = "https://avi-smart-config.lovable.app";
 
@@ -35,7 +35,7 @@ export type GalpaoCfg = {
 export const AMBIENCIA_CFG_KEY = "agro:ambiencia:cfg";
 
 export function lerGalpaoCfg(): GalpaoCfg {
-  const fallback: GalpaoCfg = { larguraM: 14, comprimentoM: 120, alturaM: 3, totalExaustores: 10, linhagem: "cobb500" };
+  const fallback: GalpaoCfg = { larguraM: 14, comprimentoM: 120, alturaM: 3, totalExaustores: 10, linhagem: "ross_ap95" };
   try {
     const raw = localStorage.getItem(AMBIENCIA_CFG_KEY);
     if (!raw) return fallback;
@@ -51,15 +51,16 @@ export function montarContexto(
   clima?: { tempC: number; umidade: number; vento: number; cidade?: string },
 ): AviContexto {
   const idade = Math.max(0, diffDias(lote.dataEntrada));
+  const linhagem = resolveLinhagem(lote.linhagem ?? cfg.linhagem);
   const mortas = lote.entries.reduce((s, e) => s + e.mortalidade + (e.eliminados ?? 0), 0);
   const ultPeso = [...lote.entries].reverse().find((e) => e.pesoMedioG)?.pesoMedioG;
   return {
     loteNumero: lote.numero,
     idadeDias: idade,
     avesVivas: Math.max(0, lote.quantidadeInicial - mortas),
-    pesoMedioG: ultPeso ?? metaPeso(cfg.linhagem, idade),
+    pesoMedioG: ultPeso ?? metaPeso(linhagem, idade),
     pesoFonte: ultPeso ? "pesagem" : "curva",
-    linhagem: cfg.linhagem,
+    linhagem,
     larguraM: cfg.larguraM,
     comprimentoM: cfg.comprimentoM,
     alturaM: cfg.alturaM,
@@ -95,7 +96,7 @@ export function aviSmartUrl(ctx: AviContexto): string {
 export function resumoTexto(ctx: AviContexto): string {
   return [
     `Lote ${ctx.loteNumero} — ${ctx.idadeDias} dias de idade`,
-    `Linhagem: ${ctx.linhagem === "cobb500" ? "Cobb 500" : "Ross 308"}`,
+    `Linhagem: ${LINHAGEM_LABEL[ctx.linhagem]}`,
     `Aves vivas: ${ctx.avesVivas.toLocaleString("pt-BR")}`,
     `Peso médio: ${Math.round(ctx.pesoMedioG)} g (${ctx.pesoFonte === "pesagem" ? "pesagem real" : "estimado pela curva"})`,
     `Galpão: ${ctx.larguraM} x ${ctx.comprimentoM} x ${ctx.alturaM} m · ${ctx.exaustores} exaustores`,

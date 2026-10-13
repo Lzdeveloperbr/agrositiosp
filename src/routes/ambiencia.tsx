@@ -48,7 +48,7 @@ const DEFAULT_CFG: Cfg = {
   totalExaustores: 10,
   capExaustorCfm: 24000,
   cicloSegundos: 300,
-  linhagem: "cobb500",
+  linhagem: "ross_ap95",
 };
 
 function AmbienciaPage() {
@@ -146,6 +146,7 @@ function AmbienciaPage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cobb500">Cobb 500</SelectItem>
+                  <SelectItem value="ross_ap95">Ross AP95 (Ross 308 AP)</SelectItem>
                   <SelectItem value="ross308">Ross 308</SelectItem>
                 </SelectContent>
               </Select>
