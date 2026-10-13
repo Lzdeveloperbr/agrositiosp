@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mic, MicOff, PhoneOff, Trash2, Zap, Volume2, Send } from "lucide-react";
-import { chatAgroIA, type ChatMsg } from "@/lib/agroChat.functions";
+import { Mic, MicOff, PhoneOff, Trash2, Zap, Volume2 } from "lucide-react";
+
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLotes } from "@/lib/state";
 import { useLiveVoice, type LiveEvent } from "@/hooks/use-live-voice";
@@ -71,50 +72,67 @@ const labels = {
   closed: "Conversa encerrada",
 };
 function AgroIAPage() {
-  const fn = useServerFn(chatAgroIA);
   const { codigo, fazendaId, fazendaNome } = useFazenda();
   const [lotes] = useLotes();
   const [selected, setSelected] = useState("ativo");
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [seconds, setSeconds] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const requestRef = useRef(false);
+
   const storageKey = `aviario:ia:${fazendaId ?? "sem-acesso"}`;
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/poultry-chat",
+        body: { codigo, ...(selected !== "ativo" ? { numeroLote: selected } : {}) },
+      }),
+    [codigo, selected],
+  );
+  const { messages, setMessages, sendMessage, status, stop } = useChat({
+    id: storageKey,
+    transport,
+    onError: (err) => setError(err.message),
+    onFinish: () => inputRef.current?.focus(),
+  });
+  const loading = status === "submitted" || status === "streaming";
   useEffect(() => {
     setReady(false);
     setMessages([]);
     setError(null);
     try {
-      const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+      const stored = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
       if (Array.isArray(stored))
         setMessages(
-          stored.filter(
-            (m) =>
-              m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string",
-          ),
+          stored
+            .map((m, i) =>
+              m.parts
+                ? m
+                : { id: `legacy-${i}`, role: m.role, parts: [{ type: "text", text: m.content }] },
+            )
+            .filter((m) => ["user", "assistant"].includes(m.role) && Array.isArray(m.parts)),
         );
     } catch {
       /* empty history */
     }
     setReady(true);
-  }, [storageKey]);
+  }, [storageKey, setMessages]);
   useEffect(() => {
-    if (ready) {
+    if (ready && !loading) {
       try {
         localStorage.setItem(storageKey, JSON.stringify(messages));
       } catch {
         /* unavailable */
       }
     }
-  }, [messages, ready, storageKey]);
+  }, [messages, ready, loading, storageKey]);
   useEffect(() => {
-    inputRef.current?.focus();
+    if (!loading) inputRef.current?.focus();
   }, [loading]);
   function onEvent(event: LiveEvent) {
     if (event.type === "app.delegation.pending") setPending(true);
@@ -153,30 +171,19 @@ function AgroIAPage() {
       return rows;
     });
   }
-  const voice = useLiveVoice({ codigo: codigo ?? undefined, onEvent });
+  const voice = useLiveVoice({
+    codigo: codigo ?? undefined,
+    numeroLote: selected === "ativo" ? undefined : selected,
+    onEvent,
+  });
   const canStart = voice.status === "idle" || voice.status === "closed";
   async function send(text: string) {
     const t = text.trim();
-    if (!t || requestRef.current || !codigo) return;
-    requestRef.current = true;
-    const next: ChatMsg[] = [...messages, { role: "user", content: t }];
-    setMessages(next);
+    if (!t || loading || !codigo) return;
     setInput("");
-    setLoading(true);
     setError(null);
-    try {
-      const result = await fn({
-        data: { messages: next, codigo, ...(selected !== "ativo" ? { numeroLote: selected } : {}) },
-      });
-      setMessages((prev) => [...prev, { role: "assistant", content: result.texto }]);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível consultar o assistente.");
-      setInput(t);
-    } finally {
-      requestRef.current = false;
-      setLoading(false);
-      inputRef.current?.focus();
-    }
+    inputRef.current?.focus();
+    await sendMessage({ text: t });
   }
   return (
     <AppShell>
@@ -286,12 +293,12 @@ function AgroIAPage() {
         </section>
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <Select value={selected} onValueChange={setSelected}>
+            <Select value={selected} onValueChange={setSelected} disabled={loading || !canStart}>
               <SelectTrigger className="w-56" aria-label="Lote consultado">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ativo">Lote ativo · Texto</SelectItem>
+                <SelectItem value="ativo">Lote ativo</SelectItem>
                 {lotes.map((l) => (
                   <SelectItem key={l.id} value={l.numero}>
                     Lote {l.numero}
@@ -339,13 +346,29 @@ function AgroIAPage() {
               {messages.map((m, i) => (
                 <Message key={i} from={m.role}>
                   <MessageContent className="group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
-                    <MessageResponse>{m.content}</MessageResponse>
+                    {m.parts.map((part, j) =>
+                      part.type === "text" ? (
+                        <MessageResponse key={j}>{part.text}</MessageResponse>
+                      ) : part.type === "reasoning" ? (
+                        <details key={j} className="text-sm text-muted-foreground">
+                          <summary>Raciocínio</summary>
+                          <MessageResponse>{part.text}</MessageResponse>
+                        </details>
+                      ) : null,
+                    )}
                   </MessageContent>
                   {m.role === "assistant" && (
                     <MessageActions>
                       <MessageAction
                         tooltip="Copiar resposta"
-                        onClick={() => void navigator.clipboard.writeText(m.content)}
+                        onClick={() =>
+                          void navigator.clipboard.writeText(
+                            m.parts
+                              .filter((p) => p.type === "text")
+                              .map((p) => p.text)
+                              .join("\n"),
+                          )
+                        }
                       >
                         Copiar
                       </MessageAction>
@@ -367,18 +390,24 @@ function AgroIAPage() {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              disabled={loading || !codigo}
+              disabled={!codigo}
               placeholder="Pergunte sobre peso, ração, água ou manejo…"
               aria-label="Pergunta para o assistente"
             />
             <PromptInputFooter className="justify-end">
               <PromptInputSubmit
-                aria-label="Enviar pergunta"
-                status={loading ? "submitted" : "ready"}
-                disabled={loading || !input.trim() || !codigo}
-              >
-                <Send className="size-4" />
-              </PromptInputSubmit>
+                aria-label={loading ? "Interromper resposta" : "Enviar pergunta"}
+                status={status}
+                onClick={
+                  loading
+                    ? (e) => {
+                        e.preventDefault();
+                        stop();
+                      }
+                    : undefined
+                }
+                disabled={!codigo || (!loading && !input.trim())}
+              />
             </PromptInputFooter>
           </PromptInput>
           <p className="text-xs text-muted-foreground">

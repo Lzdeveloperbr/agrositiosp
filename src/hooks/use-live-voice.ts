@@ -32,6 +32,7 @@ export function useLiveVoice(
   options: {
     url?: string;
     codigo?: string;
+    numeroLote?: string;
     onEvent?: (event: LiveEvent) => void | Promise<void>;
   } = {},
 ) {
@@ -73,6 +74,7 @@ export function useLiveVoice(
     const voice = createLiveVoice({
       url: endpoint.href,
       codigo: latest.current.codigo,
+      numeroLote: latest.current.numeroLote,
       audio,
       onEvent(event) {
         if (!mounted.current || controller.current !== voice) return;
@@ -130,6 +132,7 @@ export function useLiveVoice(
 type LiveOptions = {
   url: string;
   codigo?: string;
+  numeroLote?: string;
   audio: HTMLAudioElement;
   onEvent: (event: LiveEvent) => void;
 };
@@ -366,7 +369,7 @@ function createLiveVoice(options: LiveOptions) {
       deadline = setTimeout(() => fail("Voice session did not start"), 50_000);
       socket.onopen = () => {
         if (!starting()) return release();
-        send({ type: "app.start", sdp, codigo: options.codigo });
+        send({ type: "app.start", sdp, codigo: options.codigo, numeroLote: options.numeroLote });
       };
       socket.onmessage = ({ data }) => {
         try {
