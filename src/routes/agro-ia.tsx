@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mic, MicOff, PhoneOff, Trash2, Zap, Volume2, Send } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Trash2, Zap, Volume2 } from "lucide-react";
 
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { useLotes } from "@/lib/state";
@@ -407,9 +407,7 @@ function AgroIAPage() {
                     : undefined
                 }
                 disabled={!codigo || (!loading && !input.trim())}
-              >
-                {!loading && <Send className="size-4" />}
-              </PromptInputSubmit>
+              />
             </PromptInputFooter>
           </PromptInput>
           <p className="text-xs text-muted-foreground">
