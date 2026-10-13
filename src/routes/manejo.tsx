@@ -15,6 +15,8 @@ import { calcularSilo, CFG_PADRAO, refCA, refConsumoDiaG, refPesoG, type Entrega
 import { calcularResumoLote } from "@/lib/granja";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { fmtDataHora } from "@/lib/data";
+import { WeeklyFlockReport } from "@/components/WeeklyFlockReport";
+import { ROSS_AP95_SOURCE, ROSS_AP95_PHOTO_TARGETS } from "@/lib/ross-ap95";
 
 export const Route = createFileRoute("/manejo")({
   head: () => ({
@@ -193,7 +195,7 @@ function ManejoPage() {
   const [lotes] = useLotes();
   const ativos = lotes.filter((l) => !l.encerrado);
   const [loteId, setLoteId] = useState<string>(ativos[0]?.id ?? "");
-  const [linhagem, setLinhagem] = useState<Linhagem>("ross_ap95");
+  const linhagem: Linhagem = "ross_ap95";
   const [entregas, setEntregas] = useState<EntregaSilo[]>([]);
   const [cfgSilo, setCfgSilo] = useState<SiloCfg>(CFG_PADRAO);
   const [agora, setAgora] = useState(() => new Date());
@@ -220,26 +222,6 @@ function ManejoPage() {
     const timer = window.setInterval(() => setAgora(new Date()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    if (!fazendaId) return;
-    try {
-      const salvo = localStorage.getItem(CFG_LOCAL(fazendaId));
-      if (!salvo) return;
-      const preferencia = JSON.parse(salvo) as { linhagem?: Linhagem };
-      if (preferencia.linhagem) setLinhagem(preferencia.linhagem);
-    } catch { /* preferência inválida: mantém o padrão */ }
-  }, [fazendaId]);
-
-  useEffect(() => {
-    if (!fazendaId) return;
-    let sexo = "misto";
-    try {
-      const salvo = localStorage.getItem(CFG_LOCAL(fazendaId));
-      if (salvo) sexo = JSON.parse(salvo).sexo || sexo;
-    } catch { /* mantém sexo misto */ }
-    localStorage.setItem(CFG_LOCAL(fazendaId), JSON.stringify({ linhagem, sexo }));
-  }, [fazendaId, linhagem]);
 
   useEffect(() => {
     if (!fazendaId || !lote) {
@@ -273,7 +255,7 @@ function ManejoPage() {
   // Indicadores estimados do lote, usando a mesma curva do silo.
   const caReal = useMemo(() => {
     if (!lote) return null;
-    const resumo = calcularResumoLote(lote, linhagem);
+    const resumo = calcularResumoLote(lote, linhagem, lote.sexo ?? "misto");
     return {
       peso: resumo.pesoProjetadoHojeG,
       pesoReal: resumo.ultimaPesagem?.idade === resumo.idade,
@@ -291,14 +273,14 @@ function ManejoPage() {
     qtdInicial: lote.quantidadeInicial,
     previsaoAbateDias: lote.previsaoAbateDias || 42,
     linhagem,
-    sexo: "misto",
+    sexo: lote.sexo ?? "misto",
     entries: lote.entries || [],
     entregas,
     pesagens: [],
     cfg: cfgSilo,
   }) : null, [agora, cfgSilo, entregas, linhagem, lote]);
 
-  const resumoLote = useMemo(() => lote ? calcularResumoLote(lote, linhagem) : null, [lote, linhagem]);
+  const resumoLote = useMemo(() => lote ? calcularResumoLote(lote, linhagem, lote.sexo ?? "misto") : null, [lote, linhagem]);
 
   const planoFase = useMemo(() => {
     if (!lote || !silo) return null;
@@ -329,13 +311,10 @@ function ManejoPage() {
             <h1 className="text-3xl md:text-4xl font-display font-bold flex items-center gap-2">
               <BookOpen className="h-7 w-7 text-primary" /> Manejo do Frango
             </h1>
-            <p className="text-muted-foreground mt-1">Protocolo profissional dia a dia · D0 = alojamento · padrão Cobb/Ross</p>
+            <p className="text-muted-foreground mt-1">Ross AP95 · D0 = alojamento · manejo, desempenho e fechamento do lote</p>
           </div>
           {ativos.length > 0 && <div className="flex flex-wrap gap-2">
-            <Select value={linhagem} onValueChange={(v) => setLinhagem(v as Linhagem)}>
-              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectItem value="ross_ap95">Ross 308 AP</SelectItem><SelectItem value="ross308">Ross 308</SelectItem><SelectItem value="cobb500">Cobb 500</SelectItem></SelectContent>
-            </Select>
+            <Badge variant="secondary">Ross AP95</Badge>
             <Select value={loteId} onValueChange={(v) => { setLoteId(v); const l = ativos.find(x => x.id === v); if (l) setDiaSel(Math.min(60, idadeDias(l.dataEntrada))); }}>
               <SelectTrigger className="w-56"><SelectValue placeholder="Selecionar lote" /></SelectTrigger>
               <SelectContent>{ativos.map((l) => <SelectItem key={l.id} value={l.id}>Lote {l.numero} · D{idadeDias(l.dataEntrada)}</SelectItem>)}</SelectContent>
@@ -576,7 +555,15 @@ function ManejoPage() {
 
 
 
-          <TabsContent value="semanal" className="mt-4">
+          <TabsContent value="semanal" className="mt-4 space-y-6">
+            {lote && <WeeklyFlockReport lote={lote} />}
+            <section className="space-y-3">
+              <h3 className="font-display text-2xl">Peso Ross AP95 · dia a dia</h3>
+              <p className="text-sm text-muted-foreground">Aviagen 2022, misto. Metas da ficha da integradora são mostradas separadamente. Sexo específico utiliza ajuste estimado; não é tabela oficial por sexo.</p>
+              <a className="text-sm text-primary underline" href={ROSS_AP95_SOURCE} target="_blank" rel="noreferrer">Referência Aviagen</a>
+              <div className="max-h-80 overflow-auto border-y border-border"><table className="w-full text-sm"><thead><tr>{["Idade", "Referência misto", "Meta da ficha", "Projeção do lote", "Peso medido"].map(h => <th key={h} className="p-3 text-right first:text-left">{h}</th>)}</tr></thead><tbody>{Array.from({length:57},(_,d)=><tr key={d} className="border-t border-border"><td className="p-3">D{d}</td><td className="p-3 text-right">{refPesoG(d,"ross_ap95","misto").toFixed(0)} g</td><td className="p-3 text-right">{ROSS_AP95_PHOTO_TARGETS[d] ? `${ROSS_AP95_PHOTO_TARGETS[d]} g` : "—"}</td><td className="p-3 text-right">{resumoLote ? `${resumoLote.projetarPesoG(d).toFixed(0)} g` : "—"}</td><td className="p-3 text-right">{resumoLote?.pesagens.find(p=>p.idade===d)?.pesoG ?? "—"}</td></tr>)}</tbody></table></div>
+            </section>
+            <section className="border-y border-border py-4 space-y-2"><h3 className="font-display text-2xl">Prioridades de manejo Ross AP95</h3><ul className="list-disc pl-5 text-sm space-y-2"><li>D0–D7: acesso imediato à água e ração; conferir distribuição e enchimento de papo. Luz 23 h com 1 h de escuro e 30–40 lux na altura das aves.</li><li>Após D7: planejar 4–6 h de escuro conforme integradora; verificar lux, não apenas porcentagem de brilho do controlador.</li><li>Inspecionar vazamentos, altura dos nipples e acesso aos comedouros diariamente; pressão e vazão seguem o fabricante e o consumo medido.</li><li>A partir de D6: revisar a cama a cada 3 dias; revolver apenas conforme condição da cama, evitando poeira, frio e estresse das aves.</li><li>Pesagem semanal com amostra representativa de vários pontos do galpão; registrar uniformidade e comparar o ganho, água e ração.</li><li>Queda de consumo ou aumento de mortalidade: avisar o técnico e veterinário; ajustar ventilação pela condição interna, sem acionar nebulização automaticamente.</li></ul></section>
             <Card className="p-5" style={{ background: "var(--gradient-surface)" }}>
               <h3 className="font-display font-semibold mb-3">Resumo por semana</h3>
               <div className="overflow-x-auto">

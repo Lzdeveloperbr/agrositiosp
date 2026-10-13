@@ -78,11 +78,15 @@ function SiloPage() {
       const raw = localStorage.getItem(CFG_LOCAL(fazendaId));
       if (raw) {
         const p = JSON.parse(raw);
-        if (p.linhagem) setLinhagem(p.linhagem);
+        setLinhagem("ross_ap95");
         if (p.sexo) setSexo(p.sexo);
       }
     } catch { /* ignore */ }
   }, [fazendaId]);
+  useEffect(() => {
+    setLinhagem(loteAtivo?.linhagem ?? "ross_ap95");
+    setSexo(loteAtivo?.sexo ?? "misto");
+  }, [loteAtivo?.id, loteAtivo?.linhagem, loteAtivo?.sexo]);
   useEffect(() => {
     if (!fazendaId) return;
     localStorage.setItem(CFG_LOCAL(fazendaId), JSON.stringify({ linhagem, sexo }));
