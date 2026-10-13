@@ -147,7 +147,7 @@ export function PainelLoteAtivo({ linhagem: linhagemOverride }: Props) {
                 <Badge variant="outline" className="border-primary/40 text-primary">{LINHAGEM_LABEL[linhagem]}</Badge>
               </div>
               <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
-                {ativo.integradora || "Integradora"} · abate previsto {dataAbate.toLocaleDateString("pt-BR")}
+                {ativo.integradora || "Integradora"} · abate previsto {dataAbate?.toLocaleDateString("pt-BR") ?? "Data inválida"}
               </p>
             </div>
           </div>
@@ -184,7 +184,7 @@ export function PainelLoteAtivo({ linhagem: linhagemOverride }: Props) {
           hint={pesoReal ? `meta ${Math.round(pesoMeta).toLocaleString("pt-BR")} g (${pesoVsMetaPct >= 0 ? "+" : ""}${pesoVsMetaPct.toFixed(1)}%)` : `meta ${Math.round(pesoMeta).toLocaleString("pt-BR")} g`}
           tone={!pesoReal ? "muted" : pesoVsMetaPct < -5 ? "warning" : "primary"}
         />
-        <KPI icon={Calendar} label="Dias p/ abate" value={diasRestantes.toString()} hint={dataAbate.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })} tone="accent" />
+        <KPI icon={Calendar} label="Dias p/ abate" value={diasRestantes.toString()} hint={dataAbate?.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) ?? "Data inválida"} tone="accent" />
       </div>
 
       {/* Segunda linha de KPIs derivados */}
