@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Padronizar Ross AP95, referência de peso e sexo em granja, manejo, silo e assistente.
+- [ ] Gerar ficha semanal automática por lote com mortalidade, eliminados, percentuais, acumulados e PDF, usando a foto como referência sem inventar lançamentos.
+- [ ] Melhorar manejo e validar cálculos, datas D0 e leitura das telas.
+
 - [x] Corrigir esgotamento de memória na compilação com catálogo de formatação reduzido; compilação automática OK, 2 testes aprovados e entrada do app sem erros de execução.
 
 - [x] Melhorar contexto e respostas do assistente avícola e corrigir regras das automações.
