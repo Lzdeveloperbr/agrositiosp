@@ -39,6 +39,7 @@ import { Route as AgroIaRouteImport } from './routes/agro-ia'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
+import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
 const TarefasRoute = TarefasRouteImport.update({
@@ -191,6 +192,11 @@ const GranjaIdRoute = GranjaIdRouteImport.update({
   path: '/granja/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPoultryChatRoute = ApiPoultryChatRouteImport.update({
+  id: '/api/poultry-chat',
+  path: '/api/poultry-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWhatsappRoute = ApiPublicWhatsappRouteImport.update({
   id: '/api/public/whatsapp',
   path: '/api/public/whatsapp',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
     | '/api/public/whatsapp'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja'
     | '/api/public/whatsapp'
@@ -394,6 +405,7 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
     | '/api/public/whatsapp'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
+  ApiPoultryChatRoute: typeof ApiPoultryChatRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
   ApiPublicWhatsappRoute: typeof ApiPublicWhatsappRoute
@@ -645,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GranjaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/poultry-chat': {
+      id: '/api/poultry-chat'
+      path: '/api/poultry-chat'
+      fullPath: '/api/poultry-chat'
+      preLoaderRoute: typeof ApiPoultryChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/whatsapp': {
       id: '/api/public/whatsapp'
       path: '/api/public/whatsapp'
@@ -684,6 +704,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
+  ApiPoultryChatRoute: ApiPoultryChatRoute,
   GranjaIdRoute: GranjaIdRoute,
   GranjaIndexRoute: GranjaIndexRoute,
   ApiPublicWhatsappRoute: ApiPublicWhatsappRoute,

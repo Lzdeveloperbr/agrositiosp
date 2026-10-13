@@ -3,8 +3,10 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { withLovableAiGatewayRunIdHeader, createLovableAiGatewayRunIdFetch } from "./ai/run-id";
 import { getPoultryContext } from "./poultry-context.server";
 
-
-export async function streamPoultry(data: { codigo: string; numeroLote?: string; messages: UIMessage[] }, signal: AbortSignal) {
+export async function streamPoultry(
+  data: { codigo: string; numeroLote?: string; messages: UIMessage[] },
+  signal: AbortSignal,
+) {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("O serviço de IA ainda não está configurado.");
   const facts = await getPoultryContext(data.codigo, data.numeroLote ?? null);
@@ -31,15 +33,33 @@ export async function streamPoultry(data: { codigo: string; numeroLote?: string;
     messages: await convertToModelMessages(data.messages),
     abortSignal: signal,
   });
-  return withLovableAiGatewayRunIdHeader(result.toUIMessageStreamResponse({
-    originalMessages: data.messages,
-    sendReasoning: true,
-    onFinish() { /* Browser history is persisted by the client after completion. */ },
-    onError(error) {
-      if (error && typeof error === "object" && "responseBody" in error && typeof error.responseBody === "string") {
-        try { const body = JSON.parse(error.responseBody); return body.error?.message ?? body.message ?? "A consulta foi encerrada pelo serviço de IA."; } catch { /* safe fallback */ }
-      }
-      return "A consulta foi interrompida. Confira sua conexão e a disponibilidade do serviço de IA.";
-    },
-  }), run, { "Cache-Control": "no-store" });
+  return withLovableAiGatewayRunIdHeader(
+    result.toUIMessageStreamResponse({
+      originalMessages: data.messages,
+      sendReasoning: true,
+      onFinish() {
+        /* Browser history is persisted by the client after completion. */
+      },
+      onError(error) {
+        if (
+          error &&
+          typeof error === "object" &&
+          "responseBody" in error &&
+          typeof error.responseBody === "string"
+        ) {
+          try {
+            const body = JSON.parse(error.responseBody);
+            return (
+              body.error?.message ?? body.message ?? "A consulta foi encerrada pelo serviço de IA."
+            );
+          } catch {
+            /* safe fallback */
+          }
+        }
+        return "A consulta foi interrompida. Confira sua conexão e a disponibilidade do serviço de IA.";
+      },
+    }),
+    run,
+    { "Cache-Control": "no-store" },
+  );
 }

@@ -72,7 +72,6 @@ const labels = {
   closed: "Conversa encerrada",
 };
 function AgroIAPage() {
-
   const { codigo, fazendaId, fazendaNome } = useFazenda();
   const [lotes] = useLotes();
   const [selected, setSelected] = useState("ativo");
@@ -87,25 +86,54 @@ function AgroIAPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const storageKey = `aviario:ia:${fazendaId ?? "sem-acesso"}`;
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/poultry-chat", body: { codigo, ...(selected !== "ativo" ? { numeroLote: selected } : {}) } }), [codigo, selected]);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/poultry-chat",
+        body: { codigo, ...(selected !== "ativo" ? { numeroLote: selected } : {}) },
+      }),
+    [codigo, selected],
+  );
   const { messages, setMessages, sendMessage, status, stop } = useChat({
-    id: storageKey, transport,
+    id: storageKey,
+    transport,
     onError: (err) => setError(err.message),
     onFinish: () => inputRef.current?.focus(),
   });
   const loading = status === "submitted" || status === "streaming";
   useEffect(() => {
-    setReady(false); setMessages([]); setError(null);
+    setReady(false);
+    setMessages([]);
+    setError(null);
     try {
       const stored = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
-      if (Array.isArray(stored)) setMessages(stored.map((m, i) => m.parts ? m : { id: `legacy-${i}`, role: m.role, parts: [{ type: "text", text: m.content }] }).filter(m => ["user", "assistant"].includes(m.role) && Array.isArray(m.parts)));
-    } catch { /* empty history */ }
+      if (Array.isArray(stored))
+        setMessages(
+          stored
+            .map((m, i) =>
+              m.parts
+                ? m
+                : { id: `legacy-${i}`, role: m.role, parts: [{ type: "text", text: m.content }] },
+            )
+            .filter((m) => ["user", "assistant"].includes(m.role) && Array.isArray(m.parts)),
+        );
+    } catch {
+      /* empty history */
+    }
     setReady(true);
   }, [storageKey, setMessages]);
   useEffect(() => {
-    if (ready && !loading) { try { localStorage.setItem(storageKey, JSON.stringify(messages)); } catch { /* unavailable */ } }
+    if (ready && !loading) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+      } catch {
+        /* unavailable */
+      }
+    }
   }, [messages, ready, loading, storageKey]);
-  useEffect(() => { if (!loading) inputRef.current?.focus(); }, [loading]);
+  useEffect(() => {
+    if (!loading) inputRef.current?.focus();
+  }, [loading]);
   function onEvent(event: LiveEvent) {
     if (event.type === "app.delegation.pending") setPending(true);
     if (
@@ -148,7 +176,9 @@ function AgroIAPage() {
   async function send(text: string) {
     const t = text.trim();
     if (!t || loading || !codigo) return;
-    setInput(""); setError(null); inputRef.current?.focus();
+    setInput("");
+    setError(null);
+    inputRef.current?.focus();
     await sendMessage({ text: t });
   }
   return (
@@ -312,13 +342,29 @@ function AgroIAPage() {
               {messages.map((m, i) => (
                 <Message key={i} from={m.role}>
                   <MessageContent className="group-[.is-user]:bg-primary group-[.is-user]:text-primary-foreground">
-                    {m.parts.map((part, j) => part.type === "text" ? <MessageResponse key={j}>{part.text}</MessageResponse> : part.type === "reasoning" ? <details key={j} className="text-sm text-muted-foreground"><summary>Raciocínio</summary><MessageResponse>{part.text}</MessageResponse></details> : null)}
+                    {m.parts.map((part, j) =>
+                      part.type === "text" ? (
+                        <MessageResponse key={j}>{part.text}</MessageResponse>
+                      ) : part.type === "reasoning" ? (
+                        <details key={j} className="text-sm text-muted-foreground">
+                          <summary>Raciocínio</summary>
+                          <MessageResponse>{part.text}</MessageResponse>
+                        </details>
+                      ) : null,
+                    )}
                   </MessageContent>
                   {m.role === "assistant" && (
                     <MessageActions>
                       <MessageAction
                         tooltip="Copiar resposta"
-                        onClick={() => void navigator.clipboard.writeText(m.parts.filter(p => p.type === "text").map(p => p.text).join("\n"))}
+                        onClick={() =>
+                          void navigator.clipboard.writeText(
+                            m.parts
+                              .filter((p) => p.type === "text")
+                              .map((p) => p.text)
+                              .join("\n"),
+                          )
+                        }
                       >
                         Copiar
                       </MessageAction>
@@ -348,7 +394,14 @@ function AgroIAPage() {
               <PromptInputSubmit
                 aria-label={loading ? "Interromper resposta" : "Enviar pergunta"}
                 status={status}
-                onClick={loading ? (e) => { e.preventDefault(); stop(); } : undefined}
+                onClick={
+                  loading
+                    ? (e) => {
+                        e.preventDefault();
+                        stop();
+                      }
+                    : undefined
+                }
                 disabled={!codigo || (!loading && !input.trim())}
               >
                 {!loading && <Send className="size-4" />}

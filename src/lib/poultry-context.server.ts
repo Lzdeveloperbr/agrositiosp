@@ -30,8 +30,14 @@ export async function getPoultryContext(
   const farm = await client.rpc("entrar_fazenda", { p_codigo: code.trim().toUpperCase() });
   if (farm.error) throw new Error("Não foi possível verificar o acesso à granja.");
   if (!farm.data?.length) throw new Error("Código da granja inválido.");
-  const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(new Date());
-  let query = client.from("lotes").select("*").lte("data_entrada", date).order("data_entrada", { ascending: false });
+  const date = new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Sao_Paulo" }).format(
+    new Date(),
+  );
+  let query = client
+    .from("lotes")
+    .select("*")
+    .lte("data_entrada", date)
+    .order("data_entrada", { ascending: false });
   query = numero ? query.eq("numero", numero) : query.eq("encerrado", false);
   const lots = await query.limit(1).maybeSingle();
   if (lots.error) throw new Error("Não foi possível ler o lote.");

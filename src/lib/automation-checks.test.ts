@@ -19,7 +19,9 @@ describe("poultry automation checks", () => {
   });
   it("does not mistake a zero-loss daily entry for a missing entry", () => {
     expect(missingDailyEntry([], "2026-10-01", "2026-10-12")).toBe(true);
-    expect(missingDailyEntry([{ date: "2026-10-12", mortalidade: 0 }], "2026-10-01", "2026-10-12")).toBe(false);
+    expect(
+      missingDailyEntry([{ date: "2026-10-12", mortalidade: 0 }], "2026-10-01", "2026-10-12"),
+    ).toBe(false);
     expect(missingDailyEntry([], "2026-10-12", "2026-10-12")).toBe(false);
   });
 });
