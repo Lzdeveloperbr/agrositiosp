@@ -29,6 +29,5 @@ export const chatAgroIA = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const { answerPoultry } = await import("./poultry-assistant.server");
-    return answerPoultry(data);
+    throw new Error("Use a conversa atual do assistente para receber respostas em tempo real.");
   });
