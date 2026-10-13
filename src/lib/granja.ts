@@ -7,8 +7,8 @@ export type ResumoZootecnico = ReturnType<typeof calcularResumoLote>;
 
 export function calcularResumoLote(
   lote: Lote,
-  linhagem: Linhagem = "ross_ap95",
-  sexo: Sexo = "misto",
+  linhagem: Linhagem = lote.linhagem ?? "ross_ap95",
+  sexo: Sexo = lote.sexo ?? "misto",
   hoje = new Date(),
 ) {
   const entries = [...(lote.entries || [])].filter((e) => e.date && e.date >= lote.dataEntrada && e.date <= isoLocal(hoje)).sort((a, b) => a.date.localeCompare(b.date));
