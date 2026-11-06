@@ -8,7 +8,7 @@ import { useEstoque, useFinanceiro, useLotes, useTarefas } from "@/lib/state";
 import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO, diffDias } from "@/lib/data";
 import {
-  Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, BarChart3, Bird,
+  Activity, AlertTriangle, BarChart3, Bird,
   CalendarRange, CircleDollarSign, ClipboardList, Package, Scale, TrendingUp,
 } from "lucide-react";
 import {
@@ -237,7 +237,7 @@ function PainelAnalitico() {
   );
 }
 
-function Kpi({ icon: Icon, label, value, note, warning = false }: { icon: typeof Bird; label: string; value: string; note: string; warning?: boolean }) {
+function Kpi({ icon: Icon, label, value, note, warning = false }: { icon: LucideIcon; label: string; value: string; note: string; warning?: boolean }) {
   return <Card className="relative overflow-hidden p-4 shadow-[0_10px_28px_-22px_rgba(20,90,60,0.55)]">
     <div className="absolute -right-4 -top-5 h-20 w-20 rounded-full bg-primary/[0.06] blur-xl" />
     <div className="relative flex items-center justify-between gap-2"><span className="text-xs font-medium text-muted-foreground">{label}</span><Icon className={`h-4 w-4 ${warning ? "text-amber-600" : "text-primary"}`} /></div>
