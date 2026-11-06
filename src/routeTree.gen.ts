@@ -9,7 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TarefasRouteImport } from './routes/tarefas'\nimport { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
+import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
 import { Route as TutorialRouteImport } from './routes/tutorial'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiloRouteImport } from './routes/silo'
@@ -239,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/tutorial': typeof TutorialRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
@@ -344,6 +346,8 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/tutorial'
+    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
@@ -448,6 +452,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
   TutorialRoute: typeof TutorialRoute
+  PainelAnaliticoRoute: typeof PainelAnaliticoRoute
   ApiPoultryChatRoute: typeof ApiPoultryChatRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
@@ -456,6 +461,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/painel-analitico': {
+      id: '/painel-analitico'
+      path: '/painel-analitico'
+      fullPath: '/painel-analitico'
+      preLoaderRoute: typeof PainelAnaliticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tutorial': {
       id: '/tutorial'
       path: '/tutorial'
@@ -720,6 +732,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
   TutorialRoute: TutorialRoute,
+  PainelAnaliticoRoute: PainelAnaliticoRoute,
   ApiPoultryChatRoute: ApiPoultryChatRoute,
   GranjaIdRoute: GranjaIdRoute,
   GranjaIndexRoute: GranjaIndexRoute,
