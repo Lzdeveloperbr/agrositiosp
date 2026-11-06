@@ -45,7 +45,8 @@ function IndicadoresPage() {
     return lotes.map((l) => {
       const entries = [...(l.entries ?? [])].filter((e) => e.date >= l.dataEntrada && e.date <= hojeISO()).sort((a, b) => a.date.localeCompare(b.date));
       const mortos = entries.reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
-      const dataReferencia = l.encerrado ? entries.at(-1)?.date ?? hojeISO() : hojeISO();\n      const dias = Math.max(0, diffDias(l.dataEntrada, dataReferencia));
+      const dataReferencia = l.encerrado ? entries.at(-1)?.date ?? hojeISO() : hojeISO();
+      const dias = Math.max(0, diffDias(l.dataEntrada, dataReferencia));
       const alojadas = l.quantidadeInicial || 0;
       const vivas = Math.max(alojadas - mortos, 0);
       const viab = alojadas ? (vivas / alojadas) * 100 : 0;
@@ -67,7 +68,8 @@ function IndicadoresPage() {
   const melhor = ranking[0];
   const mediaIEP = kpis.length ? kpis.reduce((s, k) => s + k.iep, 0) / kpis.length : 0;
   const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : 0;
-  const gpdValidos = kpis.map((k) => k.gpd).filter((v): v is number => typeof v === "number" && Number.isFinite(v));\n  const mediaGPD = gpdValidos.length ? gpdValidos.reduce((s, v) => s + v, 0) / gpdValidos.length : null;
+  const gpdValidos = kpis.map((k) => k.gpd).filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+  const mediaGPD = gpdValidos.length ? gpdValidos.reduce((s, v) => s + v, 0) / gpdValidos.length : null;
 
   const serieFin = useMemo(() => {
     const base = new Date();
