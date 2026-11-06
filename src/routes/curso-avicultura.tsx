@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { BookOpen, CheckCircle2, CirclePlay, Clock3, Award, ExternalLink, GraduationCap, ShieldCheck, ChevronDown, ChevronUp, ClipboardList, Download, RotateCcw } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { AvicultureStudyMaterials } from "@/components/AvicultureStudyMaterials";
 
 export const Route = createFileRoute("/curso-avicultura")({
   head: () => ({ meta: [
