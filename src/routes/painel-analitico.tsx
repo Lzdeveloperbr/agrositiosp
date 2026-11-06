@@ -305,7 +305,7 @@ function PainelAnalitico() {
               <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Aguardando entrega</p><p className="mt-1 text-2xl font-bold tabular-nums">{comprasAguardando.length}</p></div>
             </div>
             {comprasAbertas.length ? <div className="mt-4 space-y-2">
-              {comprasAbertas.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 4).map((c) => <div key={c.id} className="flex items-center justify-between gap-2 text-sm"><span className="min-w-0 truncate">{c.fornecedor || c.itens.map((i) => i.nome).join(", ") || "Compra sem descrição"}</span><span className="shrink-0 text-xs tabular-nums text-muted-foreground">{brl(c.total)}</span></div>)}
+              {comprasAbertas.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 4).map((c) => <div key={c.id} className="flex items-center justify-between gap-2 text-sm"><span className="min-w-0 truncate">{c.fornecedor || (c.itens ?? []).map((i) => i.nome).join(", ") || "Compra sem descrição"}</span><span className="shrink-0 text-xs tabular-nums text-muted-foreground">{brl(c.total)}</span></div>)}
             </div> : <div className="mt-4 rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Nenhuma compra em andamento.</div>}
             <p className="mt-3 text-[11px] text-muted-foreground">Os totais consideram somente compras com status solicitado, aprovado ou pedido.</p>
           </Card>
