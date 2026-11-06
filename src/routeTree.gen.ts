@@ -9,7 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as TarefasRouteImport } from './routes/tarefas'\nimport { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
 import { Route as TutorialRouteImport } from './routes/tutorial'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiloRouteImport } from './routes/silo'
@@ -43,7 +43,7 @@ import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
-const TutorialRoute = TutorialRouteImport.update({
+const PainelAnaliticoRoute = PainelAnaliticoRouteImport.update({\n  id: '/painel-analitico',\n  path: '/painel-analitico',\n  getParentRoute: () => rootRouteImport,\n} as any)\nconst TutorialRoute = TutorialRouteImport.update({
   id: '/tutorial',
   path: '/tutorial',
   getParentRoute: () => rootRouteImport,
