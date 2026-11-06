@@ -33,7 +33,7 @@ const n2 = (v: number | null) => (typeof v === "number" && Number.isFinite(v) ? 
 
 type LoteKPI = {
   id: string; numero: string; dias: number; alojadas: number; vivas: number;
-  mortPct: number; viab: number; pesoKg: number; gpd: number | null; iep: number | null;
+  mortPct: number; viab: number; pesoKg: number | null; gpd: number | null; iep: number | null;
 };
 
 function IndicadoresPage() {
@@ -54,7 +54,7 @@ function IndicadoresPage() {
       const pesagem = pesagens.at(-1);
       const anterior = pesagens.at(-2);
       const ultimoPeso = Number(pesagem?.pesoMedioG ?? 0);
-      const pesoKg = ultimoPeso / 1000;
+      const pesoKg = pesagem ? ultimoPeso / 1000 : null;
       const intervalo = pesagem && anterior ? diffDias(anterior.date, pesagem.date) : 0;
       const gpd = intervalo > 0 ? (ultimoPeso - Number(anterior?.pesoMedioG ?? 0)) / intervalo : null;
       const iep = null; // Sem conversão alimentar real, não calcular IEP.
@@ -68,7 +68,7 @@ function IndicadoresPage() {
 
   const ranking = useMemo(() => [...kpis].sort((a, b) => b.viab - a.viab), [kpis]);
   const melhor = ranking[0];
-  const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : 0;
+  const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : null;
   const gpdValidos = kpis.map((k) => k.gpd).filter((v): v is number => typeof v === "number" && Number.isFinite(v));
   const mediaGPD = gpdValidos.length ? gpdValidos.reduce((s, v) => s + v, 0) / gpdValidos.length : null;
 
