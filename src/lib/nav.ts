@@ -44,6 +44,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Desempenho",
     icon: TrendingUp,
     items: [
+      { to: "/painel-analitico", label: "Painel analítico", icon: BarChart3, desc: "Gráficos de produção, pesagens, financeiro e estoque", tags: ["dashboard", "graficos", "analise"] },
       { to: "/excelencia-lote", label: "Excelência do lote", icon: Trophy, desc: "IEP, GPD e curva de peso vs. meta", tags: ["iep", "kpi"] },
       { to: "/ficha-lote", label: "Ficha do lote", icon: ClipboardList, desc: "Ficha técnica completa", tags: ["lote"] },
       { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3, desc: "Compare desempenho entre lotes", tags: ["comparar"] },
