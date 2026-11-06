@@ -47,6 +47,8 @@ function LoteDetalhe() {
     pesoMedioG: undefined as number | undefined,
     consumoRacaoKg: undefined as number | undefined,
     consumoAguaLitros: undefined as number | undefined,
+    vazaoNippleMlMin: undefined as number | undefined,
+    pressaoAguaCmH2O: undefined as number | undefined,
     observacoes: "",
   });
 
@@ -85,8 +87,8 @@ function LoteDetalhe() {
       toast.error("Informe um peso médio entre 20 g e 6.000 g");
       return;
     }
-    if ([entry.consumoRacaoKg, entry.consumoAguaLitros].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) {
-      toast.error("Consumo de ração e água não pode ser negativo");
+    if ([entry.consumoRacaoKg, entry.consumoAguaLitros, entry.vazaoNippleMlMin, entry.pressaoAguaCmH2O].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) {
+      toast.error("Consumos, vazão e pressão devem ser valores válidos e não negativos");
       return;
     }
     const jaExiste = lote.entries.some((e) => e.date === entry.date);
@@ -98,7 +100,7 @@ function LoteDetalhe() {
       ...l,
       entries: [...l.entries, { ...entry }].sort((a, b) => a.date.localeCompare(b.date)),
     } : l));
-    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, consumoRacaoKg: undefined, consumoAguaLitros: undefined, observacoes: "" });
+    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, consumoRacaoKg: undefined, consumoAguaLitros: undefined, vazaoNippleMlMin: undefined, pressaoAguaCmH2O: undefined, observacoes: "" });
     toast.success("Lançamento registrado");
   };
 
@@ -240,7 +242,17 @@ function LoteDetalhe() {
                     onChange={(e) => setEntry({ ...entry, consumoAguaLitros: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 2400" />
                 </Field>
               </div>
-              <p className="text-[11px] text-muted-foreground">Ração e água são opcionais. Registre apenas valores medidos; o sistema não preenche dados ausentes.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Vazão do nipple (ml/min)">
+                  <Input type="number" inputMode="decimal" min={0} step="1" value={entry.vazaoNippleMlMin ?? ""}
+                    onChange={(e) => setEntry({ ...entry, vazaoNippleMlMin: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 65" />
+                </Field>
+                <Field label="Pressão da linha (cm H₂O)">
+                  <Input type="number" inputMode="decimal" min={0} step="0.5" value={entry.pressaoAguaCmH2O ?? ""}
+                    onChange={(e) => setEntry({ ...entry, pressaoAguaCmH2O: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 28" />
+                </Field>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Ração, água, vazão e pressão são opcionais. Registre apenas valores medidos; o sistema não preenche dados ausentes.</p>
               <Field label="Observações"><Textarea rows={2} value={entry.observacoes} onChange={(e) => setEntry({ ...entry, observacoes: e.target.value })} /></Field>
               <Button onClick={adicionar} className="w-full"><Plus className="h-4 w-4 mr-1" /> Lançar</Button>
             </div>
@@ -250,6 +262,7 @@ function LoteDetalhe() {
         <ConfigRemuneracao loteId={lote.id} vivas={vivas} pesoVivoKg={pesoTotalKg} />
 
         <ConsumoDiario lote={lote} />
+        <ControleLinhaAgua lote={lote} />
 
         <FechamentoLoteCard lote={lote} estoqueRacaoKg={estoqueRacaoKg} />
 
@@ -268,6 +281,8 @@ function LoteDetalhe() {
                     <th className="text-right py-2">Peso (g)</th>
                     <th className="text-right py-2">Ração (kg)</th>
                     <th className="text-right py-2">Água (L)</th>
+                    <th className="text-right py-2">Vazão</th>
+                    <th className="text-right py-2">Pressão</th>
                     <th className="text-left py-2 pl-4">Obs</th>
                     <th></th>
                   </tr>
@@ -283,6 +298,8 @@ function LoteDetalhe() {
                         <td className="py-2 text-right tabular-nums">{e.pesoMedioG ?? "—"}</td>
                         <td className="py-2 text-right tabular-nums">{e.consumoRacaoKg?.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) ?? "—"}</td>
                         <td className="py-2 text-right tabular-nums">{e.consumoAguaLitros?.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.vazaoNippleMlMin ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.pressaoAguaCmH2O ?? "—"}</td>
                         <td className="py-2 pl-4 text-muted-foreground">{e.observacoes ?? ""}</td>
                         <td className="py-2 text-right"><Button size="icon" variant="ghost" onClick={() => removerEntry(realIdx)}><Trash2 className="h-3.5 w-3.5" /></Button></td>
                       </tr>
@@ -298,6 +315,47 @@ function LoteDetalhe() {
   );
 }
 
+
+
+function ControleLinhaAgua({ lote }: { lote: import("@/lib/types").Lote }) {
+  const faixas = [
+    { ate: 3, fase: "D0–D3", vazao: [30, 40], pressao: [10, 15] },
+    { ate: 7, fase: "D4–D7", vazao: [40, 50], pressao: [15, 20] },
+    { ate: 14, fase: "D8–D14", vazao: [50, 60], pressao: [20, 25] },
+    { ate: 21, fase: "D15–D21", vazao: [60, 70], pressao: [25, 30] },
+    { ate: 28, fase: "D22–D28", vazao: [70, 80], pressao: [30, 35] },
+    { ate: 35, fase: "D29–D35", vazao: [80, 90], pressao: [35, 40] },
+    { ate: 999, fase: "D36+", vazao: [80, 100], pressao: [35, 45] },
+  ];
+  const registros = (lote.entries ?? []).filter((e) => e.vazaoNippleMlMin !== undefined || e.pressaoAguaCmH2O !== undefined).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const ultimo = registros.at(-1);
+  const idade = ultimo ? Math.max(0, diffDias(lote.dataEntrada, ultimo.date)) : Math.max(0, diffDias(lote.dataEntrada));
+  const faixa = faixas.find((f) => idade <= f.ate) ?? faixas[faixas.length - 1];
+  const dentro = (v: number | undefined, range: number[]) => v === undefined ? null : v >= range[0] && v <= range[1];
+  const vazaoOk = dentro(ultimo?.vazaoNippleMlMin, faixa.vazao);
+  const pressaoOk = dentro(ultimo?.pressaoAguaCmH2O, faixa.pressao);
+  const status = (ok: boolean | null) => ok === null ? "Sem medição" : ok ? "Dentro da faixa de referência" : "Fora da faixa de referência";
+  return <Card className="p-5 space-y-4">
+    <div><h2 className="font-display font-semibold text-lg">Pressão e vazão da linha de água</h2>
+      <p className="text-xs text-muted-foreground">Registre a medição manual de um nipple e a pressão da linha. Comparação com as faixas de referência do módulo Manejo.</p></div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <KPI label="Fase do lote" value={faixa.fase} />
+      <KPI label="Vazão de referência" value={`${faixa.vazao[0]}–${faixa.vazao[1]} ml/min`} />
+      <KPI label="Pressão de referência" value={`${faixa.pressao[0]}–${faixa.pressao[1]} cm H₂O`} />
+      <KPI label="Medições registradas" value={String(registros.length)} />
+    </div>
+    {ultimo ? <div className="rounded-xl border border-border p-3 space-y-2">
+      <p className="text-sm font-semibold">Última medição · {fmtData(ultimo.date)}</p>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div><p className="text-muted-foreground text-xs">Vazão</p><p className="font-semibold">{ultimo.vazaoNippleMlMin === undefined ? "—" : `${ultimo.vazaoNippleMlMin} ml/min`}</p><p className={vazaoOk === false ? "text-destructive text-xs" : "text-xs text-muted-foreground"}>{status(vazaoOk)}</p></div>
+        <div><p className="text-muted-foreground text-xs">Pressão</p><p className="font-semibold">{ultimo.pressaoAguaCmH2O === undefined ? "—" : `${ultimo.pressaoAguaCmH2O} cm H₂O`}</p><p className={pressaoOk === false ? "text-destructive text-xs" : "text-xs text-muted-foreground"}>{status(pressaoOk)}</p></div>
+      </div>
+    </div> : <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 text-center">Nenhuma medição de vazão ou pressão registrada ainda.</p>}
+    <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="text-xs text-muted-foreground"><tr className="border-b border-border"><th className="py-2 text-left">Data</th><th className="py-2 text-right">Vazão ml/min</th><th className="py-2 text-right">Pressão cm H₂O</th></tr></thead>
+      <tbody>{registros.slice().reverse().map((e)=><tr key={e.date} className="border-b border-border/50"><td className="py-2">{fmtData(e.date)}</td><td className="py-2 text-right">{e.vazaoNippleMlMin ?? "—"}</td><td className="py-2 text-right">{e.pressaoAguaCmH2O ?? "—"}</td></tr>)}</tbody></table></div>
+    <p className="text-[11px] text-muted-foreground">Faixas são referências orientativas do módulo Manejo, não diagnóstico automático. Confira altura dos nipples, limpeza, vazamentos e pontos representativos da linha, inclusive o final.</p>
+  </Card>;
+}
 
 function ConsumoDiario({ lote }: { lote: import("@/lib/types").Lote }) {
   const registros = [...(lote.entries ?? [])].filter((e) => e.consumoRacaoKg !== undefined || e.consumoAguaLitros !== undefined).sort((a, b) => a.date.localeCompare(b.date));
