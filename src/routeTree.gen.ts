@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as TutorialRouteImport } from './routes/tutorial'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SiloRouteImport } from './routes/silo'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
@@ -42,6 +43,11 @@ import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
+const TutorialRoute = TutorialRouteImport.update({
+  id: '/tutorial',
+  path: '/tutorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/tutorial': typeof TutorialRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
@@ -440,6 +447,7 @@ export interface RootRouteChildren {
   SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
+  TutorialRoute: typeof TutorialRoute
   ApiPoultryChatRoute: typeof ApiPoultryChatRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
@@ -448,6 +456,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tutorial': {
+      id: '/tutorial'
+      path: '/tutorial'
+      fullPath: '/tutorial'
+      preLoaderRoute: typeof TutorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tarefas': {
       id: '/tarefas'
       path: '/tarefas'
@@ -704,6 +719,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
+  TutorialRoute: TutorialRoute,
   ApiPoultryChatRoute: ApiPoultryChatRoute,
   GranjaIdRoute: GranjaIdRoute,
   GranjaIndexRoute: GranjaIndexRoute,
