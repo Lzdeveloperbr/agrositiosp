@@ -14,6 +14,7 @@ import { AlertasInteligentes } from "@/components/AlertasInteligentes";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { verificarENotificar } from "@/lib/lembretes";
 import { calcularResumoLote } from "@/lib/granja";
+import { OperationalOverview } from "@/components/OperationalOverview";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -85,6 +86,8 @@ function Central() {
           <SectionTitle title="Lote ativo" to="/granja" link="Todos os lotes" />
           <PainelLoteAtivo />
         </section>
+
+        <OperationalOverview />
 
         <AlertasInteligentes />
         <NotificationsManager />
