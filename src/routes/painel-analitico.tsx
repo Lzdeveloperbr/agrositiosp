@@ -231,6 +231,7 @@ function PainelAnalitico() {
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart><Pie data={distribuicao} dataKey="value" nameKey="name" innerRadius={52} outerRadius={82} paddingAngle={4}>{distribuicao.map((entry, index) => <Cell key={entry.name} fill={index === 0 ? "#16845b" : "#d97736"} />)}</Pie><Tooltip formatter={(v) => brl(Number(v))} /></PieChart>
+              </ResponsiveContainer>
             </div>
             <div className="space-y-3">
               {distribuicao.map((item, index) => <div key={item.name} className="flex items-center justify-between gap-3"><span className="flex items-center gap-2 text-sm"><span className="h-3 w-3 rounded-sm" style={{ background: index === 0 ? "#16845b" : "#d97736" }} />{item.name}</span><strong className="tabular-nums">{brl(item.value)}</strong></div>)}
