@@ -44,9 +44,10 @@ function PainelAnalitico() {
   const lotesVisiveis = loteId === "todos" ? lotes : loteSelecionado ? [loteSelecionado] : lotes;
 
   const producao = useMemo(() => {
-    const limite = new Date();
+    const [ano, mes, dia] = hoje.split("-").map(Number);
+    const limite = new Date(ano, mes - 1, dia);
     limite.setDate(limite.getDate() - periodo);
-    const inicio = limite.toISOString().slice(0, 10);
+    const inicio = `${limite.getFullYear()}-${String(limite.getMonth() + 1).padStart(2, "0")}-${String(limite.getDate()).padStart(2, "0")}`;
     const pesagens = lotesVisiveis.flatMap((l) => (l.entries ?? [])
       .filter((e) => e.date >= inicio && e.date <= hoje && Number(e.pesoMedioG) > 0)
       .map((e) => ({ data: e.date, lote: l.numero, peso: Number(e.pesoMedioG), idade: Math.max(0, diffDias(l.dataEntrada, e.date)) })))
@@ -192,7 +193,7 @@ function PainelAnalitico() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 10 }} />
                   <YAxis type="category" dataKey="item" width={100} tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={(v, name, item) => [`${Number(v).toLocaleString("pt-BR")} ${item.payload.unidade}`, name === "atual" ? "Quantidade atual" : "Mínimo"]} />
+                  <Tooltip formatter={(v) => Number(v).toLocaleString("pt-BR")} />
                   <Bar dataKey="atual" name="Atual" radius={[0, 6, 6, 0]}>{estoqueChart.map((entry, index) => <Cell key={entry.item + index} fill={entry.atual <= entry.minimo ? "#d97736" : PALETTE[index % PALETTE.length]} />)}</Bar>
                   <Bar dataKey="minimo" name="Mínimo" fill="#9ca3af" radius={[0, 6, 6, 0]} />
                 </BarChart>
