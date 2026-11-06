@@ -29,11 +29,11 @@ export const Route = createFileRoute("/indicadores")({
 });
 
 const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-const n2 = (v: number) => (Number.isFinite(v) ? v.toFixed(2) : "—");
+const n2 = (v: number | null) => (typeof v === "number" && Number.isFinite(v) ? v.toFixed(2) : "—");
 
 type LoteKPI = {
   id: string; numero: string; dias: number; alojadas: number; vivas: number;
-  mortPct: number; viab: number; pesoKg: number; gpd: number; iep: number;
+  mortPct: number; viab: number; pesoKg: number; gpd: number | null; iep: number | null;
 };
 
 function IndicadoresPage() {
@@ -43,9 +43,9 @@ function IndicadoresPage() {
 
   const kpis: LoteKPI[] = useMemo(() => {
     return lotes.map((l) => {
-      const entries = [...(l.entries ?? [])].sort((a, b) => a.date.localeCompare(b.date));
+      const entries = [...(l.entries ?? [])].filter((e) => e.date >= l.dataEntrada && e.date <= hojeISO()).sort((a, b) => a.date.localeCompare(b.date));
       const mortos = entries.reduce((s, e) => s + (e.mortalidade || 0) + (e.eliminados || 0), 0);
-      const dias = entries.length ? Math.max(0, diffDias(l.dataEntrada, entries.at(-1)?.date ?? hojeISO())) : 0;
+      const dataReferencia = l.encerrado ? entries.at(-1)?.date ?? hojeISO() : hojeISO();\n      const dias = Math.max(0, diffDias(l.dataEntrada, dataReferencia));
       const alojadas = l.quantidadeInicial || 0;
       const vivas = Math.max(alojadas - mortos, 0);
       const viab = alojadas ? (vivas / alojadas) * 100 : 0;
@@ -67,7 +67,7 @@ function IndicadoresPage() {
   const melhor = ranking[0];
   const mediaIEP = kpis.length ? kpis.reduce((s, k) => s + k.iep, 0) / kpis.length : 0;
   const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : 0;
-  const mediaGPD = kpis.length ? kpis.reduce((s, k) => s + k.gpd, 0) / kpis.length : 0;
+  const gpdValidos = kpis.map((k) => k.gpd).filter((v): v is number => typeof v === "number" && Number.isFinite(v));\n  const mediaGPD = gpdValidos.length ? gpdValidos.reduce((s, v) => s + v, 0) / gpdValidos.length : null;
 
   const serieFin = useMemo(() => {
     const base = new Date();
@@ -128,7 +128,7 @@ function IndicadoresPage() {
               <h2 className="font-semibold mb-3">Viabilidade por lote</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ranking.map((r) => ({ nome: r.numero, IEP: Math.round(r.iep), Viabilidade: Number(r.viab.toFixed(1)) }))}>
+                  <BarChart data={ranking.map((r) => ({ nome: r.numero, Viabilidade: Number(r.viab.toFixed(1)) }))}>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                     <XAxis dataKey="nome" fontSize={11} />
                     <YAxis fontSize={11} />
@@ -168,7 +168,7 @@ function IndicadoresPage() {
                       <TableCell className="text-right tabular-nums">{n2(r.pesoKg)} kg</TableCell>
                       <TableCell className="text-right tabular-nums">{n2(r.gpd)} g</TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={r.iep >= mediaIEP ? "secondary" : "outline"}>—</Badge>
+                        <Badge variant="outline">Sem CA real</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
