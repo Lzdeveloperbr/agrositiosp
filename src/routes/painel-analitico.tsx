@@ -256,7 +256,7 @@ function PainelAnalitico() {
           <p className="mt-4 text-[11px] leading-5 text-muted-foreground">Observação: aves vivas e mortalidade são calculadas a partir dos lançamentos existentes. O gráfico de peso mostra somente pesagens registradas; não representa projeções. Valores financeiros consideram os lançamentos por data e não substituem conciliação bancária.</p>
         </Card>
 
-        <section className="grid gap-4 xl:grid-cols-3">
+        <section className="grid gap-4 xl:grid-cols-2">
           <Card className="p-4 sm:p-5">
             <div className="mb-3 flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Manutenção preventiva</h2></div>
             <p className="mb-4 text-xs text-muted-foreground">Prazos registrados nas máquinas por data ou horímetro</p>
