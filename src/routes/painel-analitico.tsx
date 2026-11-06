@@ -282,6 +282,22 @@ function PainelAnalitico() {
           </Card>
 
           <Card className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Combustível das máquinas</h2></div>
+            <p className="mb-4 text-xs text-muted-foreground">Abastecimentos lançados nos últimos 30 dias</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Litros registrados</p><p className="mt-1 text-2xl font-bold tabular-nums">{num(litros30d, 0)} L</p></div>
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Custo conhecido</p><p className="mt-1 text-xl font-bold tabular-nums">{brl(custoCombustivelConhecido)}</p></div>
+            </div>
+            {abastecimentos30d.length ? <div className="mt-4 space-y-2">
+              {maquinas.map((m) => {
+                const litros = abastecimentos30d.filter((a) => a.maquina === m.nome).reduce((s, a) => s + a.litros, 0);
+                return litros > 0 ? <div key={m.id} className="flex items-center justify-between gap-3 text-sm"><span className="truncate">{m.nome}</span><strong className="tabular-nums">{num(litros, 1)} L</strong></div> : null;
+              })}
+            </div> : <div className="mt-4 rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Sem abastecimentos registrados neste período.</div>}
+            <p className="mt-3 text-[11px] text-muted-foreground">{abastecimentosComCusto} de {abastecimentos30d.length} abastecimento(s) têm valor calculável. O custo exibido soma somente os valores conhecidos.</p>
+          </Card>
+
+          <Card className="p-4 sm:p-5">
             <div className="mb-3 flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Compras em andamento</h2></div>
             <p className="mb-4 text-xs text-muted-foreground">Solicitações, aprovações e pedidos ainda não recebidos</p>
             <div className="grid grid-cols-2 gap-3">
