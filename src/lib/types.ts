@@ -5,6 +5,14 @@ export type DailyEntry = {
   mortalidade: number;
   eliminados?: number;
   pesoMedioG?: number;
+  /** Consumo diário medido no lote; opcional para preservar registros antigos. */
+  consumoRacaoKg?: number;
+  /** Água consumida no dia, em litros; informar somente quando medida. */
+  consumoAguaLitros?: number;
+  /** Medição manual de vazão de um nipple, em ml/min. */
+  vazaoNippleMlMin?: number;
+  /** Pressão medida na linha, em cm de coluna d'água. */
+  pressaoAguaCmH2O?: number;
   amostraPesagem?: { id: string; sexo: "macho" | "femea" | "misto"; pesoG: number }[];
   operadorPesagem?: string;
   observacoes?: string;

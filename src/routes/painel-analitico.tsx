@@ -4,12 +4,12 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useEstoque, useFinanceiro, useLotes, useTarefas } from "@/lib/state";
+import { useCompras, useEstoque, useFinanceiro, useLotes, useMaquinas, useTarefas } from "@/lib/state";
 import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO, diffDias } from "@/lib/data";
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity, AlertTriangle, BarChart3, Bird,
+  Activity, AlertTriangle, BarChart3, Bird, Wrench, ShoppingCart, CalendarClock,
   CalendarRange, CircleDollarSign, ClipboardList, Package, Scale, TrendingUp,
 } from "lucide-react";
 import {
@@ -36,6 +36,8 @@ function PainelAnalitico() {
   const [financeiro] = useFinanceiro();
   const [estoque] = useEstoque();
   const [tarefas] = useTarefas();
+  const [maquinas] = useMaquinas();
+  const [compras] = useCompras();
   const [periodo, setPeriodo] = useState(90);
   const [loteId, setLoteId] = useState("todos");
   const hoje = hojeISO();
@@ -85,6 +87,35 @@ function PainelAnalitico() {
     });
   }, [financeiro]);
 
+  const contasProximas = financeiro
+    .filter((l) => l.tipo === "despesa" && l.status !== "pago" && l.vencimento)
+    .map((l) => ({ ...l, dias: diffDias(hoje, l.vencimento!) }))
+    .filter((l) => l.dias <= 7)
+    .sort((a, b) => a.dias - b.dias);
+  const manutencoesPendentes = maquinas.flatMap((maquina) =>
+    (maquina.manutencoes ?? []).filter((m) => m.proximaData || m.proximoHorimetro !== undefined)
+      .map((m) => {
+        const dias = m.proximaData ? diffDias(hoje, m.proximaData) : null;
+        const horas = m.proximoHorimetro !== undefined ? m.proximoHorimetro - maquina.horimetro : null;
+        const vencida = (dias !== null && dias <= 0) || (horas !== null && horas <= 0);
+        const proxima = (dias !== null && dias <= 14) || (horas !== null && horas <= 10);
+        return { maquina: maquina.nome, descricao: m.descricao, dias, horas, vencida, proxima, data: m.proximaData };
+      }).filter((m) => m.vencida || m.proxima)
+  ).sort((a, b) => Number(b.vencida) - Number(a.vencida) || (a.dias ?? 9999) - (b.dias ?? 9999));
+  const dataInicioCombustivel = (() => {
+    const [ano, mes, dia] = hoje.split("-").map(Number);
+    const inicio = new Date(ano, mes - 1, dia);
+    inicio.setDate(inicio.getDate() - 29);
+    return `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, "0")}-${String(inicio.getDate()).padStart(2, "0")}`;
+  })();
+  const abastecimentos30d = maquinas.flatMap((m) => (m.abastecimentos ?? [])
+    .filter((a) => a.data >= dataInicioCombustivel && a.data <= hoje)
+    .map((a) => ({ maquina: m.nome, litros: Math.max(0, Number(a.litros) || 0), custo: Number.isFinite(Number(a.total)) ? Number(a.total) : Number.isFinite(Number(a.precoLitro)) ? Number(a.litros) * Number(a.precoLitro) : null })));
+  const litros30d = abastecimentos30d.reduce((s, a) => s + a.litros, 0);
+  const custoCombustivelConhecido = abastecimentos30d.reduce((s, a) => s + (a.custo ?? 0), 0);
+  const abastecimentosComCusto = abastecimentos30d.filter((a) => a.custo !== null).length;
+  const comprasAbertas = compras.filter((c) => ["solicitado", "aprovado", "pedido"].includes(c.status));
+  const comprasAguardando = compras.filter((c) => c.status === "pedido");
   const estoqueCritico = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
   const estoqueChart = estoque.filter((i) => Number.isFinite(i.quantidade) && i.quantidade >= 0)
     .slice().sort((a, b) => a.quantidade - b.quantidade).slice(0, 7)
@@ -224,6 +255,61 @@ function PainelAnalitico() {
           </div> : <Empty text="Cadastre um lote para acompanhar os indicadores de produção." link="/granja" label="Cadastrar lote" />}
           <p className="mt-4 text-[11px] leading-5 text-muted-foreground">Observação: aves vivas e mortalidade são calculadas a partir dos lançamentos existentes. O gráfico de peso mostra somente pesagens registradas; não representa projeções. Valores financeiros consideram os lançamentos por data e não substituem conciliação bancária.</p>
         </Card>
+
+        <section className="grid gap-4 xl:grid-cols-2">
+          <Card className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Manutenção preventiva</h2></div>
+            <p className="mb-4 text-xs text-muted-foreground">Prazos registrados nas máquinas por data ou horímetro</p>
+            {manutencoesPendentes.length ? <div className="space-y-3">
+              {manutencoesPendentes.slice(0, 5).map((m, i) => <div key={m.maquina + m.descricao + i} className="flex items-start justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
+                <div className="min-w-0"><p className="text-sm font-semibold">{m.maquina}</p><p className="text-xs text-muted-foreground">{m.descricao}</p><p className="mt-1 text-[11px] text-muted-foreground">{m.dias !== null ? (m.dias <= 0 ? `Data vencida há ${Math.abs(m.dias)} dia(s)` : `Em ${m.dias} dia(s)`) : ""}{m.dias !== null && m.horas !== null ? " · " : ""}{m.horas !== null ? (m.horas <= 0 ? `Horímetro excedido em ${Math.abs(m.horas)} h` : `Faltam ${m.horas} h`) : ""}</p></div>
+                <Badge variant={m.vencida ? "destructive" : "outline"}>{m.vencida ? "Vencida" : "Próxima"}</Badge>
+              </div>)}
+            </div> : <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Nenhuma manutenção próxima com prazo informado.</div>}
+            <p className="mt-3 text-[11px] text-muted-foreground">Alertas calculados apenas para manutenções que já possuem próxima data ou horímetro cadastrados.</p>
+          </Card>
+
+          <Card className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2"><CalendarClock className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Contas a vencer</h2></div>
+            <p className="mb-4 text-xs text-muted-foreground">Despesas pendentes vencidas ou com vencimento nos próximos 7 dias</p>
+            {contasProximas.length ? <div className="space-y-3">
+              {contasProximas.slice(0, 5).map((l) => <div key={l.id} className="flex items-start justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
+                <div className="min-w-0"><p className="text-sm font-semibold">{l.descricao || l.categoria}</p><p className="text-xs text-muted-foreground">{l.categoria} · {l.vencimento ? l.vencimento.split("-").reverse().join("/") : ""}</p><p className="mt-1 text-xs font-semibold tabular-nums">{brl(l.valor)}</p></div>
+                <Badge variant={l.dias < 0 || l.status === "atrasado" ? "destructive" : "outline"}>{l.dias < 0 ? `${Math.abs(l.dias)} d atrasada` : l.dias === 0 ? "Hoje" : `${l.dias} d`}</Badge>
+              </div>)}
+            </div> : <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Nenhuma despesa com vencimento próximo registrada.</div>}
+            <div className="mt-3 flex justify-end"><Link to="/financeiro" className="text-xs font-semibold text-primary">Abrir financeiro →</Link></div>
+          </Card>
+
+          <Card className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Combustível das máquinas</h2></div>
+            <p className="mb-4 text-xs text-muted-foreground">Abastecimentos lançados nos últimos 30 dias</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Litros registrados</p><p className="mt-1 text-2xl font-bold tabular-nums">{num(litros30d, 0)} L</p></div>
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Custo conhecido</p><p className="mt-1 text-xl font-bold tabular-nums">{brl(custoCombustivelConhecido)}</p></div>
+            </div>
+            {abastecimentos30d.length ? <div className="mt-4 space-y-2">
+              {maquinas.map((m) => {
+                const litros = abastecimentos30d.filter((a) => a.maquina === m.nome).reduce((s, a) => s + a.litros, 0);
+                return litros > 0 ? <div key={m.id} className="flex items-center justify-between gap-3 text-sm"><span className="truncate">{m.nome}</span><strong className="tabular-nums">{num(litros, 1)} L</strong></div> : null;
+              })}
+            </div> : <div className="mt-4 rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Sem abastecimentos registrados neste período.</div>}
+            <p className="mt-3 text-[11px] text-muted-foreground">{abastecimentosComCusto} de {abastecimentos30d.length} abastecimento(s) têm valor calculável. O custo exibido soma somente os valores conhecidos.</p>
+          </Card>
+
+          <Card className="p-4 sm:p-5">
+            <div className="mb-3 flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Compras em andamento</h2></div>
+            <p className="mb-4 text-xs text-muted-foreground">Solicitações, aprovações e pedidos ainda não recebidos</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Em aberto</p><p className="mt-1 text-2xl font-bold tabular-nums">{comprasAbertas.length}</p></div>
+              <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Aguardando entrega</p><p className="mt-1 text-2xl font-bold tabular-nums">{comprasAguardando.length}</p></div>
+            </div>
+            {comprasAbertas.length ? <div className="mt-4 space-y-2">
+              {comprasAbertas.slice().sort((a, b) => b.data.localeCompare(a.data)).slice(0, 4).map((c) => <div key={c.id} className="flex items-center justify-between gap-2 text-sm"><span className="min-w-0 truncate">{c.fornecedor || (c.itens ?? []).map((i) => i.nome).join(", ") || "Compra sem descrição"}</span><span className="shrink-0 text-xs tabular-nums text-muted-foreground">{brl(c.total)}</span></div>)}
+            </div> : <div className="mt-4 rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">Nenhuma compra em andamento.</div>}
+            <p className="mt-3 text-[11px] text-muted-foreground">Os totais consideram somente compras com status solicitado, aprovado ou pedido.</p>
+          </Card>
+        </section>
 
         {distribuicao.length > 0 && <Card className="p-4 sm:p-5">
           <div className="mb-2 flex items-center gap-2"><CalendarRange className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Composição financeira do semestre</h2></div>

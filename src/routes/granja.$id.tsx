@@ -15,7 +15,7 @@ import { FechamentoLoteCard } from "@/components/FechamentoLoteCard";
 import { toast } from "sonner";
 import { addDias, diffDias, fmtData, hojeISO, parseData } from "@/lib/data";
 import { calcularResumoLote } from "@/lib/granja";
-import { refPesoG } from "@/lib/silo";
+import { refConsumoDiaG, refPesoG } from "@/lib/silo";
 
 export const Route = createFileRoute("/granja/$id")({
   head: () => ({
@@ -45,6 +45,10 @@ function LoteDetalhe() {
     mortalidade: 0,
     eliminados: 0,
     pesoMedioG: undefined as number | undefined,
+    consumoRacaoKg: undefined as number | undefined,
+    consumoAguaLitros: undefined as number | undefined,
+    vazaoNippleMlMin: undefined as number | undefined,
+    pressaoAguaCmH2O: undefined as number | undefined,
     observacoes: "",
   });
 
@@ -83,6 +87,10 @@ function LoteDetalhe() {
       toast.error("Informe um peso médio entre 20 g e 6.000 g");
       return;
     }
+    if ([entry.consumoRacaoKg, entry.consumoAguaLitros, entry.vazaoNippleMlMin, entry.pressaoAguaCmH2O].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) {
+      toast.error("Consumos, vazão e pressão devem ser valores válidos e não negativos");
+      return;
+    }
     const jaExiste = lote.entries.some((e) => e.date === entry.date);
     if (jaExiste) {
       toast.error("Já existe um lançamento nessa data. Exclua o registro antigo antes de substituí-lo.");
@@ -92,7 +100,7 @@ function LoteDetalhe() {
       ...l,
       entries: [...l.entries, { ...entry }].sort((a, b) => a.date.localeCompare(b.date)),
     } : l));
-    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, observacoes: "" });
+    setEntry({ ...entry, mortalidade: 0, eliminados: 0, pesoMedioG: undefined, consumoRacaoKg: undefined, consumoAguaLitros: undefined, vazaoNippleMlMin: undefined, pressaoAguaCmH2O: undefined, observacoes: "" });
     toast.success("Lançamento registrado");
   };
 
@@ -224,6 +232,27 @@ function LoteDetalhe() {
                 <Input type="number" inputMode="decimal" min={0} value={entry.pesoMedioG ?? ""}
                   onChange={(e) => setEntry({ ...entry, pesoMedioG: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 1850" />
               </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Ração consumida (kg)">
+                  <Input type="number" inputMode="decimal" min={0} step="0.1" value={entry.consumoRacaoKg ?? ""}
+                    onChange={(e) => setEntry({ ...entry, consumoRacaoKg: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 1250" />
+                </Field>
+                <Field label="Água consumida (L)">
+                  <Input type="number" inputMode="decimal" min={0} step="1" value={entry.consumoAguaLitros ?? ""}
+                    onChange={(e) => setEntry({ ...entry, consumoAguaLitros: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 2400" />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Vazão do nipple (ml/min)">
+                  <Input type="number" inputMode="decimal" min={0} step="1" value={entry.vazaoNippleMlMin ?? ""}
+                    onChange={(e) => setEntry({ ...entry, vazaoNippleMlMin: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 65" />
+                </Field>
+                <Field label="Pressão da linha (cm H₂O)">
+                  <Input type="number" inputMode="decimal" min={0} step="0.5" value={entry.pressaoAguaCmH2O ?? ""}
+                    onChange={(e) => setEntry({ ...entry, pressaoAguaCmH2O: e.target.value ? Number(e.target.value) : undefined })} placeholder="Ex: 28" />
+                </Field>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Ração, água, vazão e pressão são opcionais. Registre apenas valores medidos; o sistema não preenche dados ausentes.</p>
               <Field label="Observações"><Textarea rows={2} value={entry.observacoes} onChange={(e) => setEntry({ ...entry, observacoes: e.target.value })} /></Field>
               <Button onClick={adicionar} className="w-full"><Plus className="h-4 w-4 mr-1" /> Lançar</Button>
             </div>
@@ -231,6 +260,9 @@ function LoteDetalhe() {
         </div>
 
         <ConfigRemuneracao loteId={lote.id} vivas={vivas} pesoVivoKg={pesoTotalKg} />
+
+        <ConsumoDiario lote={lote} />
+        <ControleLinhaAgua lote={lote} />
 
         <FechamentoLoteCard lote={lote} estoqueRacaoKg={estoqueRacaoKg} />
 
@@ -247,6 +279,10 @@ function LoteDetalhe() {
                     <th className="text-right py-2">Mort.</th>
                     <th className="text-right py-2">Elim.</th>
                     <th className="text-right py-2">Peso (g)</th>
+                    <th className="text-right py-2">Ração (kg)</th>
+                    <th className="text-right py-2">Água (L)</th>
+                    <th className="text-right py-2">Vazão</th>
+                    <th className="text-right py-2">Pressão</th>
                     <th className="text-left py-2 pl-4">Obs</th>
                     <th></th>
                   </tr>
@@ -260,6 +296,10 @@ function LoteDetalhe() {
                         <td className="py-2 text-right tabular-nums">{e.mortalidade}</td>
                         <td className="py-2 text-right tabular-nums">{e.eliminados ?? 0}</td>
                         <td className="py-2 text-right tabular-nums">{e.pesoMedioG ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.consumoRacaoKg?.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.consumoAguaLitros?.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.vazaoNippleMlMin ?? "—"}</td>
+                        <td className="py-2 text-right tabular-nums">{e.pressaoAguaCmH2O ?? "—"}</td>
                         <td className="py-2 pl-4 text-muted-foreground">{e.observacoes ?? ""}</td>
                         <td className="py-2 text-right"><Button size="icon" variant="ghost" onClick={() => removerEntry(realIdx)}><Trash2 className="h-3.5 w-3.5" /></Button></td>
                       </tr>
@@ -272,6 +312,104 @@ function LoteDetalhe() {
         </Card>
       </div>
     </AppShell>
+  );
+}
+
+
+
+function ControleLinhaAgua({ lote }: { lote: import("@/lib/types").Lote }) {
+  const faixas = [
+    { ate: 3, fase: "D0–D3", vazao: [30, 40], pressao: [10, 15] },
+    { ate: 7, fase: "D4–D7", vazao: [40, 50], pressao: [15, 20] },
+    { ate: 14, fase: "D8–D14", vazao: [50, 60], pressao: [20, 25] },
+    { ate: 21, fase: "D15–D21", vazao: [60, 70], pressao: [25, 30] },
+    { ate: 28, fase: "D22–D28", vazao: [70, 80], pressao: [30, 35] },
+    { ate: 35, fase: "D29–D35", vazao: [80, 90], pressao: [35, 40] },
+    { ate: 999, fase: "D36+", vazao: [80, 100], pressao: [35, 45] },
+  ];
+  const registros = (lote.entries ?? []).filter((e) => e.vazaoNippleMlMin !== undefined || e.pressaoAguaCmH2O !== undefined).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const ultimo = registros.at(-1);
+  const idade = ultimo ? Math.max(0, diffDias(lote.dataEntrada, ultimo.date)) : Math.max(0, diffDias(lote.dataEntrada));
+  const faixa = faixas.find((f) => idade <= f.ate) ?? faixas[faixas.length - 1];
+  const dentro = (v: number | undefined, range: number[]) => v === undefined ? null : v >= range[0] && v <= range[1];
+  const vazaoOk = dentro(ultimo?.vazaoNippleMlMin, faixa.vazao);
+  const pressaoOk = dentro(ultimo?.pressaoAguaCmH2O, faixa.pressao);
+  const status = (ok: boolean | null) => ok === null ? "Sem medição" : ok ? "Dentro da faixa de referência" : "Fora da faixa de referência";
+  return <Card className="p-5 space-y-4">
+    <div><h2 className="font-display font-semibold text-lg">Pressão e vazão da linha de água</h2>
+      <p className="text-xs text-muted-foreground">Registre a medição manual de um nipple e a pressão da linha. Comparação com as faixas de referência do módulo Manejo.</p></div>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <KPI label="Fase do lote" value={faixa.fase} />
+      <KPI label="Vazão de referência" value={`${faixa.vazao[0]}–${faixa.vazao[1]} ml/min`} />
+      <KPI label="Pressão de referência" value={`${faixa.pressao[0]}–${faixa.pressao[1]} cm H₂O`} />
+      <KPI label="Medições registradas" value={String(registros.length)} />
+    </div>
+    {ultimo ? <div className="rounded-xl border border-border p-3 space-y-2">
+      <p className="text-sm font-semibold">Última medição · {fmtData(ultimo.date)}</p>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div><p className="text-muted-foreground text-xs">Vazão</p><p className="font-semibold">{ultimo.vazaoNippleMlMin === undefined ? "—" : `${ultimo.vazaoNippleMlMin} ml/min`}</p><p className={vazaoOk === false ? "text-destructive text-xs" : "text-xs text-muted-foreground"}>{status(vazaoOk)}</p></div>
+        <div><p className="text-muted-foreground text-xs">Pressão</p><p className="font-semibold">{ultimo.pressaoAguaCmH2O === undefined ? "—" : `${ultimo.pressaoAguaCmH2O} cm H₂O`}</p><p className={pressaoOk === false ? "text-destructive text-xs" : "text-xs text-muted-foreground"}>{status(pressaoOk)}</p></div>
+      </div>
+    </div> : <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 text-center">Nenhuma medição de vazão ou pressão registrada ainda.</p>}
+    <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="text-xs text-muted-foreground"><tr className="border-b border-border"><th className="py-2 text-left">Data</th><th className="py-2 text-right">Vazão ml/min</th><th className="py-2 text-right">Pressão cm H₂O</th></tr></thead>
+      <tbody>{registros.slice().reverse().map((e)=><tr key={e.date} className="border-b border-border/50"><td className="py-2">{fmtData(e.date)}</td><td className="py-2 text-right">{e.vazaoNippleMlMin ?? "—"}</td><td className="py-2 text-right">{e.pressaoAguaCmH2O ?? "—"}</td></tr>)}</tbody></table></div>
+    <p className="text-[11px] text-muted-foreground">Faixas são referências orientativas do módulo Manejo, não diagnóstico automático. Confira altura dos nipples, limpeza, vazamentos e pontos representativos da linha, inclusive o final.</p>
+  </Card>;
+}
+
+function ConsumoDiario({ lote }: { lote: import("@/lib/types").Lote }) {
+  const registros = [...(lote.entries ?? [])].filter((e) => e.consumoRacaoKg !== undefined || e.consumoAguaLitros !== undefined).sort((a, b) => a.date.localeCompare(b.date));
+  const totalRacao = registros.reduce((s, e) => s + (e.consumoRacaoKg ?? 0), 0);
+  const totalAgua = registros.reduce((s, e) => s + (e.consumoAguaLitros ?? 0), 0);
+  const diasComRacao = registros.filter((e) => e.consumoRacaoKg !== undefined).length;
+  const diasComAgua = registros.filter((e) => e.consumoAguaLitros !== undefined).length;
+  const comparacoes = registros.filter((e) => e.consumoRacaoKg !== undefined).map((e) => {
+    const idade = Math.max(0, diffDias(lote.dataEntrada, e.date));
+    const baixas = (lote.entries ?? []).filter((x) => x.date <= e.date).reduce((s, x) => s + Math.max(0, x.mortalidade || 0) + Math.max(0, x.eliminados || 0), 0);
+    const vivasNoDia = Math.max(0, lote.quantidadeInicial - baixas);
+    const linhagem = lote.linhagem ?? "ross_ap95";
+    const sexo = lote.sexo ?? "misto";
+    const esperado = refConsumoDiaG(idade, linhagem, sexo) * vivasNoDia / 1000;
+    return { ...e, esperado, diferenca: esperado > 0 ? ((e.consumoRacaoKg! - esperado) / esperado) * 100 : null };
+  });
+  const ultimo = comparacoes.at(-1);
+  const aguaPorKg = totalRacao > 0 && diasComAgua > 0 ? totalAgua / totalRacao : null;
+  return (
+    <Card className="p-5 space-y-4">
+      <div>
+        <h2 className="font-display font-semibold text-lg">Controle diário de ração e água</h2>
+        <p className="text-xs text-muted-foreground">Consumos medidos por dia, com comparação da ração à curva da linhagem e ao número estimado de aves vivas naquela data.</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KPI label="Ração registrada" value={diasComRacao ? `${totalRacao.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kg` : "—"} />
+        <KPI label="Água registrada" value={diasComAgua ? `${totalAgua.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} L` : "—"} />
+        <KPI label="Dias com ração" value={String(diasComRacao)} />
+        <KPI label="Água / ração" value={aguaPorKg === null ? "—" : `${aguaPorKg.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} L/kg`} />
+      </div>
+      {ultimo && <div className="rounded-xl border border-border bg-muted/20 p-3">
+        <p className="text-sm font-semibold">Último comparativo de ração · {fmtData(ultimo.date)}</p>
+        <p className="mt-1 text-sm">Medido: <strong>{ultimo.consumoRacaoKg?.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kg</strong> · Referência: <strong>{ultimo.esperado.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} kg</strong></p>
+        <p className="text-xs text-muted-foreground mt-1">{ultimo.diferenca === null ? "Referência indisponível para esta idade." : `${ultimo.diferenca > 0 ? "+" : ""}${ultimo.diferenca.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% em relação à curva de referência`}</p>
+      </div>}
+      {registros.length ? <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-xs text-muted-foreground"><tr className="border-b border-border">
+            <th className="py-2 text-left">Data</th><th className="py-2 text-right">Ração medida</th><th className="py-2 text-right">Ração referência</th><th className="py-2 text-right">Água</th><th className="py-2 text-right">Água/ração</th>
+          </tr></thead>
+          <tbody>{registros.slice().reverse().map((e) => {
+            const c = comparacoes.find((x) => x.date === e.date);
+            return <tr key={e.date} className="border-b border-border/50">
+              <td className="py-2">{fmtData(e.date)}</td>
+              <td className="py-2 text-right tabular-nums">{e.consumoRacaoKg?.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) ?? "—"}</td>
+              <td className="py-2 text-right tabular-nums">{c ? c.esperado.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—"}</td>
+              <td className="py-2 text-right tabular-nums">{e.consumoAguaLitros?.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) ?? "—"}</td>
+              <td className="py-2 text-right tabular-nums">{e.consumoAguaLitros !== undefined && e.consumoRacaoKg && e.consumoRacaoKg > 0 ? (e.consumoAguaLitros / e.consumoRacaoKg).toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</td>
+            </tr>;
+          })}</tbody>
+        </table>
+      </div> : <p className="text-sm text-muted-foreground rounded-lg border border-dashed p-4 text-center">Ainda não há consumo diário registrado. Os dados começam a aparecer após preencher ração e/ou água no lançamento diário.</p>}
+      <p className="text-[11px] text-muted-foreground">A referência de ração é estimada pela curva selecionada do lote e pelas baixas registradas até cada data; não substitui pesagem física do silo. Água não recebe meta automática: temperatura, vazão, pressão e manejo alteram o consumo. Registros antigos permanecem válidos.</p>
+    </Card>
   );
 }
 
