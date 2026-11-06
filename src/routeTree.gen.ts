@@ -9,179 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TarefasRouteImport } from './routes/tarefas'
-import { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
-import { Route as TutorialRouteImport } from './routes/tutorial'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SiloRouteImport } from './routes/silo'
-import { Route as RelatoriosRouteImport } from './routes/relatorios'
-import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
-import { Route as ModulosRouteImport } from './routes/modulos'
-import { Route as ManejoRouteImport } from './routes/manejo'
-import { Route as LembretesRouteImport } from './routes/lembretes'
-import { Route as IndicadoresRouteImport } from './routes/indicadores'
-import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
-import { Route as FinanceiroLoteRouteImport } from './routes/financeiro-lote'
-import { Route as FinanceiroRouteImport } from './routes/financeiro'
-import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
-import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
-import { Route as EstoqueRouteImport } from './routes/estoque'
-import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
-import { Route as DiarioRouteImport } from './routes/diario'
-import { Route as CustosRouteImport } from './routes/custos'
-import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
-import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
-import { Route as BackupRouteImport } from './routes/backup'
-import { Route as AutomacoesRouteImport } from './routes/automacoes'
-import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
-import { Route as AmbienciaRouteImport } from './routes/ambiencia'
-import { Route as AgroIaRouteImport } from './routes/agro-ia'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgroIaRouteImport } from './routes/agro-ia'
+import { Route as AmbienciaRouteImport } from './routes/ambiencia'
+import { Route as AnaliseAvesRouteImport } from './routes/analise-aves'
+import { Route as AutomacoesRouteImport } from './routes/automacoes'
+import { Route as BackupRouteImport } from './routes/backup'
+import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
+import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
+import { Route as CustosRouteImport } from './routes/custos'
+import { Route as DiarioRouteImport } from './routes/diario'
+import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
+import { Route as EstoqueRouteImport } from './routes/estoque'
+import { Route as ExcelenciaLoteRouteImport } from './routes/excelencia-lote'
+import { Route as FichaLoteRouteImport } from './routes/ficha-lote'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as FinanceiroLoteRouteImport } from './routes/financeiro-lote'
+import { Route as HistoricoLotesRouteImport } from './routes/historico-lotes'
+import { Route as IndicadoresRouteImport } from './routes/indicadores'
+import { Route as LembretesRouteImport } from './routes/lembretes'
+import { Route as ManejoRouteImport } from './routes/manejo'
+import { Route as ModulosRouteImport } from './routes/modulos'
+import { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
+import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as SiloRouteImport } from './routes/silo'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as TutorialRouteImport } from './routes/tutorial'
+import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as GranjaIndexRouteImport } from './routes/granja.index'
 import { Route as GranjaIdRouteImport } from './routes/granja.$id'
-import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
-const PainelAnaliticoRoute = PainelAnaliticoRouteImport.update({
-  id: '/painel-analitico',
-  path: '/painel-analitico',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TutorialRoute = TutorialRouteImport.update({
-  id: '/tutorial',
-  path: '/tutorial',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TarefasRoute = TarefasRouteImport.update({
-  id: '/tarefas',
-  path: '/tarefas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SiloRoute = SiloRouteImport.update({
-  id: '/silo',
-  path: '/silo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RelatoriosRoute = RelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PesagemProRoute = PesagemProRouteImport.update({
-  id: '/pesagem-pro',
-  path: '/pesagem-pro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ModulosRoute = ModulosRouteImport.update({
-  id: '/modulos',
-  path: '/modulos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManejoRoute = ManejoRouteImport.update({
-  id: '/manejo',
-  path: '/manejo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LembretesRoute = LembretesRouteImport.update({
-  id: '/lembretes',
-  path: '/lembretes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndicadoresRoute = IndicadoresRouteImport.update({
-  id: '/indicadores',
-  path: '/indicadores',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
-  id: '/historico-lotes',
-  path: '/historico-lotes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FinanceiroLoteRoute = FinanceiroLoteRouteImport.update({
-  id: '/financeiro-lote',
-  path: '/financeiro-lote',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FinanceiroRoute = FinanceiroRouteImport.update({
-  id: '/financeiro',
-  path: '/financeiro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FichaLoteRoute = FichaLoteRouteImport.update({
-  id: '/ficha-lote',
-  path: '/ficha-lote',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExcelenciaLoteRoute = ExcelenciaLoteRouteImport.update({
-  id: '/excelencia-lote',
-  path: '/excelencia-lote',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EstoqueRoute = EstoqueRouteImport.update({
-  id: '/estoque',
-  path: '/estoque',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EntregasRacaoRoute = EntregasRacaoRouteImport.update({
-  id: '/entregas-racao',
-  path: '/entregas-racao',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiarioRoute = DiarioRouteImport.update({
-  id: '/diario',
-  path: '/diario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustosRoute = CustosRouteImport.update({
-  id: '/custos',
-  path: '/custos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ComparativoLotesRoute = ComparativoLotesRouteImport.update({
-  id: '/comparativo-lotes',
-  path: '/comparativo-lotes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
-  id: '/checklist-granja',
-  path: '/checklist-granja',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
-  id: '/calendario-sanitario',
-  path: '/calendario-sanitario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BackupRoute = BackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AutomacoesRoute = AutomacoesRouteImport.update({
-  id: '/automacoes',
-  path: '/automacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnaliseAvesRoute = AnaliseAvesRouteImport.update({
-  id: '/analise-aves',
-  path: '/analise-aves',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AmbienciaRoute = AmbienciaRouteImport.update({
-  id: '/ambiencia',
-  path: '/ambiencia',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgroIaRoute = AgroIaRouteImport.update({
@@ -189,9 +54,149 @@ const AgroIaRoute = AgroIaRouteImport.update({
   path: '/agro-ia',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AmbienciaRoute = AmbienciaRouteImport.update({
+  id: '/ambiencia',
+  path: '/ambiencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnaliseAvesRoute = AnaliseAvesRouteImport.update({
+  id: '/analise-aves',
+  path: '/analise-aves',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomacoesRoute = AutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarioSanitarioRoute = CalendarioSanitarioRouteImport.update({
+  id: '/calendario-sanitario',
+  path: '/calendario-sanitario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
+  id: '/checklist-granja',
+  path: '/checklist-granja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparativoLotesRoute = ComparativoLotesRouteImport.update({
+  id: '/comparativo-lotes',
+  path: '/comparativo-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustosRoute = CustosRouteImport.update({
+  id: '/custos',
+  path: '/custos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiarioRoute = DiarioRouteImport.update({
+  id: '/diario',
+  path: '/diario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntregasRacaoRoute = EntregasRacaoRouteImport.update({
+  id: '/entregas-racao',
+  path: '/entregas-racao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExcelenciaLoteRoute = ExcelenciaLoteRouteImport.update({
+  id: '/excelencia-lote',
+  path: '/excelencia-lote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FichaLoteRoute = FichaLoteRouteImport.update({
+  id: '/ficha-lote',
+  path: '/ficha-lote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroLoteRoute = FinanceiroLoteRouteImport.update({
+  id: '/financeiro-lote',
+  path: '/financeiro-lote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoLotesRoute = HistoricoLotesRouteImport.update({
+  id: '/historico-lotes',
+  path: '/historico-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndicadoresRoute = IndicadoresRouteImport.update({
+  id: '/indicadores',
+  path: '/indicadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LembretesRoute = LembretesRouteImport.update({
+  id: '/lembretes',
+  path: '/lembretes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManejoRoute = ManejoRouteImport.update({
+  id: '/manejo',
+  path: '/manejo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulosRoute = ModulosRouteImport.update({
+  id: '/modulos',
+  path: '/modulos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelAnaliticoRoute = PainelAnaliticoRouteImport.update({
+  id: '/painel-analitico',
+  path: '/painel-analitico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesagemProRoute = PesagemProRouteImport.update({
+  id: '/pesagem-pro',
+  path: '/pesagem-pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiloRoute = SiloRouteImport.update({
+  id: '/silo',
+  path: '/silo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TarefasRoute = TarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorialRoute = TutorialRouteImport.update({
+  id: '/tutorial',
+  path: '/tutorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPoultryChatRoute = ApiPoultryChatRouteImport.update({
+  id: '/api/poultry-chat',
+  path: '/api/poultry-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GranjaIndexRoute = GranjaIndexRouteImport.update({
@@ -202,11 +207,6 @@ const GranjaIndexRoute = GranjaIndexRouteImport.update({
 const GranjaIdRoute = GranjaIdRouteImport.update({
   id: '/granja/$id',
   path: '/granja/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPoultryChatRoute = ApiPoultryChatRouteImport.update({
-  id: '/api/poultry-chat',
-  path: '/api/poultry-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWhatsappRoute = ApiPublicWhatsappRouteImport.update({
@@ -239,13 +239,13 @@ export interface FileRoutesByFullPath {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/modulos': typeof ModulosRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/tutorial': typeof TutorialRoute
-  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
@@ -275,13 +275,13 @@ export interface FileRoutesByTo {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/modulos': typeof ModulosRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/tutorial': typeof TutorialRoute
-  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja': typeof GranjaIndexRoute
@@ -312,13 +312,13 @@ export interface FileRoutesById {
   '/lembretes': typeof LembretesRoute
   '/manejo': typeof ManejoRoute
   '/modulos': typeof ModulosRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
   '/tutorial': typeof TutorialRoute
-  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
@@ -350,13 +350,13 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/modulos'
+    | '/painel-analitico'
     | '/pesagem-pro'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/tutorial'
-    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
@@ -386,13 +386,13 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/modulos'
+    | '/painel-analitico'
     | '/pesagem-pro'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/tutorial'
-    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja'
@@ -422,13 +422,13 @@ export interface FileRouteTypes {
     | '/lembretes'
     | '/manejo'
     | '/modulos'
+    | '/painel-analitico'
     | '/pesagem-pro'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
     | '/tutorial'
-    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
@@ -459,13 +459,13 @@ export interface RootRouteChildren {
   LembretesRoute: typeof LembretesRoute
   ManejoRoute: typeof ManejoRoute
   ModulosRoute: typeof ModulosRoute
+  PainelAnaliticoRoute: typeof PainelAnaliticoRoute
   PesagemProRoute: typeof PesagemProRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TarefasRoute: typeof TarefasRoute
   TutorialRoute: typeof TutorialRoute
-  PainelAnaliticoRoute: typeof PainelAnaliticoRoute
   ApiPoultryChatRoute: typeof ApiPoultryChatRoute
   GranjaIdRoute: typeof GranjaIdRoute
   GranjaIndexRoute: typeof GranjaIndexRoute
@@ -474,200 +474,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/painel-analitico': {
-      id: '/painel-analitico'
-      path: '/painel-analitico'
-      fullPath: '/painel-analitico'
-      preLoaderRoute: typeof PainelAnaliticoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tutorial': {
-      id: '/tutorial'
-      path: '/tutorial'
-      fullPath: '/tutorial'
-      preLoaderRoute: typeof TutorialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tarefas': {
-      id: '/tarefas'
-      path: '/tarefas'
-      fullPath: '/tarefas'
-      preLoaderRoute: typeof TarefasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/silo': {
-      id: '/silo'
-      path: '/silo'
-      fullPath: '/silo'
-      preLoaderRoute: typeof SiloRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/relatorios': {
-      id: '/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof RelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pesagem-pro': {
-      id: '/pesagem-pro'
-      path: '/pesagem-pro'
-      fullPath: '/pesagem-pro'
-      preLoaderRoute: typeof PesagemProRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/modulos': {
-      id: '/modulos'
-      path: '/modulos'
-      fullPath: '/modulos'
-      preLoaderRoute: typeof ModulosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manejo': {
-      id: '/manejo'
-      path: '/manejo'
-      fullPath: '/manejo'
-      preLoaderRoute: typeof ManejoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lembretes': {
-      id: '/lembretes'
-      path: '/lembretes'
-      fullPath: '/lembretes'
-      preLoaderRoute: typeof LembretesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/indicadores': {
-      id: '/indicadores'
-      path: '/indicadores'
-      fullPath: '/indicadores'
-      preLoaderRoute: typeof IndicadoresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/historico-lotes': {
-      id: '/historico-lotes'
-      path: '/historico-lotes'
-      fullPath: '/historico-lotes'
-      preLoaderRoute: typeof HistoricoLotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/financeiro-lote': {
-      id: '/financeiro-lote'
-      path: '/financeiro-lote'
-      fullPath: '/financeiro-lote'
-      preLoaderRoute: typeof FinanceiroLoteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/financeiro': {
-      id: '/financeiro'
-      path: '/financeiro'
-      fullPath: '/financeiro'
-      preLoaderRoute: typeof FinanceiroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ficha-lote': {
-      id: '/ficha-lote'
-      path: '/ficha-lote'
-      fullPath: '/ficha-lote'
-      preLoaderRoute: typeof FichaLoteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/excelencia-lote': {
-      id: '/excelencia-lote'
-      path: '/excelencia-lote'
-      fullPath: '/excelencia-lote'
-      preLoaderRoute: typeof ExcelenciaLoteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/estoque': {
-      id: '/estoque'
-      path: '/estoque'
-      fullPath: '/estoque'
-      preLoaderRoute: typeof EstoqueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/entregas-racao': {
-      id: '/entregas-racao'
-      path: '/entregas-racao'
-      fullPath: '/entregas-racao'
-      preLoaderRoute: typeof EntregasRacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/diario': {
-      id: '/diario'
-      path: '/diario'
-      fullPath: '/diario'
-      preLoaderRoute: typeof DiarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/custos': {
-      id: '/custos'
-      path: '/custos'
-      fullPath: '/custos'
-      preLoaderRoute: typeof CustosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/comparativo-lotes': {
-      id: '/comparativo-lotes'
-      path: '/comparativo-lotes'
-      fullPath: '/comparativo-lotes'
-      preLoaderRoute: typeof ComparativoLotesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checklist-granja': {
-      id: '/checklist-granja'
-      path: '/checklist-granja'
-      fullPath: '/checklist-granja'
-      preLoaderRoute: typeof ChecklistGranjaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/calendario-sanitario': {
-      id: '/calendario-sanitario'
-      path: '/calendario-sanitario'
-      fullPath: '/calendario-sanitario'
-      preLoaderRoute: typeof CalendarioSanitarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/backup': {
-      id: '/backup'
-      path: '/backup'
-      fullPath: '/backup'
-      preLoaderRoute: typeof BackupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/automacoes': {
-      id: '/automacoes'
-      path: '/automacoes'
-      fullPath: '/automacoes'
-      preLoaderRoute: typeof AutomacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analise-aves': {
-      id: '/analise-aves'
-      path: '/analise-aves'
-      fullPath: '/analise-aves'
-      preLoaderRoute: typeof AnaliseAvesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ambiencia': {
-      id: '/ambiencia'
-      path: '/ambiencia'
-      fullPath: '/ambiencia'
-      preLoaderRoute: typeof AmbienciaRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agro-ia': {
@@ -677,11 +488,207 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgroIaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ambiencia': {
+      id: '/ambiencia'
+      path: '/ambiencia'
+      fullPath: '/ambiencia'
+      preLoaderRoute: typeof AmbienciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analise-aves': {
+      id: '/analise-aves'
+      path: '/analise-aves'
+      fullPath: '/analise-aves'
+      preLoaderRoute: typeof AnaliseAvesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automacoes': {
+      id: '/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendario-sanitario': {
+      id: '/calendario-sanitario'
+      path: '/calendario-sanitario'
+      fullPath: '/calendario-sanitario'
+      preLoaderRoute: typeof CalendarioSanitarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checklist-granja': {
+      id: '/checklist-granja'
+      path: '/checklist-granja'
+      fullPath: '/checklist-granja'
+      preLoaderRoute: typeof ChecklistGranjaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparativo-lotes': {
+      id: '/comparativo-lotes'
+      path: '/comparativo-lotes'
+      fullPath: '/comparativo-lotes'
+      preLoaderRoute: typeof ComparativoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/custos': {
+      id: '/custos'
+      path: '/custos'
+      fullPath: '/custos'
+      preLoaderRoute: typeof CustosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diario': {
+      id: '/diario'
+      path: '/diario'
+      fullPath: '/diario'
+      preLoaderRoute: typeof DiarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entregas-racao': {
+      id: '/entregas-racao'
+      path: '/entregas-racao'
+      fullPath: '/entregas-racao'
+      preLoaderRoute: typeof EntregasRacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/excelencia-lote': {
+      id: '/excelencia-lote'
+      path: '/excelencia-lote'
+      fullPath: '/excelencia-lote'
+      preLoaderRoute: typeof ExcelenciaLoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ficha-lote': {
+      id: '/ficha-lote'
+      path: '/ficha-lote'
+      fullPath: '/ficha-lote'
+      preLoaderRoute: typeof FichaLoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro-lote': {
+      id: '/financeiro-lote'
+      path: '/financeiro-lote'
+      fullPath: '/financeiro-lote'
+      preLoaderRoute: typeof FinanceiroLoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico-lotes': {
+      id: '/historico-lotes'
+      path: '/historico-lotes'
+      fullPath: '/historico-lotes'
+      preLoaderRoute: typeof HistoricoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/indicadores': {
+      id: '/indicadores'
+      path: '/indicadores'
+      fullPath: '/indicadores'
+      preLoaderRoute: typeof IndicadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lembretes': {
+      id: '/lembretes'
+      path: '/lembretes'
+      fullPath: '/lembretes'
+      preLoaderRoute: typeof LembretesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manejo': {
+      id: '/manejo'
+      path: '/manejo'
+      fullPath: '/manejo'
+      preLoaderRoute: typeof ManejoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modulos': {
+      id: '/modulos'
+      path: '/modulos'
+      fullPath: '/modulos'
+      preLoaderRoute: typeof ModulosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel-analitico': {
+      id: '/painel-analitico'
+      path: '/painel-analitico'
+      fullPath: '/painel-analitico'
+      preLoaderRoute: typeof PainelAnaliticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesagem-pro': {
+      id: '/pesagem-pro'
+      path: '/pesagem-pro'
+      fullPath: '/pesagem-pro'
+      preLoaderRoute: typeof PesagemProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/silo': {
+      id: '/silo'
+      path: '/silo'
+      fullPath: '/silo'
+      preLoaderRoute: typeof SiloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarefas': {
+      id: '/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tutorial': {
+      id: '/tutorial'
+      path: '/tutorial'
+      fullPath: '/tutorial'
+      preLoaderRoute: typeof TutorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/poultry-chat': {
+      id: '/api/poultry-chat'
+      path: '/api/poultry-chat'
+      fullPath: '/api/poultry-chat'
+      preLoaderRoute: typeof ApiPoultryChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/granja/': {
@@ -696,13 +703,6 @@ declare module '@tanstack/react-router' {
       path: '/granja/$id'
       fullPath: '/granja/$id'
       preLoaderRoute: typeof GranjaIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/poultry-chat': {
-      id: '/api/poultry-chat'
-      path: '/api/poultry-chat'
-      fullPath: '/api/poultry-chat'
-      preLoaderRoute: typeof ApiPoultryChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/whatsapp': {
@@ -739,13 +739,13 @@ const rootRouteChildren: RootRouteChildren = {
   LembretesRoute: LembretesRoute,
   ManejoRoute: ManejoRoute,
   ModulosRoute: ModulosRoute,
+  PainelAnaliticoRoute: PainelAnaliticoRoute,
   PesagemProRoute: PesagemProRoute,
   RelatoriosRoute: RelatoriosRoute,
   SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TarefasRoute: TarefasRoute,
   TutorialRoute: TutorialRoute,
-  PainelAnaliticoRoute: PainelAnaliticoRoute,
   ApiPoultryChatRoute: ApiPoultryChatRoute,
   GranjaIdRoute: GranjaIdRoute,
   GranjaIndexRoute: GranjaIndexRoute,
