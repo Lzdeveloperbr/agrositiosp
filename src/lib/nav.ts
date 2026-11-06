@@ -66,6 +66,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/tarefas", label: "Tarefas", icon: ListChecks, desc: "Atividades por prioridade", tags: ["todo"] },
       { to: "/lembretes", label: "Lembretes", icon: BellRing, desc: "Avisos recorrentes", tags: ["alerta"] },
       { to: "/backup", label: "Backup", icon: Database, desc: "Exportar e importar dados", tags: ["exportar"] },
+      { to: "/tutorial", label: "Tutorial do aplicativo", icon: BookOpen, desc: "Aprenda a usar cada módulo passo a passo", tags: ["ajuda", "guia", "como usar", "tutorial"] },
     ],
   },
 ];
