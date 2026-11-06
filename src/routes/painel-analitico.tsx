@@ -9,7 +9,7 @@ import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO, diffDias } from "@/lib/data";
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity, AlertTriangle, BarChart3, Bird, Wrench, ShoppingCart, CalendarClock, CircleAlert,
+  Activity, AlertTriangle, BarChart3, Bird, Wrench, ShoppingCart, CalendarClock,
   CalendarRange, CircleDollarSign, ClipboardList, Package, Scale, TrendingUp,
 } from "lucide-react";
 import {
@@ -102,6 +102,18 @@ function PainelAnalitico() {
         return { maquina: maquina.nome, descricao: m.descricao, dias, horas, vencida, proxima, data: m.proximaData };
       }).filter((m) => m.vencida || m.proxima)
   ).sort((a, b) => Number(b.vencida) - Number(a.vencida) || (a.dias ?? 9999) - (b.dias ?? 9999));
+  const dataInicioCombustivel = (() => {
+    const [ano, mes, dia] = hoje.split("-").map(Number);
+    const inicio = new Date(ano, mes - 1, dia);
+    inicio.setDate(inicio.getDate() - 29);
+    return `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, "0")}-${String(inicio.getDate()).padStart(2, "0")}`;
+  })();
+  const abastecimentos30d = maquinas.flatMap((m) => (m.abastecimentos ?? [])
+    .filter((a) => a.data >= dataInicioCombustivel && a.data <= hoje)
+    .map((a) => ({ maquina: m.nome, litros: Math.max(0, Number(a.litros) || 0), custo: Number.isFinite(Number(a.total)) ? Number(a.total) : Number.isFinite(Number(a.precoLitro)) ? Number(a.litros) * Number(a.precoLitro) : null })));
+  const litros30d = abastecimentos30d.reduce((s, a) => s + a.litros, 0);
+  const custoCombustivelConhecido = abastecimentos30d.reduce((s, a) => s + (a.custo ?? 0), 0);
+  const abastecimentosComCusto = abastecimentos30d.filter((a) => a.custo !== null).length;
   const comprasAbertas = compras.filter((c) => ["solicitado", "aprovado", "pedido"].includes(c.status));
   const comprasAguardando = compras.filter((c) => c.status === "pedido");
   const estoqueCritico = estoque.filter((i) => i.minimo !== undefined && i.quantidade <= (i.minimo ?? 0));
