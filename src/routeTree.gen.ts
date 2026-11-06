@@ -269,6 +269,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
+  '/curso-avicultura': typeof CursoAviculturaRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/entregas-racao': typeof EntregasRacaoRoute
@@ -306,6 +307,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
+  '/curso-avicultura': typeof CursoAviculturaRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/entregas-racao': typeof EntregasRacaoRoute
