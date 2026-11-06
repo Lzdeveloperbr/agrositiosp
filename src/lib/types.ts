@@ -5,6 +5,10 @@ export type DailyEntry = {
   mortalidade: number;
   eliminados?: number;
   pesoMedioG?: number;
+  /** Consumo diário medido no lote; opcional para preservar registros antigos. */
+  consumoRacaoKg?: number;
+  /** Água consumida no dia, em litros; informar somente quando medida. */
+  consumoAguaLitros?: number;
   amostraPesagem?: { id: string; sexo: "macho" | "femea" | "misto"; pesoG: number }[];
   operadorPesagem?: string;
   observacoes?: string;
