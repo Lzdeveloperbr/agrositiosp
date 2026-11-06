@@ -58,7 +58,10 @@ function PainelAnalitico() {
       .forEach((e) => mortalidadePorDia.set(e.date, (mortalidadePorDia.get(e.date) ?? 0) + Math.max(0, Number(e.mortalidade) || 0) + Math.max(0, Number(e.eliminados) || 0))));
     const mortalidade = [...mortalidadePorDia.entries()].sort(([a], [b]) => a.localeCompare(b))
       .map(([data, aves]) => ({ data: data.slice(5).split("-").reverse().join("/"), aves }));
-    const pesos = pesagens.map((p) => ({ data: p.data.slice(5).split("-").reverse().join("/"), peso: p.peso, lote: p.lote }));
+    const pesosPorDia = new Map<string, number[]>();
+    pesagens.forEach((p) => pesosPorDia.set(p.data, [...(pesosPorDia.get(p.data) ?? []), p.peso]));
+    const pesos = [...pesosPorDia.entries()].sort(([a], [b]) => a.localeCompare(b))
+      .map(([data, valores]) => ({ data: data.slice(5).split("-").reverse().join("/"), peso: valores.reduce((s, v) => s + v, 0) / valores.length }));
     return { pesagens, pesos, mortalidade };
   }, [lotesVisiveis, periodo, hoje]);
 
@@ -117,7 +120,7 @@ function PainelAnalitico() {
         <section className="grid gap-4 xl:grid-cols-5">
           <Card className="overflow-hidden p-4 sm:p-5 xl:col-span-3">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <div><div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Evolução das pesagens</h2></div><p className="mt-1 text-xs text-muted-foreground">Peso médio registrado (gramas) por data</p></div>
+              <div><div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /><h2 className="text-lg font-semibold">Evolução das pesagens</h2></div><p className="mt-1 text-xs text-muted-foreground">Média das pesagens registradas (gramas) por data</p></div>
               <select aria-label="Filtrar lote" value={loteId} onChange={(e) => setLoteId(e.target.value)} className="h-9 max-w-44 rounded-lg border border-input bg-background px-3 text-xs">
                 <option value="todos">Todos os lotes</option>
                 {lotes.map((l) => <option key={l.id} value={l.id}>Lote {l.numero}</option>)}
@@ -125,14 +128,15 @@ function PainelAnalitico() {
             </div>
             {producao.pesos.length ? <div className="h-72 rounded-xl bg-gradient-to-br from-primary/[0.07] via-transparent to-emerald-500/[0.04] p-2 [filter:drop-shadow(0_12px_14px_rgb(20_90_60/0.08))]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={producao.pesos} margin={{ top: 12, right: 12, left: -16, bottom: 4 }}>
+                <AreaChart data={producao.pesos} margin={{ top: 12, right: 12, left: -16, bottom: 4 }}>
                   <defs><linearGradient id="pesoGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#16845b" stopOpacity={0.28} /><stop offset="100%" stopColor="#16845b" stopOpacity={0.02} /></linearGradient></defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.65} />
                   <XAxis dataKey="data" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} width={48} />
                   <Tooltip formatter={(v) => [`${Number(v).toLocaleString("pt-BR")} g`, "Peso médio"]} labelFormatter={(v) => `Data: ${v}`} />
+                  <Area type="monotone" dataKey="peso" fill="url(#pesoGradient)" stroke="none" />
                   <Line type="monotone" dataKey="peso" name="Peso médio" stroke="#16845b" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 7 }} />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div> : <Empty text="Ainda não há pesagens registradas neste período para os lotes selecionados." link="/pesagem-pro" label="Registrar pesagem" />}
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground"><span>{producao.pesagens.length} pesagem(ns) encontradas</span><Link to="/pesagem-pro" className="font-semibold text-primary">Abrir pesagem →</Link></div>
