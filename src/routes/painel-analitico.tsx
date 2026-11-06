@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useEstoque, useFinanceiro, useLotes, useTarefas } from "@/lib/state";
 import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO, diffDias } from "@/lib/data";
+import type { LucideIcon } from "lucide-react";
 import {
   Activity, AlertTriangle, BarChart3, Bird,
   CalendarRange, CircleDollarSign, ClipboardList, Package, Scale, TrendingUp,
