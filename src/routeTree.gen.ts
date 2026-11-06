@@ -44,7 +44,12 @@ import { Route as GranjaIdRouteImport } from './routes/granja.$id'
 import { Route as ApiPoultryChatRouteImport } from './routes/api/poultry-chat'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
-const PainelAnaliticoRoute = PainelAnaliticoRouteImport.update({\n  id: '/painel-analitico',\n  path: '/painel-analitico',\n  getParentRoute: () => rootRouteImport,\n} as any)\nconst TutorialRoute = TutorialRouteImport.update({
+const PainelAnaliticoRoute = PainelAnaliticoRouteImport.update({
+  id: '/painel-analitico',
+  path: '/painel-analitico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorialRoute = TutorialRouteImport.update({
   id: '/tutorial',
   path: '/tutorial',
   getParentRoute: () => rootRouteImport,
