@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { BookOpen, CheckCircle2, CirclePlay, Clock3, Award, ExternalLink, GraduationCap, ShieldCheck, ChevronDown, ChevronUp, ClipboardList, Download, RotateCcw } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { AvicultureStudyMaterials } from "@/components/AvicultureStudyMaterials";
 
 export const Route = createFileRoute("/curso-avicultura")({
   head: () => ({ meta: [
@@ -223,6 +224,19 @@ function CursoAviculturaPage() {
             <div className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground space-y-1"><p>Aulas: {completed.length}/{allLessons.length}</p><p>Avaliação: {score === null ? "Pendente" : score + "%"} {passed ? "• aprovada" : ""}</p><p>Nome: {name.trim().length >= 3 ? "informado" : "pendente"}</p></div>
             <Button className="w-full" onClick={issueCertificate} disabled={!eligible}><Download className="mr-2 h-4 w-4" />Emitir certificado PDF</Button>
             {!eligible && <p className="text-xs text-muted-foreground">Complete as aulas, passe na avaliação e informe seu nome para liberar.</p>}
+          </Card>
+          <Card className="overflow-hidden">
+            <div className="space-y-2 p-5">
+              <div className="flex items-center gap-2"><CirclePlay className="h-5 w-5 text-primary" /><h3 className="font-semibold">Curso Avicultura na Prática — playlist completa</h3></div>
+              <p className="text-sm text-muted-foreground">Playlist enviada por você, adicionada como conteúdo complementar da Academia Avícola. Assista às aulas diretamente aqui ou abra a lista completa no YouTube.</p>
+              <Badge variant="outline">YouTube • playlist externa</Badge>
+            </div>
+            <div className="aspect-video bg-black">
+              <iframe className="h-full w-full" src="https://www.youtube.com/embed/videoseries?list=PL8PskvJpL8J1RFxH2sNAYOXHp5WbWaOiL" title="Curso Avicultura na Prática — playlist do YouTube" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+            </div>
+            <div className="p-4 pt-3">
+              <a className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline" href="https://youtube.com/playlist?list=PL8PskvJpL8J1RFxH2sNAYOXHp5WbWaOiL" target="_blank" rel="noreferrer">Abrir playlist completa no YouTube <ExternalLink className="h-4 w-4" /></a>
+            </div>
           </Card>
           <Card className="p-5 space-y-3">
             <h3 className="font-semibold">Biblioteca técnica</h3>
