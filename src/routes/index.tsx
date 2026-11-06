@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLotes, useTarefas } from "@/lib/state";
-import { ArrowRight, ClipboardCheck, Scale, Boxes, Syringe, Wind, BookOpen, FileText, ListChecks, Plus } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Scale, Boxes, Syringe, Wind, BookOpen, FileText, ListChecks, Plus, GraduationCap } from "lucide-react";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
@@ -39,6 +39,7 @@ const ACOES = [
   { to: "/ambiencia", label: "Ambiência", icon: Wind },
   { to: "/calendario-sanitario", label: "Sanidade", icon: Syringe },
   { to: "/relatorios", label: "Relatórios", icon: FileText },
+  { to: "/curso-avicultura", label: "Academia", icon: GraduationCap },
 ] as const;
 
 function Central() {

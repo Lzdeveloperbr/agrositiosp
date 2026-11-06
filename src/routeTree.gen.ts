@@ -18,6 +18,7 @@ import { Route as BackupRouteImport } from './routes/backup'
 import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
+import { Route as CursoAviculturaRouteImport } from './routes/curso-avicultura'
 import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
 import { Route as CustosRouteImport } from './routes/custos'
 import { Route as DiarioRouteImport } from './routes/diario'
@@ -92,6 +93,11 @@ const ChecklistGranjaRoute = ChecklistGranjaRouteImport.update({
 const ComparativoLotesRoute = ComparativoLotesRouteImport.update({
   id: '/comparativo-lotes',
   path: '/comparativo-lotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CursoAviculturaRoute = CursoAviculturaRouteImport.update({
+  id: '/curso-avicultura',
+  path: '/curso-avicultura',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustosRoute = CustosRouteImport.update({
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
+  '/curso-avicultura': typeof CursoAviculturaRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/entregas-racao': typeof EntregasRacaoRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
+  '/curso-avicultura': typeof CursoAviculturaRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/entregas-racao': typeof EntregasRacaoRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/checklist-granja': typeof ChecklistGranjaRoute
   '/comparativo-lotes': typeof ComparativoLotesRoute
+  '/curso-avicultura': typeof CursoAviculturaRoute
   '/custos': typeof CustosRoute
   '/diario': typeof DiarioRoute
   '/entregas-racao': typeof EntregasRacaoRoute
@@ -726,6 +735,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   ChecklistGranjaRoute: ChecklistGranjaRoute,
   ComparativoLotesRoute: ComparativoLotesRoute,
+  CursoAviculturaRoute: CursoAviculturaRoute,
   CustosRoute: CustosRoute,
   DiarioRoute: DiarioRoute,
   EntregasRacaoRoute: EntregasRacaoRoute,
