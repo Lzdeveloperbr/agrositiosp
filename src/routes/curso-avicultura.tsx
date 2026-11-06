@@ -238,6 +238,7 @@ function CursoAviculturaPage() {
               <a className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline" href="https://youtube.com/playlist?list=PL8PskvJpL8J1RFxH2sNAYOXHp5WbWaOiL" target="_blank" rel="noreferrer">Abrir playlist completa no YouTube <ExternalLink className="h-4 w-4" /></a>
             </div>
           </Card>
+          <AvicultureStudyMaterials />
           <Card className="p-5 space-y-3">
             <h3 className="font-semibold">Biblioteca técnica</h3>
             <p className="text-xs text-muted-foreground">Materiais complementares de instituições e canais externos. A disponibilidade e as regras de acesso são definidas pelos próprios sites.</p>
