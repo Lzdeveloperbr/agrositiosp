@@ -50,12 +50,14 @@ function IndicadoresPage() {
       const alojadas = l.quantidadeInicial || 0;
       const vivas = Math.max(alojadas - mortos, 0);
       const viab = alojadas ? (vivas / alojadas) * 100 : 0;
-      const pesagem = [...entries].reverse().find((e) => (e.pesoMedioG ?? 0) > 0);
-      const ultimoPeso = pesagem?.pesoMedioG ?? 0;
-      const idadePesagem = pesagem ? diffDias(l.dataEntrada, pesagem.date) : 0;
+      const pesagens = entries.filter((e) => Number(e.pesoMedioG) > 0);
+      const pesagem = pesagens.at(-1);
+      const anterior = pesagens.at(-2);
+      const ultimoPeso = Number(pesagem?.pesoMedioG ?? 0);
       const pesoKg = ultimoPeso / 1000;
-      const gpd = idadePesagem > 0 ? (ultimoPeso - 45) / idadePesagem : 0;
-      const iep = 0; // CA real indisponível: não inventar IEP.
+      const intervalo = pesagem && anterior ? diffDias(anterior.date, pesagem.date) : 0;
+      const gpd = intervalo > 0 ? (ultimoPeso - Number(anterior?.pesoMedioG ?? 0)) / intervalo : null;
+      const iep = null; // Sem conversão alimentar real, não calcular IEP.
       return {
         id: l.id, numero: l.numero, dias, alojadas, vivas,
         mortPct: alojadas ? (mortos / alojadas) * 100 : 0,
@@ -66,7 +68,6 @@ function IndicadoresPage() {
 
   const ranking = useMemo(() => [...kpis].sort((a, b) => b.viab - a.viab), [kpis]);
   const melhor = ranking[0];
-  const mediaIEP = kpis.length ? kpis.reduce((s, k) => s + k.iep, 0) / kpis.length : 0;
   const mediaViab = kpis.length ? kpis.reduce((s, k) => s + k.viab, 0) / kpis.length : 0;
   const gpdValidos = kpis.map((k) => k.gpd).filter((v): v is number => typeof v === "number" && Number.isFinite(v));
   const mediaGPD = gpdValidos.length ? gpdValidos.reduce((s, v) => s + v, 0) / gpdValidos.length : null;
