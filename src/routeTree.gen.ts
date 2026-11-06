@@ -280,6 +280,8 @@ export interface FileRoutesByTo {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/tutorial': typeof TutorialRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja': typeof GranjaIndexRoute
@@ -315,6 +317,8 @@ export interface FileRoutesById {
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tarefas': typeof TarefasRoute
+  '/tutorial': typeof TutorialRoute
+  '/painel-analitico': typeof PainelAnaliticoRoute
   '/api/poultry-chat': typeof ApiPoultryChatRoute
   '/granja/$id': typeof GranjaIdRoute
   '/granja/': typeof GranjaIndexRoute
@@ -387,6 +391,8 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/tutorial'
+    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja'
@@ -421,6 +427,8 @@ export interface FileRouteTypes {
     | '/silo'
     | '/sitemap.xml'
     | '/tarefas'
+    | '/tutorial'
+    | '/painel-analitico'
     | '/api/poultry-chat'
     | '/granja/$id'
     | '/granja/'
