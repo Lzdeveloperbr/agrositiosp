@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, Smartphone, X, PlusSquare, MoreVertical } from "lucide-react";
+import { Download, Share, Smartphone, PlusSquare, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
