@@ -16,3 +16,27 @@ self.addEventListener("activate", (event) => {
       .then(() => self.clients.claim())
   );
 });
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+          }
+          return response;
+        })
+        .catch(async () => (await caches.match("/")) || Response.error())
+    );
+    return;
+  }
+
+  if (APP_ICONS.includes(new URL(request.url).pathname)) {
+    event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
+  }
+});
