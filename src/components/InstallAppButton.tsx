@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Smartphone, Download, Share2, MoreVertical, PlusSquare, CheckCircle2 } from "lucide-react";
+import { Smartphone, Download, Share2, MoreVertical, CheckCircle2 } from "lucide-react";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
