@@ -1,13 +1,42 @@
 {
-  "name": "Aviário Pro — Frango de Corte",
+  "id": "/",
+  "name": "Aviário Pro — Gestão de Granja",
   "short_name": "Aviário Pro",
+  "description": "Aplicativo de gestão de granja e avicultura de corte do Agro Sítio SP.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#111827",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#f7faf7",
+  "theme_color": "#08783f",
   "lang": "pt-BR",
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
