@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, Smartphone, Apple, MonitorDown } from "lucide-react";
+import { Download, Share, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
