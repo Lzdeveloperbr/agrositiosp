@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, Share, Smartphone, PlusSquare, MoreVertical } from "lucide-react";
+import { Download, Share, Smartphone, Apple, MonitorDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -13,16 +13,20 @@ function isStandalone() {
     (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
+function detectAppleMobile() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 export function InstallAppBanner() {
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
   const [installed, setInstalled] = useState(true);
   const [isIos, setIsIos] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     setInstalled(isStandalone());
-    const ua = navigator.userAgent;
-    setIsIos(/iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+    setIsIos(detectAppleMobile());
 
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
@@ -32,7 +36,7 @@ export function InstallAppBanner() {
     const onInstalled = () => {
       setInstalled(true);
       setPromptEvent(null);
-      setShowHelp(false);
+      setMessage("Aviário Pro instalado com sucesso.");
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
@@ -50,15 +54,40 @@ export function InstallAppBanner() {
     };
   }, []);
 
-  const install = async () => {
+  const installAndroid = async () => {
     if (!promptEvent) {
-      setShowHelp((value) => !value);
+      setMessage("Este navegador não liberou a instalação direta. Abra o Aviário Pro em um navegador compatível com instalação de aplicativos.");
       return;
     }
     await promptEvent.prompt();
     const choice = await promptEvent.userChoice;
-    if (choice.outcome === "accepted") setInstalled(true);
+    if (choice.outcome === "accepted") {
+      setInstalled(true);
+      setMessage("Instalação confirmada.");
+    }
     setPromptEvent(null);
+  };
+
+  const installIphone = async () => {
+    const shareData = {
+      title: "Aviário Pro",
+      text: "Adicionar o Aviário Pro à tela inicial",
+      url: window.location.href,
+    };
+
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+        setMessage("No menu aberto, selecione “Adicionar à Tela de Início” para concluir a instalação.");
+      } catch (error) {
+        if (error instanceof Error && error.name !== "AbortError") {
+          setMessage("Não foi possível abrir o menu de compartilhamento neste navegador.");
+        }
+      }
+      return;
+    }
+
+    setMessage("Abra este site no Safari para usar a opção de adicionar à tela inicial.");
   };
 
   if (installed) return null;
@@ -71,31 +100,20 @@ export function InstallAppBanner() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">Instale o Aviário Pro</p>
-          <p className="text-xs text-muted-foreground">Acesse pelo ícone na tela inicial, como um aplicativo.</p>
+          <p className="text-xs text-muted-foreground">Adicione o app à tela inicial do seu celular.</p>
         </div>
-        <Button size="sm" onClick={install} className="shrink-0">
-          <Download className="mr-1.5 h-4 w-4" /> Instalar
+      </div>
+      <div className="grid grid-cols-2 gap-2 px-3 pb-3 sm:px-4 sm:pb-4">
+        <Button size="sm" onClick={installAndroid} disabled={isIos} variant={isIos ? "outline" : "default"}>
+          <Download className="mr-1.5 h-4 w-4" /> Android
+        </Button>
+        <Button size="sm" onClick={installIphone} disabled={!isIos} variant={!isIos ? "outline" : "default"}>
+          <Share className="mr-1.5 h-4 w-4" /> iPhone
         </Button>
       </div>
-      {showHelp && (
-        <div className="space-y-2 border-t border-border px-4 py-3 text-sm">
-          {isIos ? (
-            <>
-              <p className="font-semibold">Instalar no iPhone ou iPad</p>
-              <p className="flex items-center gap-2 text-muted-foreground"><Share className="h-4 w-4 shrink-0" /> 1. No Safari, toque em Compartilhar.</p>
-              <p className="flex items-center gap-2 text-muted-foreground"><PlusSquare className="h-4 w-4 shrink-0" /> 2. Escolha “Adicionar à Tela de Início”.</p>
-              <p className="text-xs text-muted-foreground">Confirme em “Adicionar”. O ícone do Aviário Pro ficará na tela inicial.</p>
-            </>
-          ) : (
-            <>
-              <p className="font-semibold">Instalar no Android</p>
-              <p className="flex items-center gap-2 text-muted-foreground"><MoreVertical className="h-4 w-4 shrink-0" /> 1. Abra o menu ⋮ do Chrome.</p>
-              <p className="flex items-center gap-2 text-muted-foreground"><Download className="h-4 w-4 shrink-0" /> 2. Toque em “Instalar aplicativo” ou “Adicionar à tela inicial”.</p>
-              <p className="text-xs text-muted-foreground">Se a opção não aparecer, atualize a página e tente novamente pelo Chrome.</p>
-            </>
-          )}
-        </div>
-      )}
+      {message && <p role="status" className="border-t border-border px-4 py-2 text-xs text-muted-foreground">{message}</p>}
+      {!isIos && !promptEvent && <p className="px-4 pb-3 text-xs text-muted-foreground">A instalação direta depende de o navegador oferecer o recurso de instalação.</p>}
+      {isIos && <p className="px-4 pb-3 text-xs text-muted-foreground">No iPhone, o iOS exige confirmar “Adicionar à Tela de Início” no menu que será aberto.</p>}
     </Card>
   );
 }
