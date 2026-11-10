@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Smartphone, Download, Share2 } from "lucide-react";
+import { Smartphone, Download, Share2, MoreVertical, PlusSquare, CheckCircle2 } from "lucide-react";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -37,7 +37,8 @@ export function InstallAppButton({ size = "sm" as const }) {
     const onInstalled = () => {
       setInstalled(true);
       setDeferred(null);
-      setStatus("Aviário Pro instalado. Você já pode abrir pelo ícone na tela inicial.");
+      setOpen(false);
+      setStatus("Aviário Pro instalado. Abra pelo ícone na tela inicial.");
     };
     window.addEventListener("beforeinstallprompt", handler);
     window.addEventListener("appinstalled", onInstalled);
@@ -49,43 +50,44 @@ export function InstallAppButton({ size = "sm" as const }) {
 
   const installAndroid = async () => {
     if (!deferred) {
-      setStatus("Seu navegador ainda não disponibilizou a instalação direta. Abra este endereço no Chrome atualizado e tente novamente.");
-      return;
-    }
-    await deferred.prompt();
-    const result = await deferred.userChoice;
-    if (result.outcome === "accepted") {
-      setInstalled(true);
-      setStatus("Instalação confirmada.");
-    } else {
-      setStatus("Instalação cancelada. Você pode tentar novamente quando quiser.");
-    }
-    setDeferred(null);
-  };
-
-  const installIphone = async () => {
-    if (!navigator.share) {
-      setStatus("Abra o Aviário Pro no Safari para acessar o menu nativo de compartilhamento.");
+      setStatus("O Chrome não liberou a janela automática nesta visita. Use o menu ⋮ do Chrome e escolha “Instalar app” ou “Adicionar à tela inicial”.");
       return;
     }
     try {
-      await navigator.share({
-        title: "Aviário Pro",
-        text: "Aviário Pro — aplicativo de gestão da granja",
-        url: window.location.origin,
-      });
-      setStatus("No menu do iPhone, escolha “Adicionar à Tela de Início” e confirme.");
+      await deferred.prompt();
+      const result = await deferred.userChoice;
+      setStatus(result.outcome === "accepted"
+        ? "Instalação confirmada. Procure o ícone Aviário Pro na tela inicial."
+        : "Instalação cancelada. Você pode tentar novamente pelo menu do Chrome.");
+    } catch {
+      setStatus("Não foi possível abrir a instalação automática. Use o menu ⋮ do Chrome e escolha “Instalar app” ou “Adicionar à tela inicial”.");
+    } finally {
+      setDeferred(null);
+    }
+  };
+
+  const installApple = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Aviário Pro",
+          text: "Aviário Pro — aplicativo de gestão da granja",
+          url: window.location.href,
+        });
+      }
+      setStatus("No menu aberto, toque em “Adicionar à Tela de Início” e depois em “Adicionar”. Se essa opção não aparecer, abra o endereço no Safari.");
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
-        setStatus("Não foi possível abrir o menu de compartilhamento. Tente pelo Safari.");
+        setStatus("Abra o menu Compartilhar do navegador e escolha “Adicionar à Tela de Início”. No iPhone, o Safari costuma oferecer essa opção.");
       }
     }
   };
 
   const handleClick = () => {
     if (installed) return;
+    setStatus("");
     if (ios) {
-      void installIphone();
+      setOpen(true);
       return;
     }
     if (deferred) {
@@ -104,32 +106,70 @@ export function InstallAppButton({ size = "sm" as const }) {
         {ios ? "Adicionar no iPhone" : "Instalar aplicativo"}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Download className="h-5 w-5" /> Instalar Aviário Pro</DialogTitle>
-            <DialogDescription>Instale com o ícone oficial e abra em uma janela própria, como um aplicativo.</DialogDescription>
+        <DialogContent className="w-[calc(100vw-1.25rem)] max-w-md max-h-[85dvh] overflow-y-auto rounded-2xl p-5 sm:p-6">
+          <DialogHeader className="pr-6">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              {ios ? <Share2 className="h-5 w-5" /> : <Download className="h-5 w-5" />}
+              Instalar Aviário Pro
+            </DialogTitle>
+            <DialogDescription>
+              {ios
+                ? "Adicione o sistema à tela inicial do iPhone para abrir como aplicativo."
+                : "Instale pelo Chrome para abrir o Aviário Pro em uma janela própria."}
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <div className="rounded-lg border border-border p-3 space-y-2">
-              <p className="font-semibold flex items-center gap-2"><Smartphone className="h-4 w-4" /> Android</p>
-              <p className="text-xs text-muted-foreground">Use o Google Chrome atualizado. Toque no botão abaixo para abrir a confirmação nativa de instalação.</p>
-              <Button className="w-full" onClick={() => { setOpen(false); void installAndroid(); }} disabled={!deferred}>
-                <Download className="mr-2 h-4 w-4" /> Instalar no Android
-              </Button>
-              {!deferred && <p className="text-xs text-muted-foreground">A instalação direta ainda não foi liberada por este navegador. Se estiver em um navegador interno de outro aplicativo, abra no Chrome.</p>}
+
+          {ios ? (
+            <div className="space-y-4 text-sm">
+              <div className="rounded-xl border border-border p-4">
+                <p className="mb-3 flex items-center gap-2 font-semibold"><Share2 className="h-4 w-4" /> No iPhone ou iPad</p>
+                <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
+                  <li>Toque em “Abrir compartilhamento” abaixo.</li>
+                  <li>No menu, escolha “Adicionar à Tela de Início”.</li>
+                  <li>Toque em “Adicionar” no canto superior.</li>
+                </ol>
+                <Button className="mt-4 w-full" onClick={() => void installApple()}>
+                  <Share2 className="mr-2 h-4 w-4" /> Abrir compartilhamento
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Se a opção não aparecer no Chrome, copie o endereço e abra no Safari. O iPhone exige a confirmação manual; nenhum site consegue instalar sozinho.</p>
             </div>
-            <div className="rounded-lg border border-border p-3 space-y-2">
-              <p className="font-semibold flex items-center gap-2"><Share2 className="h-4 w-4" /> iPhone / iPad</p>
-              <p className="text-xs text-muted-foreground">O iOS não permite instalação silenciosa por sites. O botão abre o menu nativo; confirme “Adicionar à Tela de Início”.</p>
-              <Button variant="outline" className="w-full" onClick={() => { setOpen(false); void installIphone(); }}>
-                <Share2 className="mr-2 h-4 w-4" /> Abrir menu do iPhone
-              </Button>
+          ) : (
+            <div className="space-y-4 text-sm">
+              <div className="rounded-xl border border-border p-4">
+                <p className="mb-3 flex items-center gap-2 font-semibold"><Smartphone className="h-4 w-4" /> Android — Google Chrome</p>
+                {deferred ? (
+                  <>
+                    <p className="mb-3 text-muted-foreground">O Chrome liberou a instalação automática para este dispositivo.</p>
+                    <Button className="w-full" onClick={() => void installAndroid()}>
+                      <Download className="mr-2 h-4 w-4" /> Instalar agora
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-3 text-muted-foreground">Mesmo quando o Chrome não mostra a janela automática, você pode adicionar o app pelo menu:</p>
+                    <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
+                      <li>Toque nos três pontinhos <MoreVertical className="mx-1 inline h-4 w-4" /> no alto do Chrome.</li>
+                      <li>Escolha “Instalar app” ou “Adicionar à tela inicial”.</li>
+                      <li>Confirme em “Instalar” ou “Adicionar”.</li>
+                    </ol>
+                    <Button variant="outline" className="mt-4 w-full" onClick={() => setStatus("Abra agora o menu ⋮ do Chrome. Se aparecer “Instalar app” ou “Adicionar à tela inicial”, toque nessa opção e confirme.")}>
+                      <MoreVertical className="mr-2 h-4 w-4" /> Entendi, mostrar no Chrome
+                    </Button>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Se nenhuma opção aparecer, atualize o Chrome, abra o endereço diretamente nele (não dentro de outro aplicativo) e tente novamente.</p>
             </div>
-            {status && <p role="status" className="text-xs text-muted-foreground">{status}</p>}
+          )}
+
+          {status && <p role="status" className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">{status}</p>}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            Seus dados da granja continuam protegidos; a instalação não compartilha suas informações.
           </div>
         </DialogContent>
       </Dialog>
-      {status && <p role="status" className="sr-only">{status}</p>}
     </>
   );
 }
