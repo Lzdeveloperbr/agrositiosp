@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChatNotifier } from "@/components/ChatNotifier";
+import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { NAV_GROUPS, MOBILE_BOTTOM, ALL_NAV_ITEMS, buscarModulos, type NavItem } from "@/lib/nav";
 import logoUrl from "@/assets/logo-aviario-pro.png";
 
@@ -244,7 +245,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="flex-1 min-w-0 pb-28 md:pb-0">
-        <div className="px-3 py-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
+        <div className="px-3 py-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full"><InstallAppBanner />{children}</div>
 
         <nav aria-label="Navegação principal" className="md:hidden fixed bottom-2 left-2 right-2 z-40 grid grid-cols-5 rounded-lg bg-sidebar/95 backdrop-blur-xl border border-primary/15 shadow-2xl overflow-hidden">
           {MOBILE_BOTTOM.map((it) => {
