@@ -15,6 +15,7 @@ import { useFazenda } from "@/lib/cloud/fazenda";
 import { verificarENotificar } from "@/lib/lembretes";
 import { calcularResumoLote } from "@/lib/granja";
 import { OperationalOverview } from "@/components/OperationalOverview";
+import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -88,6 +89,8 @@ function Central() {
           <SectionTitle title="Lote ativo" to="/granja" link="Todos os lotes" />
           <PainelLoteAtivo />
         </section>
+
+        <AvicultureCommandCenter />
 
         <OperationalOverview />
 
