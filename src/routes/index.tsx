@@ -17,6 +17,7 @@ import { calcularResumoLote } from "@/lib/granja";
 import { OperationalOverview } from "@/components/OperationalOverview";
 import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
 import { AvicultureCharts } from "@/components/AvicultureCharts";
+import { AvicultureRecordQuality } from "@/components/AvicultureRecordQuality";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -94,6 +95,8 @@ function Central() {
         <AvicultureCommandCenter />
 
         <AvicultureCharts />
+
+        <AvicultureRecordQuality />
 
         <OperationalOverview />
 
