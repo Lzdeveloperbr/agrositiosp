@@ -16,6 +16,7 @@ import { verificarENotificar } from "@/lib/lembretes";
 import { calcularResumoLote } from "@/lib/granja";
 import { OperationalOverview } from "@/components/OperationalOverview";
 import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
+import { AvicultureCharts } from "@/components/AvicultureCharts";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -91,6 +92,8 @@ function Central() {
         </section>
 
         <AvicultureCommandCenter />
+
+        <AvicultureCharts />
 
         <OperationalOverview />
 
