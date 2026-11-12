@@ -68,7 +68,7 @@ export function AvicultureCommandCenter() {
 
           <div className="grid gap-3 xl:grid-cols-2">
             {rows.map(({ lote, resumo, registroHoje, ultimaData }) => (
-              <Card key={lote.id} className="overflow-hidden p-4 md:p-5">
+              <Card key={lote.id} className="avi-card-3d overflow-hidden p-4 md:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="text-xs text-muted-foreground">Lote {lote.numero}{lote.galpao ? ` · ${lote.galpao}` : ""}</p>
@@ -118,7 +118,7 @@ function Metric({ icon: Icon, label, value, detail, warning = false }: {
   icon: typeof Bird; label: string; value: string; detail: string; warning?: boolean;
 }) {
   return (
-    <Card className="p-4">
+    <Card className="avi-metric-3d p-4">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-muted-foreground">{label}</span>
         <Icon className={`h-4 w-4 ${warning ? "text-warning" : "text-primary"}`} />
