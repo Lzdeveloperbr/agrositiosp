@@ -64,9 +64,13 @@ export function sensacaoTermica(tempC: number, umidadeRel: number, ventoMs: numb
   return Math.round((tempC - chill + umidExtra) * 10) / 10;
 }
 
+/** Temperatura de conforto por idade: pintinho 32ºC → adulto 21ºC. */
+export function temperaturaIdealC(idadeDias: number): number {
+  return idadeDias <= 7 ? 32 : idadeDias <= 14 ? 29 : idadeDias <= 21 ? 26 : idadeDias <= 28 ? 24 : 21;
+}
+
 export function statusTermico(et: number, idadeDias: number): { faixa: string; cor: string; recomendacao: string } {
-  // Faixa ideal varia com a idade: pintinho 32ºC → adulto 21ºC
-  const ideal = idadeDias <= 7 ? 32 : idadeDias <= 14 ? 29 : idadeDias <= 21 ? 26 : idadeDias <= 28 ? 24 : 21;
+  const ideal = temperaturaIdealC(idadeDias);
   const diff = et - ideal;
   if (Math.abs(diff) <= 1.5) return { faixa: "Conforto", cor: "text-emerald-600", recomendacao: `Ideal para idade (${ideal}ºC). Manter manejo.` };
   if (diff > 1.5 && diff <= 4) return { faixa: "Calor leve", cor: "text-amber-600", recomendacao: "Aumentar exaustão / abrir mais inlets. Verificar nebulização." };

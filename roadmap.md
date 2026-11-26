@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Adicionar gêmeo digital 3D do galpão, índice do lote, IEP projetado e plano de ação automático na central (6 testes do motor, compilação OK, cena 3D verificada com dados de exemplo).
+- [ ] Validar o piloto automático com dados reais da granja. Bloqueado: sem código de granja na sessão de teste.
+
 - [ ] Padronizar Ross AP95, referência de peso e sexo em granja, manejo, silo e assistente.
 - [ ] Gerar ficha semanal automática por lote com mortalidade, eliminados, percentuais, acumulados e PDF, usando a foto como referência sem inventar lançamentos.
 - [ ] Melhorar manejo e validar cálculos, datas D0 e leitura das telas.

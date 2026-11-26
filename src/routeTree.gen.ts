@@ -18,8 +18,8 @@ import { Route as BackupRouteImport } from './routes/backup'
 import { Route as CalendarioSanitarioRouteImport } from './routes/calendario-sanitario'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ChecklistGranjaRouteImport } from './routes/checklist-granja'
-import { Route as CursoAviculturaRouteImport } from './routes/curso-avicultura'
 import { Route as ComparativoLotesRouteImport } from './routes/comparativo-lotes'
+import { Route as CursoAviculturaRouteImport } from './routes/curso-avicultura'
 import { Route as CustosRouteImport } from './routes/custos'
 import { Route as DiarioRouteImport } from './routes/diario'
 import { Route as EntregasRacaoRouteImport } from './routes/entregas-racao'
@@ -346,6 +346,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/checklist-granja'
     | '/comparativo-lotes'
+    | '/curso-avicultura'
     | '/custos'
     | '/diario'
     | '/entregas-racao'
@@ -382,6 +383,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/checklist-granja'
     | '/comparativo-lotes'
+    | '/curso-avicultura'
     | '/custos'
     | '/diario'
     | '/entregas-racao'
@@ -418,6 +420,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/checklist-granja'
     | '/comparativo-lotes'
+    | '/curso-avicultura'
     | '/custos'
     | '/diario'
     | '/entregas-racao'
@@ -455,6 +458,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   ChecklistGranjaRoute: typeof ChecklistGranjaRoute
   ComparativoLotesRoute: typeof ComparativoLotesRoute
+  CursoAviculturaRoute: typeof CursoAviculturaRoute
   CustosRoute: typeof CustosRoute
   DiarioRoute: typeof DiarioRoute
   EntregasRacaoRoute: typeof EntregasRacaoRoute
@@ -551,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/comparativo-lotes'
       fullPath: '/comparativo-lotes'
       preLoaderRoute: typeof ComparativoLotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/curso-avicultura': {
+      id: '/curso-avicultura'
+      path: '/curso-avicultura'
+      fullPath: '/curso-avicultura'
+      preLoaderRoute: typeof CursoAviculturaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/custos': {
