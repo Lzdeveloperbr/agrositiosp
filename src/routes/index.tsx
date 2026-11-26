@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { OperationalOverview } from "@/components/OperationalOverview";
 import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
 import { AvicultureCharts } from "@/components/AvicultureCharts";
 import { AvicultureRecordQuality } from "@/components/AvicultureRecordQuality";
+import { LoteAutopilotPanel } from "@/components/LoteAutopilotPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,12 +62,12 @@ function Central() {
   return (
     <AppShell>
       <div className="space-y-6 md:space-y-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border pb-5">
+        <header className="hero-central reveal relative overflow-hidden rounded-2xl border border-border px-5 py-6 md:px-7 md:py-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <p className="eyebrow min-h-4">
               {today ? today.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }) : ""}
             </p>
-            <h1 className="mt-1 text-4xl md:text-5xl leading-none">Central da granja</h1>
+            <h1 className="mt-1 text-4xl md:text-5xl leading-none text-gradient">Central da granja</h1>
             <p className="mt-2 text-sm text-muted-foreground truncate">
               {nome} · {fazendaNome ?? "Aviário"}{ativo ? ` · Lote ${ativo.numero} em D${resumo?.idade ?? 0}` : " · nenhum lote ativo"}
             </p>
@@ -78,14 +79,18 @@ function Central() {
           </div>
         </header>
 
-        <section aria-label="Ações rápidas" className="grid grid-cols-4 lg:grid-cols-8 gap-2">
-          {ACOES.map((a) => (
-            <Link key={a.to} to={a.to} className="flex flex-col items-center justify-center gap-2 rounded-md border border-border bg-card px-1 py-3.5 text-center transition-colors hover:border-primary/60 hover:bg-secondary">
-              <a.icon className="h-5 w-5 text-primary" />
+        <section aria-label="Ações rápidas" className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
+          {ACOES.map((a, i) => (
+            <Link key={a.to} to={a.to} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card px-1 py-3.5 text-center">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+                <a.icon className="h-5 w-5 text-primary" />
+              </span>
               <span className="text-xs font-semibold leading-tight">{a.label}</span>
             </Link>
           ))}
         </section>
+
+        <LoteAutopilotPanel />
 
         <section aria-label="Lote ativo">
           <SectionTitle title="Lote ativo" to="/granja" link="Todos os lotes" />
