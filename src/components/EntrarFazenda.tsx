@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import logoUrl from "@/assets/logo-aviario-pro.png";
+import logoUrl from "@/assets/logo-aviario-pro.webp";
 
 export function EntrarFazenda() {
   const { entrar, criar, setOperador } = useFazenda();

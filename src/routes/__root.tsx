@@ -4,6 +4,7 @@ import { FazendaProvider, useFazenda } from "@/lib/cloud/fazenda";
 import { EntrarFazenda } from "@/components/EntrarFazenda";
 
 import appCss from "../styles.css?url";
+import logoUrl from "@/assets/logo-aviario-pro.webp";
 
 function NotFoundComponent() {
   return (
@@ -48,7 +49,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
@@ -98,7 +99,17 @@ function RootComponent() {
 }
 
 function Gate() {
-  const { fazendaId } = useFazenda();
+  const { fazendaId, pronto } = useFazenda();
+  if (!pronto) return <Splash />;
   if (!fazendaId) return <EntrarFazenda />;
   return <Outlet />;
+}
+
+function Splash() {
+  return (
+    <div className="app-splash" role="status" aria-label="Carregando Aviário Pro">
+      <img src={logoUrl} alt="" width={88} height={88} />
+      <span className="app-splash-bar" />
+    </div>
+  );
 }

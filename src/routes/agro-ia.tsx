@@ -35,7 +35,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import logo from "@/assets/logo-aviario-pro.png";
+import logo from "@/assets/logo-aviario-pro.webp";
 
 export const Route = createFileRoute("/agro-ia")({
   head: () => ({

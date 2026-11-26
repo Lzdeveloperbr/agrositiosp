@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChatNotifier } from "@/components/ChatNotifier";
 import { NAV_GROUPS, MOBILE_BOTTOM, ALL_NAV_ITEMS, buscarModulos, type NavItem } from "@/lib/nav";
-import logoUrl from "@/assets/logo-aviario-pro.png";
+import logoUrl from "@/assets/logo-aviario-pro.webp";
 
 function NavLinkRow({ item, active, onClick, compact }: { item: NavItem; active: boolean; onClick?: () => void; compact?: boolean }) {
   const Icon = item.icon;
@@ -213,7 +213,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-sidebar-border bg-sidebar/95 backdrop-blur-xl sticky top-0 z-30">
+      <header className="md:hidden grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 border-b border-sidebar-border bg-sidebar sticky top-0 z-30 shadow-[0_1px_0_var(--color-sidebar-border)] pt-[max(0.75rem,env(safe-area-inset-top))]">
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
           <img src={logoUrl} alt="Aviário Pro" width={36} height={36} className="h-9 w-9 object-contain shrink-0" />
           <div className="leading-tight min-w-0">
@@ -243,10 +243,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 pb-28 md:pb-0">
-        <div className="px-3 py-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
+      <main className="flex-1 min-w-0 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">
+        <div className="page-enter px-3 py-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">{children}</div>
 
-        <nav aria-label="Navegação principal" className="md:hidden fixed bottom-2 left-2 right-2 z-40 grid grid-cols-5 rounded-lg bg-sidebar/95 backdrop-blur-xl border border-primary/15 shadow-2xl overflow-hidden">
+        <nav aria-label="Navegação principal" className="mobile-dock md:hidden fixed left-2 right-2 z-40 grid grid-cols-5 rounded-2xl bg-sidebar border border-primary/15 overflow-hidden">
           {MOBILE_BOTTOM.map((it) => {
             const active = isActive(it.to);
             const Icon = it.icon;

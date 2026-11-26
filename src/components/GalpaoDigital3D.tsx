@@ -69,6 +69,28 @@ export function GalpaoDigital3D({
   };
   useEffect(apply, []);
 
+  // Pausa todas as animações quando o galpão sai da tela ou o app vai para segundo plano.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    let visivel = true;
+    const sync = () => {
+      if (visivel && !document.hidden) delete el.dataset.paused;
+      else el.dataset.paused = "true";
+    };
+    const io = new IntersectionObserver(([e]) => {
+      visivel = e.isIntersecting;
+      sync();
+    });
+    io.observe(el);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, []);
+
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
     drag.current = { x: e.clientX, y: e.clientY, ...rot.current };
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -101,6 +123,7 @@ export function GalpaoDigital3D({
 
   return (
     <div
+      ref={rootRef}
       className="galpao3d relative overflow-hidden rounded-xl border border-border"
       style={style}
     >
@@ -127,12 +150,13 @@ export function GalpaoDigital3D({
             />
             {/* piso / cama com mapa térmico */}
             <div className="g3-face g3-floor" style={{ width: L, height: W }}>
-              {birds.map((b, i) => (
-                <span
-                  key={i}
-                  className="g3-bird"
-                  style={{ left: b.x, top: b.y, animationDelay: `${b.d}s` }}
-                />
+              {/* 3 grupos animados em vez de uma animação por ave (bem mais leve). */}
+              {[0, 1, 2].map((g) => (
+                <div key={g} className={`g3-flock g3-flock-${g}`}>
+                  {birds.map((b, i) =>
+                    i % 3 === g ? <span key={i} className="g3-bird" style={{ left: b.x, top: b.y }} /> : null,
+                  )}
+                </div>
               ))}
               <div className="g3-heat" />
             </div>
@@ -212,7 +236,7 @@ export function GalpaoDigital3D({
       </div>
 
       {/* HUD */}
-      <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
+      <div className="pointer-events-none absolute left-3 right-24 top-3 flex flex-wrap gap-1.5">
         <Hud label="Aves vivas" value={avesVivas.toLocaleString("pt-BR")} />
         <Hud
           label="Peso previsto"
@@ -250,7 +274,7 @@ export function GalpaoDigital3D({
 
 function Hud({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/60 bg-white/75 px-2 py-1 shadow-sm backdrop-blur">
+    <div className="rounded-md border border-white/60 bg-white/90 px-2 py-1 shadow-sm">
       <p className="text-[9px] font-semibold uppercase text-muted-foreground">{label}</p>
       <p className="text-xs font-bold tabular-nums">{value}</p>
     </div>

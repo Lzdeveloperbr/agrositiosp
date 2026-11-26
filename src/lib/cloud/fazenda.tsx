@@ -16,6 +16,8 @@ type FazendaCtx = {
   criar: (nome: string, codigo: string) => Promise<{ ok: boolean; erro?: string }>;
   sair: () => void;
   client: SupabaseClient;
+  /** true depois de ler a sessão salva no navegador (evita piscar a tela de entrada). */
+  pronto: boolean;
 };
 
 const Ctx = createContext<FazendaCtx | null>(null);
@@ -30,6 +32,7 @@ export function FazendaProvider({ children }: { children: ReactNode }) {
   const [codigo, setCodigo] = useState<string | null>(null);
   const [operador, setOperadorState] = useState<string>("");
   const [coords, setCoordsState] = useState<Coords | null>(null);
+  const [pronto, setPronto] = useState(false);
 
   useEffect(() => {
     try {
@@ -42,6 +45,7 @@ export function FazendaProvider({ children }: { children: ReactNode }) {
       setOperadorState(op);
       if (co) setCoordsState(JSON.parse(co));
     } catch {}
+    setPronto(true);
   }, []);
 
   const setOperador = (s: string) => { setOperadorState(s); persist("fazenda:operador", s); };
@@ -94,7 +98,7 @@ export function FazendaProvider({ children }: { children: ReactNode }) {
   const client = getCloudClient(codigo);
 
   return (
-    <Ctx.Provider value={{ fazendaId, fazendaNome, codigo, operador, coords, setOperador, setCoords, entrar, criar, sair, client }}>
+    <Ctx.Provider value={{ fazendaId, fazendaNome, codigo, operador, coords, setOperador, setCoords, entrar, criar, sair, client, pronto }}>
       {children}
     </Ctx.Provider>
   );

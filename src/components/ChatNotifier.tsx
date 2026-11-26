@@ -47,8 +47,9 @@ export function ChatNotifier() {
     };
 
     void checar();
-    const timer = setInterval(() => void checar(), 10000);
-    const onFocus = () => void checar();
+    // Não consulta com o app em segundo plano: economiza bateria e dados.
+    const timer = setInterval(() => { if (!document.hidden) void checar(); }, 10000);
+    const onFocus = () => { if (!document.hidden) void checar(); };
     document.addEventListener("visibilitychange", onFocus);
 
     return () => {

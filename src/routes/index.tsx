@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { ArrowRight, ClipboardCheck, Scale, Boxes, Syringe, Wind, BookOpen, File
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
-import { PainelLoteAtivo } from "@/components/PainelLoteAtivo";
 import { NotificationsManager } from "@/components/NotificationsManager";
 import { AlertasInteligentes } from "@/components/AlertasInteligentes";
 import { useFazenda } from "@/lib/cloud/fazenda";
@@ -16,9 +15,16 @@ import { verificarENotificar } from "@/lib/lembretes";
 import { calcularResumoLote } from "@/lib/granja";
 import { OperationalOverview } from "@/components/OperationalOverview";
 import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
-import { AvicultureCharts } from "@/components/AvicultureCharts";
 import { AvicultureRecordQuality } from "@/components/AvicultureRecordQuality";
 import { LoteAutopilotPanel } from "@/components/LoteAutopilotPanel";
+
+// Gráficos (recharts) carregam depois da primeira pintura, para a central abrir rápido.
+const PainelLoteAtivo = lazy(() => import("@/components/PainelLoteAtivo").then((m) => ({ default: m.PainelLoteAtivo })));
+const AvicultureCharts = lazy(() => import("@/components/AvicultureCharts").then((m) => ({ default: m.AvicultureCharts })));
+
+function ChartSkeleton({ h = 320 }: { h?: number }) {
+  return <div className="skeleton-shimmer rounded-xl border border-border" style={{ height: h }} aria-hidden />;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -72,16 +78,16 @@ function Central() {
               {nome} · {fazendaNome ?? "Aviário"}{ativo ? ` · Lote ${ativo.numero} em D${resumo?.idade ?? 0}` : " · nenhum lote ativo"}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 [&>*:last-child]:max-sm:flex-1">
             <InstallAppButton />
             <Button asChild variant="outline"><Link to="/painel-analitico">Análises</Link></Button>
             {ativo ? <Button asChild><Link to="/granja/$id" params={{ id: ativo.id }}><Plus className="h-4 w-4" />Lançar dados de hoje</Link></Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
           </div>
         </header>
 
-        <section aria-label="Ações rápidas" className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2">
+        <section aria-label="Ações rápidas" className="quick-actions -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 snap-x sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 lg:grid-cols-9">
           {ACOES.map((a, i) => (
-            <Link key={a.to} to={a.to} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card px-1 py-3.5 text-center">
+            <Link key={a.to} to={a.to} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex w-[5.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-1 py-2.5 text-center sm:w-auto sm:gap-2 sm:py-3.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
                 <a.icon className="h-5 w-5 text-primary" />
               </span>
@@ -94,21 +100,27 @@ function Central() {
 
         <section aria-label="Lote ativo">
           <SectionTitle title="Lote ativo" to="/granja" link="Todos os lotes" />
-          <PainelLoteAtivo />
+          <Suspense fallback={<ChartSkeleton h={420} />}>
+            <PainelLoteAtivo />
+          </Suspense>
         </section>
 
-        <AvicultureCommandCenter />
+        <div className="cv-auto"><AvicultureCommandCenter /></div>
 
-        <AvicultureCharts />
+        <div className="cv-auto">
+          <Suspense fallback={<ChartSkeleton />}>
+            <AvicultureCharts />
+          </Suspense>
+        </div>
 
-        <AvicultureRecordQuality />
+        <div className="cv-auto"><AvicultureRecordQuality /></div>
 
-        <OperationalOverview />
+        <div className="cv-auto"><OperationalOverview /></div>
 
         <AlertasInteligentes />
         <NotificationsManager />
 
-        <div className="grid lg:grid-cols-3 gap-4">
+        <div className="cv-auto grid lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2"><WeatherWidget /></div>
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
