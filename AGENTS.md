@@ -17,3 +17,4 @@
 - Slaughter planning simulates each loading day with the shared anchored weight projection and reference CA, honours the density limit, and keeps house/market parameters per lot on the device only, never as farm records.
 - Feed phases and the conversion/weight diagnosis reuse the silo engine's integrarConsumo; intake is treated as measured only when physical silo weighings calibrate it, and the silo page recalculates every 30 s while only the live gauge ticks each second.
 - Quick daily entry follows the bot API semantics: only informed fields change, entries stay in lotes.entries and measurements upsert one lote_medicoes row per day; cloud sync in useCloud runs once per setter call even if React re-runs the updater.
+- All quick entries go through the device queue (fila-lancamentos): saved locally first, sent with updated_at concurrency, retried when the connection returns; only unsent user input is stored, never cached farm data.

@@ -89,7 +89,7 @@ function Central() {
 
         <section aria-label="Ações rápidas" className="quick-actions -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 snap-x sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 lg:grid-cols-10">
           {ACOES.map((a, i) => (
-            <Link key={a.to} to={a.to} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex w-[5.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-1 py-2.5 text-center sm:w-auto sm:gap-2 sm:py-3.5">
+            <Link key={a.to} to={a.to} onClick={(e) => { if (a.label === "Lançar dia" && ativo) { e.preventDefault(); abrirLancamentoRapido(); } }} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex w-[5.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-1 py-2.5 text-center sm:w-auto sm:gap-2 sm:py-3.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
                 <a.icon className="h-5 w-5 text-primary" />
               </span>

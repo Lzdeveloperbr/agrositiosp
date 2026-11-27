@@ -16,6 +16,13 @@ import { useLotes } from "@/lib/state";
 import { useFazenda } from "@/lib/cloud/fazenda";
 import { addDias, diffDias, hojeISO } from "@/lib/data";
 import {
+  enfileirar,
+  lerFila,
+  mesclarForms,
+  salvarFila,
+  sincronizarFila,
+} from "@/lib/fila-lancamentos";
+import {
   mesclarEntry,
   patchMedicao,
   validarLancamento,
@@ -42,7 +49,7 @@ const vazio = (data: string): FormLancamento => ({
 
 /** Painel de lançamento do dia: baixas, peso e medições do galpão em um só lugar. */
 export function LancamentoRapido() {
-  const [lotes, setLotes] = useLotes();
+  const [lotes] = useLotes();
   const { client, fazendaId, operador } = useFazenda();
   const ativos = useMemo(() => lotes.filter((l) => !l.encerrado), [lotes]);
   const [open, setOpen] = useState(false);
@@ -93,6 +100,11 @@ export function LancamentoRapido() {
               n[k] = data[k] === null || data[k] === undefined ? null : Number(data[k]);
             return n;
           });
+        // Lançamento ainda não enviado (sem sinal) aparece por cima do que está na nuvem.
+        const pendente = fazendaId
+          ? lerFila(fazendaId).find((x) => x.loteId === lote.id && x.form.data === form.data)
+          : null;
+        if (pendente) setForm((f) => mesclarForms(f, pendente.form));
         setCarregando(false);
       });
     return () => {
@@ -110,37 +122,37 @@ export function LancamentoRapido() {
     if (!lote || !fazendaId) return;
     const erros = validarLancamento(form, lote, hoje);
     if (erros.length) return toast.error(erros[0]);
-    setSalvando(true);
-    try {
-      const m = mesclarEntry(lote.entries ?? [], form);
-      if (m.mudou)
-        setLotes((prev) => prev.map((l) => (l.id === lote.id ? { ...l, entries: m.entries } : l)));
-      const patch = patchMedicao(form);
-      const mudouMedicao = Object.entries(patch).some(
-        ([k, v]) => !existente || Number(existente[k]) !== v || existente[k] === null,
+    const nadaMudou =
+      !mesclarEntry(lote.entries ?? [], form).mudou &&
+      Object.entries(patchMedicao(form)).every(
+        ([k, v]) => existente && existente[k] !== null && Number(existente[k]) === v,
       );
-      if (Object.keys(patch).length && mudouMedicao) {
-        const { error } = await client.from("lote_medicoes").upsert(
-          {
-            ...(existente ?? {}),
-            fazenda_id: fazendaId,
-            lote_id: lote.id,
-            data: form.data,
-            ...patch,
-            autor: operador || null,
-            atualizado_em: new Date().toISOString(),
-          },
-          { onConflict: "lote_id,data" },
-        );
-        if (error) throw error;
+    if (nadaMudou) {
+      toast.info("Nada mudou nesta data.");
+      return setOpen(false);
+    }
+    setSalvando(true);
+    // Sempre passa pela fila: grava no aparelho primeiro e envia em seguida.
+    const item = { loteId: lote.id, loteNumero: lote.numero, form };
+    salvarFila(fazendaId, enfileirar(lerFila(fazendaId), item));
+    const rotulo = `Lote ${lote.numero} · D${diffDias(lote.dataEntrada, form.data)}`;
+    try {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        toast.warning(`${rotulo} salvo no aparelho`, {
+          description: "Sem internet. Será enviado automaticamente quando o sinal voltar.",
+        });
+      } else {
+        const r = await sincronizarFila(client, fazendaId, operador || null);
+        const recusado = r.recusados.find((x) => x.loteId === lote.id && x.form.data === form.data);
+        if (recusado) toast.error(recusado.erro ?? "Lançamento recusado.");
+        else if (lerFila(fazendaId).some((x) => x.loteId === lote.id && x.form.data === form.data))
+          toast.warning(`${rotulo} salvo no aparelho`, {
+            description: "Conexão instável. O envio será repetido automaticamente.",
+          });
+        else toast.success(`${rotulo} registrado`);
       }
-      if (!m.mudou && !mudouMedicao) toast.info("Nada mudou nesta data.");
-      else
-        toast.success(`Lote ${lote.numero} · D${diffDias(lote.dataEntrada, form.data)} registrado`);
       window.dispatchEvent(new CustomEvent(EVENTO_SALVO));
       setOpen(false);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível salvar agora.");
     } finally {
       setSalvando(false);
     }

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChatNotifier } from "@/components/ChatNotifier";
+import { StatusConexao } from "@/components/StatusConexao";
 import { NAV_GROUPS, MOBILE_BOTTOM, ALL_NAV_ITEMS, buscarModulos, type NavItem } from "@/lib/nav";
 import logoUrl from "@/assets/logo-aviario-pro.webp";
 
@@ -191,6 +192,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
+          <StatusConexao className="w-full justify-center" />
           <button
             onClick={() => setPalette(true)}
             className="w-full flex items-center gap-2 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -222,6 +224,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </Link>
         <div className="flex items-center gap-1 shrink-0">
+          <StatusConexao />
           <Button variant="ghost" size="icon" aria-label="Buscar" className="h-9 w-9" onClick={() => setPalette(true)}><Search className="h-5 w-5" /></Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

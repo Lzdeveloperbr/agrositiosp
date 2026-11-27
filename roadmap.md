@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Lançamentos sem sinal: fila no aparelho com envio automático e controle de conflito, indicador de conexão e pendências (4 testes novos, fluxo offline → online verificado no navegador).
+
 - [x] Lançamento rápido do dia (baixas, peso e medições do galpão gravadas no app), alerta de queda de água, gravação duplicada na nuvem corrigida (6 testes novos, fluxo verificado no navegador).
 
 - [x] Silo ao vivo: silo animado, saldo em tempo real, contagens para pedido e ruptura, pedido por WhatsApp, fases de ração com troca e sobra, diagnóstico de conversão e peso com custo da CA; cores dos gráficos corrigidas (5 testes novos, compilação OK).

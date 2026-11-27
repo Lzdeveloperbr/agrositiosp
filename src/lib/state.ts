@@ -140,7 +140,16 @@ function useCloud<T extends { id: string }>(table: string, mapper: Mapper<T>) {
         });
       }).subscribe();
 
-    return () => { cancel = true; client.removeChannel(ch); };
+    // Linhas gravadas fora deste hook (ex.: fila de lançamentos) entram sem nova sincronização.
+    const onRow = (e: Event) => {
+      const d = (e as CustomEvent<{ table: string; row: any }>).detail;
+      if (d?.table !== table || !d.row) return;
+      const it = mapper.fromRow(d.row);
+      setLocal((prev) => (prev.some((p) => p.id === it.id) ? prev.map((p) => (p.id === it.id ? it : p)) : [it, ...prev]));
+    };
+    window.addEventListener("cloud-row", onRow);
+
+    return () => { cancel = true; client.removeChannel(ch); window.removeEventListener("cloud-row", onRow); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fazendaId, codigo, table]);
 
