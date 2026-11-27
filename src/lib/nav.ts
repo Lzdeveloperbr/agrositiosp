@@ -2,7 +2,7 @@
 import {
   LayoutDashboard, Bird, FileText, BookOpen, ListChecks, Boxes, Wallet, Database,
   BellRing, Stethoscope, TrendingUp, Sparkles, ClipboardList, Wind, Truck,
-  ClipboardCheck, Trophy, BarChart3, Syringe, History, Scale, MessagesSquare, PieChart,
+  ClipboardCheck, Trophy, BarChart3, Syringe, History, Scale, MessagesSquare, PieChart, Target,
 } from "lucide-react";
 
 export type NavItem = {
@@ -46,6 +46,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/painel-analitico", label: "Painel analítico", icon: BarChart3, desc: "Gráficos de produção, pesagens, financeiro e estoque", tags: ["dashboard", "graficos", "analise"] },
       { to: "/excelencia-lote", label: "Excelência do lote", icon: Trophy, desc: "IEP, GPD e curva de peso vs. meta", tags: ["iep", "kpi"] },
+      { to: "/planejamento-abate", label: "Planejamento de abate", icon: Target, desc: "Dia ótimo, densidade, jejum, caixas e caminhões", tags: ["abate", "carregamento", "jejum", "densidade", "caminhao", "margem"] },
       { to: "/ficha-lote", label: "Ficha do lote", icon: ClipboardList, desc: "Ficha técnica completa", tags: ["lote"] },
       { to: "/comparativo-lotes", label: "Comparativo", icon: BarChart3, desc: "Compare desempenho entre lotes", tags: ["comparar"] },
       { to: "/historico-lotes", label: "Histórico", icon: History, desc: "Lotes encerrados e médias", tags: ["benchmark"] },

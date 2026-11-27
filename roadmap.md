@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Planejamento de abate: dia ótimo por margem/dia e IEP com limite de densidade, cronograma de jejum, caixas e caminhões, dimensionamento do galpão (4 testes, compilação OK).
+
 - [x] Adicionar gêmeo digital 3D do galpão, índice do lote, IEP projetado e plano de ação automático na central (6 testes do motor, compilação OK, cena 3D verificada com dados de exemplo).
 - [ ] Validar o piloto automático com dados reais da granja. Bloqueado: sem código de granja na sessão de teste.
 

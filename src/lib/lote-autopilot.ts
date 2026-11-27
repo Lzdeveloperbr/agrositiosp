@@ -431,15 +431,17 @@ export function calcularAutopilot(input: {
   }
 
   const faltam = (lote.previsaoAbateDias || 42) - idade;
-  if (faltam >= 0 && faltam <= 3) {
+  if (faltam >= 0 && faltam <= 7) {
     add({
       id: "abate",
-      prioridade: "media",
+      prioridade: faltam <= 2 ? "alta" : "media",
       titulo: faltam === 0 ? "Dia previsto de carregamento" : `Carregamento em ${faltam} dia(s)`,
       detalhe:
-        "Confirme horário com a integradora, programe jejum de 8–12 h e retirada dos comedouros.",
-      to: "/excelencia-lote",
-      label: "Pré-abate",
+        faltam <= 3
+          ? "Confirme horário com a integradora e monte o cronograma de jejum, caixas e caminhões."
+          : "Simule o dia ótimo de abate pela margem e pela densidade antes de confirmar a data.",
+      to: "/planejamento-abate",
+      label: "Planejar abate",
     });
   }
 

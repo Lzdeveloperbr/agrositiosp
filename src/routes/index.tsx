@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLotes, useTarefas } from "@/lib/state";
-import { ArrowRight, ClipboardCheck, Scale, Boxes, Syringe, Wind, BookOpen, FileText, ListChecks, Plus, GraduationCap } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Scale, Boxes, Syringe, Wind, BookOpen, FileText, ListChecks, Plus, GraduationCap, Target } from "lucide-react";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { InstallAppButton } from "@/components/InstallAppButton";
@@ -48,6 +48,7 @@ const ACOES = [
   { to: "/manejo", label: "Manejo", icon: BookOpen },
   { to: "/ambiencia", label: "Ambiência", icon: Wind },
   { to: "/calendario-sanitario", label: "Sanidade", icon: Syringe },
+  { to: "/planejamento-abate", label: "Abate", icon: Target },
   { to: "/relatorios", label: "Relatórios", icon: FileText },
   { to: "/curso-avicultura", label: "Academia", icon: GraduationCap },
 ] as const;
@@ -85,7 +86,7 @@ function Central() {
           </div>
         </header>
 
-        <section aria-label="Ações rápidas" className="quick-actions -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 snap-x sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 lg:grid-cols-9">
+        <section aria-label="Ações rápidas" className="quick-actions -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 snap-x sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 lg:grid-cols-10">
           {ACOES.map((a, i) => (
             <Link key={a.to} to={a.to} style={{ "--reveal-delay": `${i * 35}ms` } as CSSProperties} className="reveal lift sheen group flex w-[5.5rem] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-1 py-2.5 text-center sm:w-auto sm:gap-2 sm:py-3.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">

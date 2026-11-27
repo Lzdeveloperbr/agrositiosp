@@ -35,6 +35,7 @@ import { Route as ManejoRouteImport } from './routes/manejo'
 import { Route as ModulosRouteImport } from './routes/modulos'
 import { Route as PainelAnaliticoRouteImport } from './routes/painel-analitico'
 import { Route as PesagemProRouteImport } from './routes/pesagem-pro'
+import { Route as PlanejamentoAbateRouteImport } from './routes/planejamento-abate'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as SiloRouteImport } from './routes/silo'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -175,6 +176,11 @@ const PesagemProRoute = PesagemProRouteImport.update({
   path: '/pesagem-pro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanejamentoAbateRoute = PlanejamentoAbateRouteImport.update({
+  id: '/planejamento-abate',
+  path: '/planejamento-abate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/modulos': typeof ModulosRoute
   '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
+  '/planejamento-abate': typeof PlanejamentoAbateRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/modulos': typeof ModulosRoute
   '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
+  '/planejamento-abate': typeof PlanejamentoAbateRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/modulos': typeof ModulosRoute
   '/painel-analitico': typeof PainelAnaliticoRoute
   '/pesagem-pro': typeof PesagemProRoute
+  '/planejamento-abate': typeof PlanejamentoAbateRoute
   '/relatorios': typeof RelatoriosRoute
   '/silo': typeof SiloRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/painel-analitico'
     | '/pesagem-pro'
+    | '/planejamento-abate'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
@@ -399,6 +409,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/painel-analitico'
     | '/pesagem-pro'
+    | '/planejamento-abate'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
@@ -436,6 +447,7 @@ export interface FileRouteTypes {
     | '/modulos'
     | '/painel-analitico'
     | '/pesagem-pro'
+    | '/planejamento-abate'
     | '/relatorios'
     | '/silo'
     | '/sitemap.xml'
@@ -474,6 +486,7 @@ export interface RootRouteChildren {
   ModulosRoute: typeof ModulosRoute
   PainelAnaliticoRoute: typeof PainelAnaliticoRoute
   PesagemProRoute: typeof PesagemProRoute
+  PlanejamentoAbateRoute: typeof PlanejamentoAbateRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SiloRoute: typeof SiloRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -669,6 +682,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PesagemProRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/planejamento-abate': {
+      id: '/planejamento-abate'
+      path: '/planejamento-abate'
+      fullPath: '/planejamento-abate'
+      preLoaderRoute: typeof PlanejamentoAbateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/relatorios': {
       id: '/relatorios'
       path: '/relatorios'
@@ -762,6 +782,7 @@ const rootRouteChildren: RootRouteChildren = {
   ModulosRoute: ModulosRoute,
   PainelAnaliticoRoute: PainelAnaliticoRoute,
   PesagemProRoute: PesagemProRoute,
+  PlanejamentoAbateRoute: PlanejamentoAbateRoute,
   RelatoriosRoute: RelatoriosRoute,
   SiloRoute: SiloRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
