@@ -20,6 +20,10 @@ import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO } from "@/lib/data";
 import { calcularAutopilot, type Acao, type Prioridade } from "@/lib/lote-autopilot";
 import { calcularFases, CORTES_PADRAO } from "@/lib/racao-desempenho";
+import { abrirLancamentoRapido, EVENTO_SALVO } from "@/components/LancamentoRapido";
+
+// Ações resolvidas no próprio painel de lançamento, sem sair da Central.
+const LANCAVEIS = new Set(["diario", "medir", "agua-queda"]);
 import type { SiloCalc } from "@/lib/silo";
 import type { Lote } from "@/lib/types";
 
@@ -103,7 +107,16 @@ export function LoteAutopilotPanel() {
       setTick((t) => t + 1);
       setAtualizado(new Date());
     }, REFRESH_MS);
-    return () => window.clearInterval(id);
+    // Recalcula na hora quando um lançamento rápido é salvo.
+    const salvo = () => {
+      setTick((t) => t + 1);
+      setAtualizado(new Date());
+    };
+    window.addEventListener(EVENTO_SALVO, salvo);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener(EVENTO_SALVO, salvo);
+    };
   }, []);
   const op = usePoultryOperation(ativo, tick);
 
@@ -294,12 +307,22 @@ function AcaoItem({ acao, delay }: { acao: Acao; delay: number }) {
           <span className="text-[10px] font-bold uppercase opacity-70">{p.label}</span>
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">{acao.detalhe}</p>
-        <Link
-          to={acao.to as never}
-          className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary"
-        >
-          {acao.label} <ArrowRight className="h-3 w-3" />
-        </Link>
+        {LANCAVEIS.has(acao.id) ? (
+          <button
+            type="button"
+            onClick={abrirLancamentoRapido}
+            className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary"
+          >
+            {acao.label} <ArrowRight className="h-3 w-3" />
+          </button>
+        ) : (
+          <Link
+            to={acao.to as never}
+            className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary"
+          >
+            {acao.label} <ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
       </div>
     </li>
   );

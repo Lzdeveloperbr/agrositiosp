@@ -146,8 +146,13 @@ function useCloud<T extends { id: string }>(table: string, mapper: Mapper<T>) {
 
   // setter compatível com [items, setItems]: faz diff e sincroniza
   const setItems = useCallback((v: T[] | ((prev: T[]) => T[])) => {
+    // O React pode executar o updater mais de uma vez (StrictMode / re-render concorrente):
+    // a sincronização com a nuvem deve acontecer uma única vez por chamada.
+    let sincronizado = false;
     setLocal((prev) => {
       const next = typeof v === "function" ? (v as any)(prev) : v;
+      if (sincronizado) return next;
+      sincronizado = true;
       // diff
       const prevMap = new Map<string, T>(prev.map((p) => [p.id, p]));
       const nextMap = new Map<string, T>((next as T[]).map((p) => [p.id, p]));

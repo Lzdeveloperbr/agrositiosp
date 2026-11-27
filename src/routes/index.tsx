@@ -17,6 +17,7 @@ import { OperationalOverview } from "@/components/OperationalOverview";
 import { AvicultureCommandCenter } from "@/components/AvicultureCommandCenter";
 import { AvicultureRecordQuality } from "@/components/AvicultureRecordQuality";
 import { LoteAutopilotPanel } from "@/components/LoteAutopilotPanel";
+import { LancamentoRapido, abrirLancamentoRapido } from "@/components/LancamentoRapido";
 
 // Gráficos (recharts) carregam depois da primeira pintura, para a central abrir rápido.
 const PainelLoteAtivo = lazy(() => import("@/components/PainelLoteAtivo").then((m) => ({ default: m.PainelLoteAtivo })));
@@ -82,7 +83,7 @@ function Central() {
           <div className="flex flex-wrap gap-2 [&>*:last-child]:max-sm:flex-1">
             <InstallAppButton />
             <Button asChild variant="outline"><Link to="/painel-analitico">Análises</Link></Button>
-            {ativo ? <Button asChild><Link to="/granja/$id" params={{ id: ativo.id }}><Plus className="h-4 w-4" />Lançar dados de hoje</Link></Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
+            {ativo ? <Button onClick={abrirLancamentoRapido}><Plus className="h-4 w-4" />Lançar dados de hoje</Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
           </div>
         </header>
 
@@ -97,6 +98,7 @@ function Central() {
           ))}
         </section>
 
+        <LancamentoRapido />
         <LoteAutopilotPanel />
 
         <section aria-label="Lote ativo">

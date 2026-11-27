@@ -99,4 +99,26 @@ describe("lote autopilot", () => {
     expect(r.galpao.temperaturaC).toBeNull();
     expect(r.galpao.medicaoData).toBe("2026-11-10");
   });
+
+  it("warns about a day-over-day water drop", () => {
+    const lote = base([{ date: hoje, mortalidade: 0 }]);
+    const m = (data: string, agua: number) => ({
+      data,
+      temperatura_c: null,
+      umidade_pct: null,
+      consumo_agua_l: agua,
+      consumo_racao_kg: null,
+      uniformidade_pct: null,
+    });
+    const r = calcularAutopilot({
+      lote,
+      resumo: resumoDe(lote),
+      hoje,
+      silo: null,
+      medicoes: [m(hoje, 3500), m("2026-11-19", 4000)],
+    });
+    const a = r.acoes.find((x) => x.id === "agua-queda");
+    expect(a?.prioridade).toBe("alta");
+    expect(a?.titulo).toContain("12,5%");
+  });
 });

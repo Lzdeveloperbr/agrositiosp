@@ -3,6 +3,7 @@ import { temperaturaIdealC } from "@/lib/linhagens";
 import { refCA } from "@/lib/silo";
 import type { ResumoZootecnico } from "@/lib/granja";
 import { waterFeedRatio } from "@/lib/automation-checks";
+import { quedaAgua } from "@/lib/lancamento-rapido";
 import type { Lote } from "@/lib/types";
 
 /**
@@ -371,6 +372,18 @@ export function calcularAutopilot(input: {
         "Risco de cama molhada e amônia. Aumente a ventilação mínima e revise vazamentos nos bebedouros.",
       to: "/ambiencia",
       label: "Ambiência",
+    });
+  }
+
+  const agua = quedaAgua(input.medicoes, hoje);
+  if (agua && diffDias(agua.data, hoje) <= 1 && agua.pct <= -5) {
+    add({
+      id: "agua-queda",
+      prioridade: agua.pct <= -10 ? "alta" : "media",
+      titulo: `Água caiu ${fmt1(Math.abs(agua.pct))}% em um dia`,
+      detalhe: `${Math.round(agua.litros).toLocaleString("pt-BR")} L contra ${Math.round(agua.anterior).toLocaleString("pt-BR")} L no dia anterior. Queda de água costuma anteceder problema: confira linhas, pressão, temperatura e sinais de doença.`,
+      to: "/ambiencia",
+      label: "Registrar e conferir",
     });
   }
 
