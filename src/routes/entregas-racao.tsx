@@ -329,11 +329,11 @@ function EntregasRacaoPage() {
           <div className="h-56">
             <ResponsiveContainer>
               <LineChart data={dataDiario}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="data" fontSize={11} />
                 <YAxis fontSize={11} />
                 <Tooltip formatter={(v: any) => fmtKg(Number(v))} />
-                <Line type="monotone" dataKey="kg" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="kg" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -1018,17 +1018,17 @@ function EstoqueEstimado({ totalEntregueKg }: { totalEntregueKg: number }) {
                 <AreaChart data={calc.proj}>
                   <defs>
                     <linearGradient id="gEst" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="dia" fontSize={11} />
                   <YAxis fontSize={11} />
                   <Tooltip formatter={(v: any, n: any) => [fmtKg(Number(v)), n === "estoque" ? "Estoque" : "Consumo"]} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Area type="monotone" dataKey="estoque" name="Estoque" stroke="hsl(var(--primary))" fill="url(#gEst)" strokeWidth={2} />
-                  <Line type="monotone" dataKey="consumo" name="Consumo/dia" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="estoque" name="Estoque" stroke="var(--primary)" fill="url(#gEst)" strokeWidth={2} />
+                  <Line type="monotone" dataKey="consumo" name="Consumo/dia" stroke="var(--accent)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

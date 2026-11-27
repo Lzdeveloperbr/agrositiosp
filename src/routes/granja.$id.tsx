@@ -190,9 +190,9 @@ function LoteDetalhe() {
             {chartData.length ? (
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="dia" fontSize={11} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.3} />
+                  <XAxis dataKey="dia" fontSize={11} stroke="var(--muted-foreground)" />
+                  <YAxis fontSize={11} stroke="var(--muted-foreground)" />
                   <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line type="monotone" dataKey="peso" stroke="var(--primary)" strokeWidth={2.5} name="Peso (g)" />

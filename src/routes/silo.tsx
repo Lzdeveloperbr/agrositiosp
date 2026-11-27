@@ -21,6 +21,11 @@ import {
   Activity, Drumstick, Target, ShieldCheck,
 } from "lucide-react";
 import { useFazenda } from "@/lib/cloud/fazenda";
+import { SiloLiveGauge } from "@/components/SiloLiveGauge";
+import { ConversaoPesoPanel, FasesRacaoPanel } from "@/components/RacaoDesempenhoPanels";
+import { calcularFases, CORTES_PADRAO, diagnosticarDesempenho, type Cortes } from "@/lib/racao-desempenho";
+import { calcularResumoLote } from "@/lib/granja";
+import { refMortalidadeAcumPct } from "@/lib/lote-autopilot";
 import { useLotes } from "@/lib/state";
 import { fmtData, fmtDataHora, isoLocal } from "@/lib/data";
 import {
@@ -49,7 +54,7 @@ const CFG_LOCAL = (f: string) => `silo_pref_${f}`;
 type PesagemRow = { id: string; medido_em: string; estoque_kg: number; metodo: string; estimado_kg: number | null; erro_kg: number | null; observacoes: string | null };
 
 function SiloPage() {
-  const { client, fazendaId, operador } = useFazenda();
+  const { client, fazendaId, operador, fazendaNome } = useFazenda();
   const [lotes] = useLotes();
   const [entregas, setEntregas] = useState<EntregaSilo[]>([]);
   const [pesagens, setPesagens] = useState<PesagemRow[]>([]);
@@ -60,9 +65,13 @@ function SiloPage() {
   const [agora, setAgora] = useState(() => new Date());
   const [loading, setLoading] = useState(true);
 
+  // O motor do silo recalcula a cada 30 s (e ao voltar ao app); o saldo desce segundo a
+  // segundo só dentro do SiloLiveGauge, sem redesenhar gráficos e tabelas.
   useEffect(() => {
-    const s = setInterval(() => setAgora(new Date()), 1000);
-    return () => clearInterval(s);
+    const tick = () => { if (!document.hidden) setAgora(new Date()); };
+    const s = setInterval(tick, 30_000);
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(s); document.removeEventListener("visibilitychange", tick); };
   }, []);
 
   const loteAtivo = useMemo(() => {
@@ -142,6 +151,50 @@ function SiloPage() {
     // recalcula a cada segundo (barato) — memo pelo relógio
   }, [loteAtivo, entregas, pesagens, cfg, linhagem, sexo, agora]);
 
+  // Cortes das fases e preço da ração ficam no aparelho, por lote.
+  const [cortes, setCortes] = useState<Cortes>(CORTES_PADRAO);
+  const [precoRacao, setPrecoRacao] = useState(2.4);
+  useEffect(() => {
+    if (!loteAtivo) return;
+    try {
+      const c = JSON.parse(localStorage.getItem(`racao-fases:${loteAtivo.id}`) || "null");
+      setCortes(c ? { ...CORTES_PADRAO, ...c } : CORTES_PADRAO);
+      const pa = JSON.parse(localStorage.getItem(`planejamento-abate:${loteAtivo.id}`) || "{}");
+      setPrecoRacao(Number(pa.precoRacaoKg) > 0 ? Number(pa.precoRacaoKg) : 2.4);
+    } catch { /* ignora */ }
+  }, [loteAtivo?.id]);
+  const salvarCortes = (c: Cortes) => {
+    setCortes(c);
+    if (loteAtivo) try { localStorage.setItem(`racao-fases:${loteAtivo.id}`, JSON.stringify(c)); } catch { /* ignora */ }
+  };
+  const salvarPreco = (v: number) => {
+    setPrecoRacao(v);
+    if (!loteAtivo) return;
+    try {
+      const k = `planejamento-abate:${loteAtivo.id}`;
+      localStorage.setItem(k, JSON.stringify({ ...JSON.parse(localStorage.getItem(k) || "{}"), precoRacaoKg: v }));
+    } catch { /* ignora */ }
+  };
+
+  const extra = useMemo(() => {
+    if (!loteAtivo || !calc) return null;
+    const abate = loteAtivo.previsaoAbateDias || 42;
+    const fases = calcularFases({
+      alojamento: loteAtivo.dataEntrada, agora, abateDias: abate, cortes,
+      estoqueAtualKg: calc.estoqueAtualKg, tRuptura: calc.tRuptura, integrarConsumo: (a, b) => calc.integrarConsumo(a, b),
+    });
+    const resumo = calcularResumoLote(loteAtivo, linhagem, sexo, agora);
+    const gpdRef = (refPesoG(calc.idade, linhagem, sexo) - refPesoG(Math.max(0, calc.idade - 7), linhagem, sexo)) / 7;
+    const avesAbate = Math.max(0, calc.avesVivas - loteAtivo.quantidadeInicial * 0.0008 * Math.max(0, abate - calc.idade));
+    const diag = diagnosticarDesempenho({
+      difPesoPct: resumo.diferencaPesoPct, consumoMedido: calc.fatorReal !== null, difConsumoPct: calc.difConsumoPct,
+      caEstimada: calc.fcrReal, caRef: calc.fcrRef, gpd7: calc.gpd7 ?? null, gpdRef,
+      mortalidadePct: calc.mortalidadePct, mortalidadeRefPct: refMortalidadeAcumPct(calc.idade),
+      kgVivoAbate: (avesAbate * resumo.projetarPesoG(Math.max(calc.idade, abate))) / 1000, precoRacaoKg: precoRacao,
+    });
+    return { fases, diag, resumo };
+  }, [loteAtivo, calc, agora, cortes, linhagem, sexo, precoRacao]);
+
   async function salvarCfg(novo: SiloCfg) {
     setCfg(novo);
     if (!fazendaId) return;
@@ -195,10 +248,10 @@ function SiloPage() {
               <Boxes className="h-7 w-7 text-primary" /> Silo ao Vivo
             </h1>
             <p className="text-sm text-muted-foreground">
-              Estoque calculado por balanço de massa + peso real das aves + curva da linhagem — atualizando a cada segundo.
+              Estoque calculado por balanço de massa + peso real das aves + curva da linhagem, com saldo descendo em tempo real.
             </p>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center">
             <Select value={linhagem} onValueChange={(v) => setLinhagem(v as Linhagem)}>
               <SelectTrigger className="h-9 w-[150px] text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -233,9 +286,19 @@ function SiloPage() {
               <Badge variant="outline" className="text-[10px]">D{calc.idade} · alojado {fmtData(loteAtivo.dataEntrada)}</Badge>
               <Badge variant="secondary" className="text-[10px]">{LINHAGEM_SILO_LABEL[linhagem]}</Badge>
               <span className="ml-auto flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> AO VIVO · {agora.toLocaleTimeString("pt-BR")}
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> recalculado às {agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
             </Card>
+
+            {extra && (
+              <SiloLiveGauge
+                estoqueKg={calc.estoqueAtualKg} calcAt={agora} consumoSegKg={calc.consumoSegKg}
+                capacidadeKg={cfg.capacidadeOperacionalKg || cfg.capacidadeKg} minimoKg={cfg.estoqueMinimoKg}
+                faixa={calc.faixa} tRuptura={calc.tRuptura} dataPedido={calc.dataPedido} pedidoKg={calc.pedidoRecomendadoKg}
+                autonomiaDias={calc.autonomiaDias} loteNumero={loteAtivo.numero} fazendaNome={fazendaNome}
+                faseAtual={extra.fases.atual?.nome ?? null} faseProximaCarga={extra.fases.faseProximaCarga?.nome ?? null}
+              />
+            )}
 
             {/* ===== Painel principal ===== */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -266,8 +329,10 @@ function SiloPage() {
               ))}
             </div>
 
-            <Tabs defaultValue="projecao">
+            <Tabs defaultValue="fases">
               <TabsList className="flex-wrap h-auto">
+                <TabsTrigger value="fases">Fases de ração</TabsTrigger>
+                <TabsTrigger value="conversao">Conversão & peso</TabsTrigger>
                 <TabsTrigger value="projecao">Projeção</TabsTrigger>
                 <TabsTrigger value="consumo">Consumo</TabsTrigger>
                 <TabsTrigger value="peso">Peso & GPD</TabsTrigger>
@@ -276,6 +341,18 @@ function SiloPage() {
                 <TabsTrigger value="config">Parâmetros</TabsTrigger>
               </TabsList>
 
+              <TabsContent value="fases" className="pt-4">
+                {extra && <FasesRacaoPanel fases={extra.fases} cortes={cortes} onCortes={salvarCortes} estoqueKg={calc.estoqueAtualKg} />}
+              </TabsContent>
+              <TabsContent value="conversao" className="pt-4">
+                {extra && (
+                  <ConversaoPesoPanel
+                    diag={extra.diag} caEstimada={calc.fcrReal} caRef={calc.fcrRef} consumoMedido={calc.fatorReal !== null}
+                    difPesoPct={extra.resumo.diferencaPesoPct} precoRacaoKg={precoRacao} onPreco={salvarPreco}
+                  />
+                )}
+              </TabsContent>
+
               {/* --- Projeção --- */}
               <TabsContent value="projecao" className="space-y-4 pt-4">
                 <Card className="p-4">
@@ -283,13 +360,13 @@ function SiloPage() {
                   <div className="h-64">
                     <ResponsiveContainer>
                       <AreaChart data={calc.projecao.map((p) => ({ label: p.label, estoque: p.estoque }))}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="label" fontSize={10} interval={Math.ceil(calc.projecao.length / 8)} />
                         <YAxis fontSize={10} />
                         <Tooltip formatter={(v: any) => kg(Number(v))} />
-                        <ReferenceLine y={cfg.estoqueMinimoKg} stroke="hsl(var(--destructive))" strokeDasharray="4 4" label={{ value: "mínimo", fontSize: 10 }} />
-                        <ReferenceLine y={cfg.estoqueMinimoKg + cfg.margemSegurancaKg} stroke="hsl(var(--muted-foreground))" strokeDasharray="2 2" label={{ value: "segurança", fontSize: 10 }} />
-                        <Area type="monotone" dataKey="estoque" stroke="hsl(var(--primary))" fill="hsl(var(--primary)/0.18)" strokeWidth={2} />
+                        <ReferenceLine y={cfg.estoqueMinimoKg} stroke="var(--destructive)" strokeDasharray="4 4" label={{ value: "mínimo", fontSize: 10 }} />
+                        <ReferenceLine y={cfg.estoqueMinimoKg + cfg.margemSegurancaKg} stroke="var(--muted-foreground)" strokeDasharray="2 2" label={{ value: "segurança", fontSize: 10 }} />
+                        <Area type="monotone" dataKey="estoque" stroke="var(--primary)" fill="color-mix(in oklab, var(--primary) 18%, transparent)" strokeWidth={2} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -334,13 +411,13 @@ function SiloPage() {
                   <div className="h-64">
                     <ResponsiveContainer>
                       <LineChart data={serieConsumo(calc, linhagem, sexo)}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="label" fontSize={10} />
                         <YAxis fontSize={10} />
                         <Tooltip formatter={(v: any) => kg(Number(v))} />
                         <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Line type="monotone" dataKey="modelo" name="Modelo híbrido" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="referencia" name="Referência" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="modelo" name="Modelo híbrido" stroke="var(--primary)" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="referencia" name="Referência" stroke="var(--muted-foreground)" strokeDasharray="4 4" strokeWidth={2} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -381,14 +458,14 @@ function SiloPage() {
                   <div className="h-64">
                     <ResponsiveContainer>
                       <LineChart data={seriePeso(calc, linhagem, sexo, loteAtivo.previsaoAbateDias || 45)}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="idade" fontSize={10} />
                         <YAxis fontSize={10} />
                         <Tooltip formatter={(v: any) => `${num(Number(v), 0)} g`} />
                         <Legend wrapperStyle={{ fontSize: 11 }} />
-                        <Line type="monotone" dataKey="real" name="Pesado" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} connectNulls />
-                        <Line type="monotone" dataKey="projecao" name="Projeção" stroke="hsl(var(--primary))" strokeDasharray="4 4" strokeWidth={2} dot={false} />
-                        <Line type="monotone" dataKey="referencia" name="Referência" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="real" name="Pesado" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                        <Line type="monotone" dataKey="projecao" name="Projeção" stroke="var(--primary)" strokeDasharray="4 4" strokeWidth={2} dot={false} />
+                        <Line type="monotone" dataKey="referencia" name="Referência" stroke="var(--muted-foreground)" strokeWidth={2} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -404,11 +481,11 @@ function SiloPage() {
                         { k: "7 dias", v: calc.gpd7 ?? 0 },
                         { k: "Médio", v: calc.gpdMedio ?? 0 },
                       ]}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="k" fontSize={11} />
                         <YAxis fontSize={11} />
                         <Tooltip formatter={(v: any) => `${num(Number(v), 0)} g/dia`} />
-                        <Bar dataKey="v" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey="v" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

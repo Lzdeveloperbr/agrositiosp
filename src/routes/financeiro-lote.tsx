@@ -159,7 +159,7 @@ function FinanceiroLotePage() {
                           <YAxis fontSize={11} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
                           <Tooltip formatter={(v: any) => brl(Number(v))} />
                           <Bar dataKey="valor" radius={[6, 6, 0, 0]}>
-                            {chart.map((_, i) => <Cell key={i} fill={i === 1 ? "hsl(var(--primary))" : "hsl(var(--accent))"} />)}
+                            {chart.map((_, i) => <Cell key={i} fill={i === 1 ? "var(--primary)" : "var(--accent)"} />)}
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>

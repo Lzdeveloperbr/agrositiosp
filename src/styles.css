@@ -464,3 +464,15 @@ html { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .quick-actions { scrollbar-width: none; }
 .quick-actions::-webkit-scrollbar { display: none; }
 @media (max-width: 639px) { .galpao3d-scene { scale: 0.88; top: 64%; } }
+
+/* ── Silo ao vivo ─────────────────────────────────────────── */
+.silo-live-stage {
+  background:
+    radial-gradient(80% 70% at 50% 30%, oklch(0.96 0.03 220), transparent 70%),
+    linear-gradient(180deg, oklch(0.97 0.015 220), oklch(0.94 0.03 145));
+}
+.silo-fill { transition: y 1.2s cubic-bezier(0.22, 1, 0.36, 1), height 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.silo-wave { animation: silo-wave 4s linear infinite; }
+@keyframes silo-wave { to { transform: translateX(60px); } }
+.silo-ticker { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+@media (prefers-reduced-motion: reduce) { .silo-wave { animation: none; } }

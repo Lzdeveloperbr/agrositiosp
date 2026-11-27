@@ -19,6 +19,36 @@ import { useLotes } from "@/lib/state";
 import { calcularResumoLote } from "@/lib/granja";
 import { hojeISO } from "@/lib/data";
 import { calcularAutopilot, type Acao, type Prioridade } from "@/lib/lote-autopilot";
+import { calcularFases, CORTES_PADRAO } from "@/lib/racao-desempenho";
+import type { SiloCalc } from "@/lib/silo";
+import type { Lote } from "@/lib/types";
+
+function faseRacao(lote: Lote, silo: SiloCalc | null) {
+  if (!silo) return null;
+  let cortes = CORTES_PADRAO;
+  try {
+    cortes = {
+      ...CORTES_PADRAO,
+      ...JSON.parse(localStorage.getItem(`racao-fases:${lote.id}`) || "{}"),
+    };
+  } catch {
+    /* ignora */
+  }
+  const f = calcularFases({
+    alojamento: lote.dataEntrada,
+    agora: new Date(),
+    abateDias: lote.previsaoAbateDias || 42,
+    cortes,
+    estoqueAtualKg: silo.estoqueAtualKg,
+    tRuptura: silo.tRuptura,
+    integrarConsumo: (a, b) => silo.integrarConsumo(a, b),
+  });
+  return {
+    diasParaTroca: f.diasParaTroca,
+    proxima: f.proxima?.nome ?? null,
+    sobraKg: f.sobraFaseAtualKg,
+  };
+}
 
 const REFRESH_MS = 5 * 60 * 1000;
 
@@ -87,6 +117,7 @@ export function LoteAutopilotPanel() {
       medicoes: op.medicoes,
       silo: op.silo,
       hoje,
+      racao: faseRacao(ativo, op.silo),
     });
     return { resumo, auto };
   }, [ativo, op.medicoes, op.silo, atualizado]);

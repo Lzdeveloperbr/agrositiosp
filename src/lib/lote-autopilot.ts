@@ -117,6 +117,8 @@ export function calcularAutopilot(input: {
   resumo: ResumoZootecnico;
   medicoes: MedicaoGalpao[];
   silo: SiloResumo | null;
+  /** Programa de ração por fase (racao-desempenho), quando o motor do silo está disponível. */
+  racao?: { diasParaTroca: number | null; proxima: string | null; sobraKg: number } | null;
   hoje: string;
 }): Autopilot {
   const { lote, resumo, silo, hoje } = input;
@@ -442,6 +444,24 @@ export function calcularAutopilot(input: {
           : "Simule o dia ótimo de abate pela margem e pela densidade antes de confirmar a data.",
       to: "/planejamento-abate",
       label: "Planejar abate",
+    });
+  }
+
+  const racao = input.racao;
+  if (racao && racao.proxima && racao.diasParaTroca !== null && racao.diasParaTroca <= 3) {
+    add({
+      id: "troca-racao",
+      prioridade: racao.diasParaTroca <= 1 ? "alta" : "media",
+      titulo:
+        racao.diasParaTroca === 0
+          ? `Trocar para ração ${racao.proxima.toLowerCase()} hoje`
+          : `Troca para ração ${racao.proxima.toLowerCase()} em ${racao.diasParaTroca} dia(s)`,
+      detalhe:
+        racao.sobraKg > 500
+          ? `O silo deve sobrar ~${Math.round(racao.sobraKg).toLocaleString("pt-BR")} kg da fase atual: não peça mais desta ração e confirme a próxima carga com a fábrica.`
+          : "Confirme com a fábrica que a próxima carga já é da nova fase.",
+      to: "/silo",
+      label: "Fases de ração",
     });
   }
 

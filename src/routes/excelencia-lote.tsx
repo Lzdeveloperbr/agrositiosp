@@ -250,8 +250,8 @@ function ExcelenciaLote() {
                         <YAxis label={{ value: "Peso (g)", angle: -90, position: "insideLeft" }} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="meta" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" name="Meta" dot={false} />
-                        <Line type="monotone" dataKey="real" stroke="hsl(var(--primary))" strokeWidth={3} name="Real" />
+                        <Line type="monotone" dataKey="meta" stroke="var(--muted-foreground)" strokeDasharray="4 4" name="Meta" dot={false} />
+                        <Line type="monotone" dataKey="real" stroke="var(--primary)" strokeWidth={3} name="Real" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>

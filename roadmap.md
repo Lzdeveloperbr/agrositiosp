@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Silo ao vivo: silo animado, saldo em tempo real, contagens para pedido e ruptura, pedido por WhatsApp, fases de ração com troca e sobra, diagnóstico de conversão e peso com custo da CA; cores dos gráficos corrigidas (5 testes novos, compilação OK).
+
 - [x] Planejamento de abate: dia ótimo por margem/dia e IEP com limite de densidade, cronograma de jejum, caixas e caminhões, dimensionamento do galpão (4 testes, compilação OK).
 
 - [x] Adicionar gêmeo digital 3D do galpão, índice do lote, IEP projetado e plano de ação automático na central (6 testes do motor, compilação OK, cena 3D verificada com dados de exemplo).

@@ -15,3 +15,4 @@
 - Weekly losses derive from lot daily entries through weekly-flock (seven dates, D0-D6 first week); UI, PDF and assistant reuse it and mark missing records instead of assuming zero.
 - The lot autopilot derives its index, projected IEP and action plan only from internal records via lote-autopilot; components without data are excluded, and the 3D house twin shows measured interior conditions only, never external weather.
 - Slaughter planning simulates each loading day with the shared anchored weight projection and reference CA, honours the density limit, and keeps house/market parameters per lot on the device only, never as farm records.
+- Feed phases and the conversion/weight diagnosis reuse the silo engine's integrarConsumo; intake is treated as measured only when physical silo weighings calibrate it, and the silo page recalculates every 30 s while only the live gauge ticks each second.
