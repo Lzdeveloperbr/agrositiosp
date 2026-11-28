@@ -131,4 +131,31 @@ describe("envio para a nuvem", () => {
     );
     expect(ruim).toMatchObject({ ok: false, definitivo: true });
   });
+
+  it("treats a thrown network error as temporary and keeps the queue", async () => {
+    const store: Record<string, string> = {};
+    (globalThis as any).localStorage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => (store[k] = v),
+      removeItem: (k: string) => delete store[k],
+    };
+    (globalThis as any).window = { dispatchEvent: () => true };
+    (globalThis as any).CustomEvent = class {
+      constructor(
+        public type: string,
+        public init?: unknown,
+      ) {}
+    };
+    const { salvarFila, sincronizarFila, lerFila } = await import("./fila-lancamentos");
+    salvarFila("F", [item(form({ mortalidade: 1 }))]);
+    const quebra = {
+      from: () => {
+        throw new TypeError("Failed to fetch");
+      },
+    } as unknown as SupabaseClient;
+    const r = await sincronizarFila(quebra, "F", null);
+    expect(r.enviados).toBe(0);
+    expect(lerFila("F")).toHaveLength(1);
+    expect(lerFila("F")[0].tentativas).toBe(1);
+  });
 });

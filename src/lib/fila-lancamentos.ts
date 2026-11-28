@@ -145,20 +145,18 @@ export async function enviarItem(
         !existente ||
         Object.entries(patch).some(([k, v]) => (existente as Record<string, unknown>)[k] !== v);
       if (muda) {
-        const { error: e4 } = await client
-          .from("lote_medicoes")
-          .upsert(
-            {
-              ...(existente ?? {}),
-              fazenda_id: r.fazenda_id,
-              lote_id: r.id,
-              data: item.form.data,
-              ...patch,
-              autor,
-              atualizado_em: new Date().toISOString(),
-            },
-            { onConflict: "lote_id,data" },
-          );
+        const { error: e4 } = await client.from("lote_medicoes").upsert(
+          {
+            ...(existente ?? {}),
+            fazenda_id: r.fazenda_id,
+            lote_id: r.id,
+            data: item.form.data,
+            ...patch,
+            autor,
+            atualizado_em: new Date().toISOString(),
+          },
+          { onConflict: "lote_id,data" },
+        );
         if (e4) return { ok: false, definitivo: false, erro: e4.message };
       }
     }
@@ -185,7 +183,12 @@ export async function sincronizarFila(
   const recusados: ItemFila[] = [];
   try {
     for (const item of lerFila(fazendaId)) {
-      const r = await enviarItem(client, item, autor);
+      // Exceções (rede caindo no meio da requisição) contam como falha temporária.
+      const r: ResultadoEnvio = await enviarItem(client, item, autor).catch((e: unknown) => ({
+        ok: false as const,
+        definitivo: false,
+        erro: e instanceof Error ? e.message : "Falha de conexão",
+      }));
       const fila = lerFila(fazendaId);
       if (r.ok) {
         enviados++;
