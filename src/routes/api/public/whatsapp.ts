@@ -6,6 +6,8 @@ import type { Database, Json } from "@/integrations/supabase/types";
 import { calcularResumoLote } from "@/lib/granja";
 import { calcularSilo, CFG_PADRAO, type Linhagem, type Sexo } from "@/lib/silo";
 import { diffDias } from "@/lib/data";
+import { calcularAutopilot } from "@/lib/lote-autopilot";
+import { calcularFases, CORTES_PADRAO } from "@/lib/racao-desempenho";
 import type { DailyEntry, Lote } from "@/lib/types";
 
 const headers = { "Cache-Control": "no-store" };
@@ -26,6 +28,7 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const schema = z.discriminatedUnion("acao", [
   z.object({ acao: z.literal("listar_lotes") }).strict(),
   z.object({ acao: z.literal("resumo_lote"), ...selector }).strict(),
+  z.object({ acao: z.literal("plano_lote"), ...selector }).strict(),
   z.object({ acao: z.literal("dados_lote"), ...selector }).strict(),
   z.object({ acao: z.literal("historico_lote"), ...selector, limite: z.number().int().min(1).max(120).default(30) }).strict(),
   z.object({ acao: z.literal("registrar_dados"), ...selector, data: date, mortalidade: z.number().int().min(0).max(1_000_000).optional(), eliminados: z.number().int().min(0).max(1_000_000).optional(), peso_medio_g: z.number().min(20).max(10_000).optional(), ...fields, autor: z.string().trim().min(1).max(80).default("Assistente WhatsApp") }).strict(),
@@ -100,8 +103,24 @@ async function context(client: FarmClient, row: LoteRow, limit = 30) {
   // A entrega possui apenas data; created_at indica quando o registro foi salvo, não a chegada do caminhão.
   const silo = calcularSilo({ agora: new Date(), alojamento: row.data_entrada, qtdInicial: row.quantidade_inicial, previsaoAbateDias: row.previsao_abate_dias, linhagem: breed(row), sexo: sex(row), entries: mapLote(row).entries, entregas: (deliveries.data ?? []).map(d => ({ id: d.id, data: d.data, kg: Number(d.quantidade_kg) })), pesagens: (weighings.data ?? []).map(p => ({ id: p.id, medidoEm: p.medido_em, kg: Number(p.estoque_kg) })), cfg });
   const med = measurements.data ?? [];
+  // Plano do dia com os mesmos motores da Central (piloto automático e fases de ração).
+  const loteCalc = { ...mapLote(row), linhagem: breed(row), sexo: sex(row) };
+  const temSilo = !!(deliveries.data?.length || weighings.data?.length);
+  const fases = temSilo
+    ? calcularFases({ alojamento: row.data_entrada, agora: new Date(), abateDias: row.previsao_abate_dias || 42, cortes: CORTES_PADRAO, estoqueAtualKg: silo.estoqueAtualKg, tRuptura: silo.tRuptura, integrarConsumo: (a, b) => silo.integrarConsumo(a, b) })
+    : null;
+  const auto = calcularAutopilot({
+    lote: loteCalc, resumo: calcularResumoLote(loteCalc, breed(row), sex(row), new Date()), medicoes: med.filter(m => m.data <= today()),
+    silo: temSilo ? silo : null, hoje: today(),
+    racao: fases ? { diasParaTroca: fases.diasParaTroca, proxima: fases.proxima?.nome ?? null, sobraKg: fases.sobraFaseAtualKg } : null,
+  });
+  const plano = {
+    indice: auto.indice, classe: auto.classe, iep_projetado: auto.iepProjetado,
+    acoes: auto.acoes.map(a => ({ prioridade: a.prioridade, titulo: a.titulo, detalhe: a.detalhe })),
+    racao: fases ? { fase_atual: fases.atual?.nome ?? null, proxima_fase: fases.proxima?.nome ?? null, dias_para_troca: fases.diasParaTroca, racao_proxima_carga: fases.faseProximaCarga?.nome ?? null, autonomia_dias: Number(silo.autonomiaDias.toFixed(1)), pedido_recomendado_kg: Math.round(silo.pedidoRecomendadoKg) } : null,
+  };
   const registros = (Array.isArray(row.entries) ? row.entries as DailyEntry[] : []).filter(e => e.date <= today()).map(e => ({ data: e.date, registrado_em: e.registradoEm ?? null, mortalidade: e.mortalidade, eliminados: e.eliminados ?? 0, peso_medio_g: e.pesoMedioG ?? null, observacoes: e.observacoes ?? null }));
-  return { resumo: summary(row), historico: { diarios: registros.sort((a,b) => b.data.localeCompare(a.data)).slice(0, limit), medicoes: med }, racao: { entregas: (deliveries.data ?? []).map(d => ({ data: d.data, quantidade_kg: Number(d.quantidade_kg), tipo: d.tipo_racao, galpao: d.galpao })), total_entregue_kg: silo.totalEntregueKg, saldo_silo_estimado_kg: Math.round(silo.estoqueAtualKg), consumo_estimado_hoje_kg: Math.round(silo.consumoHojeKg), consumo_estimado_acumulado_kg: Math.round(silo.consumoAcumKg), confianca_pct: silo.confianca, modo: silo.modoEstimativa, conversao_estimada: silo.fcrReal || null }, ultimas_medicoes: med[0] ?? null, dados_ausentes: [row.galpao ? null : "galpão", row.linhagem ? null : "linhagem", registros.some(e => e.peso_medio_g != null) ? null : "pesagem de peso médio", med.some(e => e.consumo_agua_l != null) ? null : "consumo de água medido", med.some(e => e.consumo_racao_kg != null) ? null : "consumo de ração medido", med.some(e => e.temperatura_c != null) ? null : "temperatura do galpão", med.some(e => e.umidade_pct != null) ? null : "umidade do galpão", med.some(e => e.ventilacao != null) ? null : "ventilação", med.some(e => e.cama != null) ? null : "estado da cama", med.some(e => e.iluminacao_lux != null) ? null : "iluminação medida", med.some(e => e.uniformidade_pct != null) ? null : "uniformidade medida"].filter(Boolean) };
+  return { resumo: summary(row), plano, historico: { diarios: registros.sort((a,b) => b.data.localeCompare(a.data)).slice(0, limit), medicoes: med }, racao: { entregas: (deliveries.data ?? []).map(d => ({ data: d.data, quantidade_kg: Number(d.quantidade_kg), tipo: d.tipo_racao, galpao: d.galpao })), total_entregue_kg: silo.totalEntregueKg, saldo_silo_estimado_kg: Math.round(silo.estoqueAtualKg), consumo_estimado_hoje_kg: Math.round(silo.consumoHojeKg), consumo_estimado_acumulado_kg: Math.round(silo.consumoAcumKg), confianca_pct: silo.confianca, modo: silo.modoEstimativa, conversao_estimada: silo.fcrReal || null }, ultimas_medicoes: med[0] ?? null, dados_ausentes: [row.galpao ? null : "galpão", row.linhagem ? null : "linhagem", registros.some(e => e.peso_medio_g != null) ? null : "pesagem de peso médio", med.some(e => e.consumo_agua_l != null) ? null : "consumo de água medido", med.some(e => e.consumo_racao_kg != null) ? null : "consumo de ração medido", med.some(e => e.temperatura_c != null) ? null : "temperatura do galpão", med.some(e => e.umidade_pct != null) ? null : "umidade do galpão", med.some(e => e.ventilacao != null) ? null : "ventilação", med.some(e => e.cama != null) ? null : "estado da cama", med.some(e => e.iluminacao_lux != null) ? null : "iluminação medida", med.some(e => e.uniformidade_pct != null) ? null : "uniformidade medida"].filter(Boolean) };
 }
 
 export const Route = createFileRoute("/api/public/whatsapp")({
@@ -129,6 +148,10 @@ export const Route = createFileRoute("/api/public/whatsapp")({
         const row = await findLote(client, body.lote_id, body.numero_lote);
         if (!row) return json({ ok: false, message: "Lote não encontrado nesta fazenda. Informe o número do lote se não houver lote ativo." }, 404);
         if (body.acao === "resumo_lote") return json({ ok: true, data: summary(row), message: `Resumo do lote ${row.numero}.` });
+        if (body.acao === "plano_lote") {
+          const data = await context(client, row, 7);
+          return json({ ok: true, data: { numero: row.numero, dia: data.resumo.dia, ...data.plano }, message: `Plano de hoje do lote ${row.numero}.` });
+        }
         if (body.acao === "dados_lote" || body.acao === "historico_lote") {
           const data = await context(client, row, body.acao === "historico_lote" ? body.limite : 30);
           return json({ ok: true, data: body.acao === "historico_lote" ? { numero: row.numero, ...data.historico } : data, message: `Dados do lote ${row.numero}.` });

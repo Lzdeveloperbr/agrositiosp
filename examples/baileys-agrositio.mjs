@@ -77,6 +77,20 @@ export async function responderComDadosDaGranja(sock, mensagem) {
       return true;
     }
 
+    if (comando === "plano" || comando === "hoje") {
+      const { data: p } = await chamarAgroSitio({ acao: "plano_lote" });
+      const icone = { critica: "🚨", alta: "⚠️", media: "🔹", baixa: "▫️" };
+      const linhas = [
+        `📋 *Plano de hoje — Lote ${p.numero} (D${p.dia})*`,
+        p.indice != null ? `Índice do lote: ${p.indice}/100 (${p.classe})${p.iep_projetado ? ` · IEP projetado ${p.iep_projetado}` : ""}` : "Índice: sem dados suficientes",
+        "",
+        ...(p.acoes.length ? p.acoes.slice(0, 5).map((a) => `${icone[a.prioridade] ?? "•"} ${a.titulo}`) : ["✅ Tudo em dia."]),
+      ];
+      if (p.racao) linhas.push("", `🌾 Ração ${p.racao.fase_atual ?? "—"} · autonomia ${p.racao.autonomia_dias} d · próxima carga: ${p.racao.racao_proxima_carga ?? "—"} (${p.racao.pedido_recomendado_kg} kg)`);
+      await sock.sendMessage(jid, { text: linhas.join("\n") });
+      return true;
+    }
+
     // Exemplo: lançar 2026-09-24 mort 4 elim 1 peso 2350 obs pesagem semanal
     const match = texto.match(/^lançar\s+(\d{4}-\d{2}-\d{2})\s+mort\s+(\d+)\s+elim\s+(\d+)(?:\s+peso\s+(\d+(?:[.,]\d+)?))?(?:\s+obs\s+(.+))?$/i);
     if (match) {

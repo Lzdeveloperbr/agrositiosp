@@ -27,6 +27,7 @@ Envie `numero_lote` (por exemplo `"001"`) ou `lote_id` (UUID) para escolher o lo
 | --- | --- | --- |
 | `listar_lotes` | nenhum | Até 100 lotes, ativos e encerrados |
 | `resumo_lote` | seletor opcional | Aves, mortalidade, pesagens, peso versus meta, projeção e alertas |
+| `plano_lote` | seletor opcional | Plano de hoje com os mesmos cálculos da Central: índice do lote, IEP projetado, ações por prioridade, fase de ração, autonomia e pedido do silo |
 | `dados_lote` | seletor opcional | Resumo, últimos 30 dias de lançamentos e medições, entregas, estimativa do silo, campos ausentes |
 | `historico_lote` | seletor opcional; `limite` de 1 a 120 (padrão 30) | Lançamentos e medições por data |
 | `registrar_dados` | seletor, `data` e um ou mais campos abaixo | Registra/atualiza somente os campos informados; dia e lote são únicos |
