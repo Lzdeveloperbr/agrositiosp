@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Scale, Plus, Trash2, Save } from "lucide-react";
 import { useLotes } from "@/lib/state";
 import { useFazenda } from "@/lib/cloud/fazenda";
+import { estatisticaAmostra } from "@/lib/uniformidade";
 import { diffDias, fmtData, hojeISO } from "@/lib/data";
 import { calcularResumoLote } from "@/lib/granja";
 import { uid } from "@/lib/storage";
@@ -36,9 +37,10 @@ function PesagemPro() {
   const [amostras, setAmostras] = useState<Amostra[]>([]);
   const [salvando, setSalvando] = useState(false);
   const resumo = useMemo(() => lote ? calcularResumoLote(lote) : null, [lote]);
-  const media = amostras.length ? amostras.reduce((s, a) => s + a.pesoG, 0) / amostras.length : 0;
-  const uniformidade = media ? 100 * amostras.filter(a => Math.abs(a.pesoG - media) <= media * .1).length / amostras.length : 0;
-  const desvio = amostras.length > 1 ? Math.sqrt(amostras.reduce((s, a) => s + (a.pesoG - media) ** 2, 0) / (amostras.length - 1)) : 0;
+  const est = estatisticaAmostra(amostras.map((a) => a.pesoG));
+  const media = est?.media ?? 0;
+  const uniformidade = est?.uniformidadePct ?? 0;
+  const desvio = est?.desvio ?? 0;
   const historico = lote?.entries.filter(e => (e.pesoMedioG ?? 0) > 0).slice().sort((a,b) => b.date.localeCompare(a.date)) ?? [];
 
   function adicionar() {

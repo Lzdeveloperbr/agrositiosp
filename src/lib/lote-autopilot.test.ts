@@ -121,4 +121,46 @@ describe("lote autopilot", () => {
     expect(a?.prioridade).toBe("alta");
     expect(a?.titulo).toContain("12,5%");
   });
+
+  it("uses the latest individual weighing sample for uniformity", () => {
+    const amostra = Array.from({ length: 30 }, (_, i) => ({
+      id: String(i),
+      sexo: "misto" as const,
+      pesoG: i < 18 ? 1000 : i < 24 ? 1300 : 700,
+    }));
+    const lote = base([{ date: hoje, mortalidade: 0, pesoMedioG: 1000, amostraPesagem: amostra }]);
+    const r = calcularAutopilot({ lote, resumo: resumoDe(lote), hoje, silo: null, medicoes: [] });
+    const a = r.acoes.find((x) => x.id === "uniformidade");
+    expect(a?.titulo).toBe("Uniformidade de 60%");
+    expect(a?.prioridade).toBe("alta");
+    expect(a?.detalhe).toContain("amostra de 30 aves");
+  });
+
+  it("prepares for external heat forecasts only with older birds and labels them as forecast", () => {
+    const lote = base([{ date: hoje, mortalidade: 0 }]);
+    const prev = [{ data: "2026-11-21", tMaxC: 35.4 }];
+    const r = calcularAutopilot({
+      lote,
+      resumo: resumoDe(lote),
+      hoje,
+      silo: null,
+      medicoes: [],
+      previsaoExterna: prev,
+    });
+    const a = r.acoes.find((x) => x.id === "previsao-calor");
+    expect(a?.titulo).toBe("Previsão externa de 35 °C amanhã");
+    expect(a?.detalhe).toMatch(/não é medição do galpão/);
+    expect(r.galpao.temperaturaC).toBeNull();
+    const jovem = { ...lote, dataEntrada: "2026-11-10" };
+    expect(
+      calcularAutopilot({
+        lote: jovem,
+        resumo: resumoDe(jovem),
+        hoje,
+        silo: null,
+        medicoes: [],
+        previsaoExterna: prev,
+      }).acoes.some((x) => x.id === "previsao-calor"),
+    ).toBe(false);
+  });
 });

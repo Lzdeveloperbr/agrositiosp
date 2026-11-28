@@ -22,6 +22,8 @@ import { calcularAutopilot, type Acao, type Prioridade } from "@/lib/lote-autopi
 import { calcularFases, CORTES_PADRAO } from "@/lib/racao-desempenho";
 import { abrirLancamentoRapido, EVENTO_SALVO } from "@/components/LancamentoRapido";
 import { notificar } from "@/lib/notifications";
+import { fetchWeather } from "@/lib/weather";
+import { useFazenda } from "@/lib/cloud/fazenda";
 
 // Ações resolvidas no próprio painel de lançamento, sem sair da Central.
 const LANCAVEIS = new Set(["diario", "medir", "agua-queda"]);
@@ -120,6 +122,19 @@ export function LoteAutopilotPanel() {
     };
   }, []);
   const op = usePoultryOperation(ativo, tick);
+  // Previsão do tempo externa só para alertas de preparo (nunca como medição do galpão).
+  const { coords } = useFazenda();
+  const [previsao, setPrevisao] = useState<{ data: string; tMaxC: number }[]>([]);
+  useEffect(() => {
+    if (!coords) return;
+    let cancel = false;
+    fetchWeather(coords.lat, coords.lon)
+      .then((w) => !cancel && setPrevisao(w.daily.map((d) => ({ data: d.date, tMaxC: d.tMax }))))
+      .catch(() => {});
+    return () => {
+      cancel = true;
+    };
+  }, [coords, tick]);
 
   const data = useMemo(() => {
     if (!ativo || !atualizado) return null;
@@ -132,9 +147,10 @@ export function LoteAutopilotPanel() {
       silo: op.silo,
       hoje,
       racao: faseRacao(ativo, op.silo),
+      previsaoExterna: previsao,
     });
     return { resumo, auto };
-  }, [ativo, op.medicoes, op.silo, atualizado]);
+  }, [ativo, op.medicoes, op.silo, atualizado, previsao]);
 
   // Notifica no aparelho as ações críticas/altas novas (uma vez por dia cada).
   useEffect(() => {

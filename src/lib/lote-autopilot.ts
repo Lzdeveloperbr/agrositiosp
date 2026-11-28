@@ -4,6 +4,7 @@ import { refCA } from "@/lib/silo";
 import type { ResumoZootecnico } from "@/lib/granja";
 import { waterFeedRatio } from "@/lib/automation-checks";
 import { quedaAgua } from "@/lib/lancamento-rapido";
+import { uniformidadeRecente } from "@/lib/uniformidade";
 import type { Lote } from "@/lib/types";
 
 /**
@@ -118,6 +119,8 @@ export function calcularAutopilot(input: {
   resumo: ResumoZootecnico;
   medicoes: MedicaoGalpao[];
   silo: SiloResumo | null;
+  /** Previsão do tempo externa (Open-Meteo) para alertas de preparo — nunca usada como medição interna. */
+  previsaoExterna?: { data: string; tMaxC: number }[];
   /** Programa de ração por fase (racao-desempenho), quando o motor do silo está disponível. */
   racao?: { diasParaTroca: number | null; proxima: string | null; sobraKg: number } | null;
   hoje: string;
@@ -411,13 +414,16 @@ export function calcularAutopilot(input: {
       label: "Conferir",
     });
   }
-  const unif = medRecente?.uniformidade_pct ?? null;
+  // Uniformidade digitada no dia ou, na falta, calculada da última amostra individual de pesagem.
+  const amostra = uniformidadeRecente(entries, hoje);
+  const unif = medRecente?.uniformidade_pct ?? amostra?.uniformidadePct ?? null;
+  const daAmostra = medRecente?.uniformidade_pct == null && amostra !== null;
   if (unif !== null && unif < 80) {
     add({
       id: "uniformidade",
-      prioridade: "media",
+      prioridade: unif < 70 ? "alta" : "media",
       titulo: `Uniformidade de ${Math.round(unif)}%`,
-      detalhe: "Abaixo de 80%. Revise espaço de comedouro por ave e distribuição de ração.",
+      detalhe: `Abaixo de 80%${daAmostra ? ` (amostra de ${amostra!.n} aves em ${amostra!.data.split("-").reverse().join("/")}, CV ${fmt1(amostra!.cvPct)}%)` : ""}. Revise espaço de comedouro por ave, distribuição de ração e acesso à água; lote desuniforme piora a CA e o rendimento no abate.`,
       to: "/excelencia-lote",
       label: "Excelência",
     });
@@ -457,6 +463,23 @@ export function calcularAutopilot(input: {
           : "Simule o dia ótimo de abate pela margem e pela densidade antes de confirmar a data.",
       to: "/planejamento-abate",
       label: "Planejar abate",
+    });
+  }
+
+  // Previsão do tempo EXTERNA (não é medição do galpão): prepara o manejo para dias quentes.
+  const quente = (input.previsaoExterna ?? []).find(
+    (d) => d.data >= hoje && d.data <= addDias(hoje, 1) && d.tMaxC >= 32,
+  );
+  if (quente && idade >= 21) {
+    const amanha = quente.data !== hoje;
+    add({
+      id: "previsao-calor",
+      prioridade: quente.tMaxC >= 35 ? "alta" : "media",
+      titulo: `Previsão externa de ${Math.round(quente.tMaxC)} °C ${amanha ? "amanhã" : "hoje"}`,
+      detalhe:
+        "Previsão do tempo da região, não é medição do galpão. Aves grandes sofrem mais: teste nebulização e exaustores, limpe bebedouros, evite manejo e pesagem nas horas quentes e registre a temperatura interna.",
+      to: "/ambiencia",
+      label: "Preparar ambiência",
     });
   }
 
