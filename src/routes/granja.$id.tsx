@@ -219,7 +219,7 @@ function LoteDetalhe() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Padrão{" "}
-                  {Math.round(refPesoG(dias + avanco, "ross_ap95", "misto")).toLocaleString(
+                  {Math.round(refPesoG(dias + avanco, lote.linhagem ?? "ross_ap95", lote.sexo ?? "misto")).toLocaleString(
                     "pt-BR",
                   )}{" "}
                   g

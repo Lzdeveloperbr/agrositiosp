@@ -63,7 +63,7 @@ function Central() {
   useEffect(() => { if (fazendaId) verificarENotificar(fazendaId); }, [fazendaId]);
 
   const ativo = lotes.find((l) => !l.encerrado);
-  const resumo = ativo && today ? calcularResumoLote(ativo, "ross_ap95", "misto", today) : null;
+  const resumo = ativo && today ? calcularResumoLote(ativo, undefined, undefined, today) : null;
   const pendentes = tarefas.filter((t) => !t.concluida);
   const nome = operador?.split(" ")[0] || "granjeiro";
 

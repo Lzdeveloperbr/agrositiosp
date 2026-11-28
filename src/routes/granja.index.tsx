@@ -284,7 +284,7 @@ function GranjaPage() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <Mini label="Vivas" value={resumo.vivas.toLocaleString("pt-BR")} />
                     <Mini label="Baixas" value={`${resumo.mortalidadePct.toFixed(1)}%`} />
-                     <Mini label="Peso" value={resumo.ultimaPesagem ? `${Math.round(resumo.pesoProjetadoHojeG)}g est.` : `${refPesoG(dias, "ross_ap95", "misto").toFixed(0)}g est.`} />
+                     <Mini label="Peso" value={resumo.ultimaPesagem ? `${Math.round(resumo.pesoProjetadoHojeG)}g est.` : `${refPesoG(dias, l.linhagem ?? "ross_ap95", l.sexo ?? "misto").toFixed(0)}g est.`} />
                   </div>
                   <div className="mb-4 rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs">
                     <div className="flex items-center justify-between gap-2">
