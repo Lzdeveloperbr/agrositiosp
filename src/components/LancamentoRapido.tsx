@@ -32,7 +32,11 @@ import {
 
 const EVENTO_ABRIR = "lancamento-rapido:abrir";
 export const EVENTO_SALVO = "lancamento-rapido:salvo";
-export const abrirLancamentoRapido = () => window.dispatchEvent(new CustomEvent(EVENTO_ABRIR));
+/** Abre o painel; com `loteId`, já seleciona esse lote. */
+export const abrirLancamentoRapido = (loteId?: string) =>
+  window.dispatchEvent(
+    new CustomEvent(EVENTO_ABRIR, { detail: typeof loteId === "string" ? loteId : null }),
+  );
 
 const vazio = (data: string): FormLancamento => ({
   data,
@@ -62,7 +66,9 @@ export function LancamentoRapido() {
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    const abrir = () => {
+    const abrir = (e: Event) => {
+      const id = (e as CustomEvent<string | null>).detail;
+      if (id) setLoteId(id);
       setForm(vazio(hojeISO()));
       setOpen(true);
     };

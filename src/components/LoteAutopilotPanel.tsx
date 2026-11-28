@@ -340,7 +340,7 @@ function AcaoItem({ acao, delay }: { acao: Acao; delay: number }) {
         {LANCAVEIS.has(acao.id) ? (
           <button
             type="button"
-            onClick={abrirLancamentoRapido}
+            onClick={() => abrirLancamentoRapido()}
             className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-primary"
           >
             {acao.label} <ArrowRight className="h-3 w-3" />

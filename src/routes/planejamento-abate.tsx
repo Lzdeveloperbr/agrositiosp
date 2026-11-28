@@ -123,7 +123,13 @@ function useConfig(lote: Lote | null) {
     } catch {
       /* ignora */
     }
-    setCfg({ ...padrao(lote), ...salvo });
+    // Área útil é a mesma cadastrada na página do lote (Configurações & remuneração).
+    const areaLote = Number(localStorage.getItem(`granja:areaM2:${lote.id}`)) || 0;
+    setCfg({
+      ...padrao(lote),
+      ...salvo,
+      ...(!salvo.areaM2 && areaLote ? { areaM2: areaLote } : {}),
+    });
   }, [lote, key]);
   const set = <K extends keyof Config>(k: K, v: Config[K]) =>
     setCfg((c) => {
@@ -131,6 +137,7 @@ function useConfig(lote: Lote | null) {
       const n = { ...c, [k]: v };
       try {
         localStorage.setItem(key, JSON.stringify(n));
+        if (k === "areaM2" && lote) localStorage.setItem(`granja:areaM2:${lote.id}`, String(v));
       } catch {
         /* ignora */
       }
@@ -389,7 +396,10 @@ function PlanejamentoAbate() {
                           "Margem/dia",
                           "IEP",
                         ].map((h) => (
-                          <th key={h} className="whitespace-nowrap px-3 py-2 text-left font-semibold">
+                          <th
+                            key={h}
+                            className="whitespace-nowrap px-3 py-2 text-left font-semibold"
+                          >
                             {h}
                           </th>
                         ))}

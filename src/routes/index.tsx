@@ -83,7 +83,7 @@ function Central() {
           <div className="flex flex-wrap gap-2 [&>*:last-child]:max-sm:flex-1">
             <InstallAppButton />
             <Button asChild variant="outline"><Link to="/painel-analitico">Análises</Link></Button>
-            {ativo ? <Button onClick={abrirLancamentoRapido}><Plus className="h-4 w-4" />Lançar dados de hoje</Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
+            {ativo ? <Button onClick={() => abrirLancamentoRapido()}><Plus className="h-4 w-4" />Lançar dados de hoje</Button> : <Button asChild><Link to="/granja"><Plus className="h-4 w-4" />Cadastrar lote</Link></Button>}
           </div>
         </header>
 
