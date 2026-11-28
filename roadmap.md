@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Assistente IA com plano do piloto automático, fases de ração, diagnóstico de conversão e dia de maior IEP; notificações de lote vindas do plano do dia (teste do contexto com nuvem simulada).
+- [ ] Validar respostas do assistente com dados reais. Bloqueado: sem código de granja na sessão de teste.
+
 - [x] Lançamentos sem sinal: fila no aparelho com envio automático e controle de conflito, indicador de conexão e pendências (4 testes novos, fluxo offline → online verificado no navegador).
 
 - [x] Lançamento rápido do dia (baixas, peso e medições do galpão gravadas no app), alerta de queda de água, gravação duplicada na nuvem corrigida (6 testes novos, fluxo verificado no navegador).

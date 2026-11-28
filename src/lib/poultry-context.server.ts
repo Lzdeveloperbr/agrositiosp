@@ -4,6 +4,10 @@ import type { DailyEntry, Lote } from "@/lib/types";
 import { calcularResumoLote } from "@/lib/granja";
 import { calcularSilo, CFG_PADRAO, type Linhagem, type Sexo } from "@/lib/silo";
 import { weeklyFlock } from "./weekly-flock";
+import { calcularAutopilot, refMortalidadeAcumPct } from "./lote-autopilot";
+import { calcularFases, CORTES_PADRAO, diagnosticarDesempenho } from "./racao-desempenho";
+import { simularAbate } from "./planejamento-abate";
+import { refPesoG } from "./silo";
 
 export async function getPoultryContext(
   code: string,
@@ -129,6 +133,123 @@ export async function getPoultryContext(
     })),
     cfg,
   });
+  // Mesmos motores das telas: o assistente vê o mesmo plano, fases e diagnóstico.
+  const temSilo = !!(ent.data?.length || pes.data?.length);
+  const medicoes = (med.data ?? []).filter((m) => m.data <= date);
+  const fases = temSilo
+    ? calcularFases({
+        alojamento: lote.dataEntrada,
+        agora: now,
+        abateDias: lote.previsaoAbateDias || 42,
+        cortes: CORTES_PADRAO,
+        estoqueAtualKg: silo.estoqueAtualKg,
+        tRuptura: silo.tRuptura,
+        integrarConsumo: (a, b) => silo.integrarConsumo(a, b),
+      })
+    : null;
+  const auto = calcularAutopilot({
+    lote,
+    resumo,
+    medicoes,
+    silo: temSilo ? silo : null,
+    hoje: date,
+    racao: fases
+      ? {
+          diasParaTroca: fases.diasParaTroca,
+          proxima: fases.proxima?.nome ?? null,
+          sobraKg: fases.sobraFaseAtualKg,
+        }
+      : null,
+  });
+  const abate = Math.max(resumo.idade, lote.previsaoAbateDias || 42);
+  const diag = temSilo
+    ? diagnosticarDesempenho({
+        difPesoPct: resumo.diferencaPesoPct,
+        consumoMedido: silo.fatorReal !== null,
+        difConsumoPct: silo.difConsumoPct,
+        caEstimada: silo.fcrReal,
+        caRef: silo.fcrRef,
+        gpd7: silo.gpd7 ?? null,
+        gpdRef:
+          (refPesoG(resumo.idade, linhagem, sexo) -
+            refPesoG(Math.max(0, resumo.idade - 7), linhagem, sexo)) /
+          7,
+        mortalidadePct: resumo.mortalidadePct,
+        mortalidadeRefPct: refMortalidadeAcumPct(resumo.idade),
+        kgVivoAbate: (resumo.vivas * resumo.projetarPesoG(abate)) / 1000,
+        precoRacaoKg: 0,
+      })
+    : null;
+  const sim =
+    resumo.idade > 0
+      ? simularAbate({
+          idadeAtual: resumo.idade,
+          avesVivas: resumo.vivas,
+          avesAlojadas: lote.quantidadeInicial,
+          linhagem,
+          sexo,
+          projetarPesoG: resumo.projetarPesoG,
+          precoKgVivo: 0,
+          precoRacaoKg: 0,
+          outrosCustos: 0,
+          vazioDias: 14,
+          areaM2: 0,
+          limiteKgM2: 39,
+        })
+      : null;
+  const analises = {
+    piloto_automatico: {
+      indice_0_100: auto.indice,
+      classe: auto.classe,
+      componentes: auto.componentes.map((c) => ({
+        item: c.label,
+        nota: c.nota,
+        detalhe: c.detalhe,
+      })),
+      iep_projetado_abate: auto.iepProjetado,
+      plano_de_acao: auto.acoes.map((a) => ({
+        prioridade: a.prioridade,
+        acao: a.titulo,
+        motivo: a.detalhe,
+      })),
+      galpao_termico: auto.galpao.termico,
+      observacao: "Índice e IEP são estimativas dos registros; componentes sem dado ficam fora.",
+    },
+    fases_racao: fases
+      ? {
+          cortes:
+            "padrão (pré-inicial até D7, inicial até D21, crescimento até D35); a granja pode ter ajustado no aparelho",
+          fase_atual: fases.atual?.nome ?? null,
+          proxima_fase: fases.proxima?.nome ?? null,
+          dias_para_troca: fases.diasParaTroca,
+          racao_da_proxima_carga: fases.faseProximaCarga?.nome ?? null,
+          sobra_fase_atual_kg: Math.round(fases.sobraFaseAtualKg),
+          a_comprar_ate_abate_kg: Math.round(fases.aComprarKg),
+        }
+      : null,
+    diagnostico_conversao_peso: diag
+      ? {
+          consumo_medido_por_pesagem_do_silo: silo.fatorReal !== null,
+          causas: diag.causas.map((c) => ({
+            gravidade: c.gravidade,
+            causa: c.titulo,
+            detalhe: c.detalhe,
+            acoes: c.acoes,
+          })),
+          kg_racao_por_0_01_de_ca_no_lote: Math.round(diag.kgPorCentesimo),
+        }
+      : null,
+    abate: sim?.melhorIEP
+      ? {
+          dia_maior_iep: sim.melhorIEP.idade,
+          iep_nesse_dia: sim.melhorIEP.iep,
+          peso_estimado_nesse_dia_g: Math.round(sim.melhorIEP.pesoG),
+          observacao:
+            "Margem e densidade dependem de preços e área informados no aparelho (Planejamento de abate); aqui só o IEP pela previsão de peso e CA de referência.",
+        }
+      : null,
+  };
+
   return {
     consultado_em: new Date().toISOString(),
     data_granja: date,
@@ -185,6 +306,7 @@ export async function getPoultryContext(
           }
         : null,
     tarefas_pendentes: tasks.data,
+    analises,
     dados_ausentes: [
       !row.linhagem ? "linhagem cadastrada" : null,
       !row.sexo ? "sexo cadastrado" : null,

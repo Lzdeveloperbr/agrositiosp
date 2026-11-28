@@ -21,6 +21,7 @@ import { hojeISO } from "@/lib/data";
 import { calcularAutopilot, type Acao, type Prioridade } from "@/lib/lote-autopilot";
 import { calcularFases, CORTES_PADRAO } from "@/lib/racao-desempenho";
 import { abrirLancamentoRapido, EVENTO_SALVO } from "@/components/LancamentoRapido";
+import { notificar } from "@/lib/notifications";
 
 // Ações resolvidas no próprio painel de lançamento, sem sair da Central.
 const LANCAVEIS = new Set(["diario", "medir", "agua-queda"]);
@@ -134,6 +135,19 @@ export function LoteAutopilotPanel() {
     });
     return { resumo, auto };
   }, [ativo, op.medicoes, op.silo, atualizado]);
+
+  // Notifica no aparelho as ações críticas/altas novas (uma vez por dia cada).
+  useEffect(() => {
+    if (!ativo || !data) return;
+    for (const a of data.auto.acoes) {
+      if (a.prioridade !== "critica" && a.prioridade !== "alta") continue;
+      notificar(
+        `auto-${ativo.id}-${a.id}`,
+        `${a.prioridade === "critica" ? "🚨" : "⚠️"} Lote ${ativo.numero}: ${a.titulo}`,
+        a.detalhe,
+      );
+    }
+  }, [ativo, data]);
 
   if (!ativo || !data) return null;
   const { resumo, auto } = data;
